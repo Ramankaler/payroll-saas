@@ -25,3 +25,25 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+
+# Payroll SaaS – Progress Update
+
+## ✅ Leave Module Improvements
+
+* Rebuilt Leave Create screen from scratch
+* Added employee code based employee search
+* Auto-filled employee name from employee code
+* Added dynamic leave type loading
+* Added start date / end date handling
+* Added automatic total leave days calculation
+* Added half-day leave option UI
+* Added applied-on display field
+* Improved overall leave form UI structure and symmetry
+
+---
+
+## ✅ Backend Leave Improvements
+
+* Added automatic pending status on leave creation
+* Added CreatedAt handling
