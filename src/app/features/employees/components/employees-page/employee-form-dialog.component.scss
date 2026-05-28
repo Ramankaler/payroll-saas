@@ -1,0 +1,4 @@
+.dialog-form { display: flex; flex-direction: column; gap: 0.5rem; min-width: 400px; }
+.form-row { display: flex; gap: 0.5rem; }
+.form-row > * { flex: 1; }
+mat-form-field { width: 100%; }

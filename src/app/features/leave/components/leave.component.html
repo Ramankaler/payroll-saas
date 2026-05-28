@@ -1,0 +1,38 @@
+<div class="leave-container">
+  <mat-tab-group mat-align-tabs="start">
+    <mat-tab label="My Leaves">
+      <div class="tab-content">
+        <mat-card *ngFor="let leave of myLeaves" class="leave-card">
+          <div class="leave-header">
+            <h3>{{ leave.employeeName }}</h3>
+            <mat-chip [color]="leave.status === 'Approved' ? 'primary' : (leave.status === 'Rejected' ? 'warn' : 'accent')" selected>{{ leave.status }}</mat-chip>
+          </div>
+          <div class="leave-body">
+            <span class="type">{{ leave.type }}</span>
+            <span class="dates">{{ leave.dates }} ({{ leave.days }} days)</span>
+            <p class="reason">{{ leave.reason }}</p>
+          </div>
+        </mat-card>
+      </div>
+    </mat-tab>
+    <mat-tab label="Approvals">
+      <div class="tab-content">
+        <mat-card *ngFor="let leave of teamApprovals" class="leave-card">
+          <div class="leave-header">
+            <h3>{{ leave.employeeName }} - {{ leave.employeeName }}</h3>
+            <mat-chip color="accent" selected>{{ leave.status }}</mat-chip>
+          </div>
+          <div class="leave-body">
+            <span class="type">{{ leave.type }}</span>
+            <span class="dates">{{ leave.dates }} ({{ leave.days }} days)</span>
+            <p class="reason">{{ leave.reason }}</p>
+          </div>
+          <div class="approval-actions">
+            <button mat-raised-button color="primary" (click)="approveLeave(leave.id)">Approve</button>
+            <button mat-stroked-button color="warn" (click)="rejectLeave(leave.id)">Reject</button>
+          </div>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

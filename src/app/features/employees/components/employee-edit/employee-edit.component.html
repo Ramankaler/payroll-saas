@@ -1,0 +1,302 @@
+<div class="emp-form-container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/employees" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      Employees
+    </a>
+    <mat-icon class="sep">chevron_right</mat-icon>
+    <span>Edit Employee</span>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="loading-page" *ngIf="loadingPage">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading employee data…</p>
+  </div>
+
+  <ng-container *ngIf="!loadingPage && employee">
+    <!-- Title row -->
+    <div class="title-row">
+      <div class="emp-title-info">
+        <div
+          class="avatar-lg"
+          [style.background]="'hsl(' + (employee.empID * 37 % 360) + ',60%,55%)'"
+        >
+          {{ employee.firstName.charAt(0) | uppercase }}{{ employee.lastName.charAt(0) | uppercase }}
+        </div>
+        <div>
+          <h1 class="page-title">{{ employee.firstName }} {{ employee.lastName }}</h1>
+          <p class="emp-subinfo">
+            <span class="code-chip">{{ employee.empCode }}</span>
+            <span class="status-dot" [class.active]="employee.isActive" [class.inactive]="!employee.isActive">
+              {{ employee.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mb-3">
+
+  <img
+    [src]="previewUrl || 'https://via.placeholder.com/150'"
+    class="img-thumbnail"
+    width="150"
+  />
+
+  <input
+    type="file"
+    class="form-control mt-2"
+    (change)="onPhotoChange($event)"
+    accept="image/*"
+  />
+
+</div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- ── Section: Identity ──────────────────────────────────── -->
+      <mat-card class="form-section">
+        <div class="section-header">
+          <mat-icon>badge</mat-icon>
+          <h2>Employee Identity</h2>
+          <span class="required-note">* Required fields</span>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="field-sm">
+            <mat-label>Employee Code <span class="req">*</span></mat-label>
+            <input matInput formControlName="empCode" />
+            <mat-error *ngIf="hasError('empCode', 'required')">Employee code is required.</mat-error>
+            <mat-error *ngIf="hasError('empCode', 'maxlength')">Max 20 characters.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>First Name <span class="req">*</span></mat-label>
+            <input matInput formControlName="firstName" />
+            <mat-error *ngIf="hasError('firstName', 'required')">First name is required.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Last Name <span class="req">*</span></mat-label>
+            <input matInput formControlName="lastName" />
+            <mat-error *ngIf="hasError('lastName', 'required')">Last name is required.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email Address</mat-label>
+            <input matInput formControlName="email" type="email" />
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="hasError('email', 'email')">Enter a valid email.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" />
+            <mat-icon matSuffix>phone</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Gender</mat-label>
+            <mat-select formControlName="gender">
+              <mat-option value="">— Select —</mat-option>
+              <mat-option *ngFor="let g of genders" [value]="g">{{ g }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput formControlName="dob" type="date" />
+            <mat-icon matSuffix>cake</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <!-- ── Section: Role ──────────────────────────────────────── -->
+      <mat-card class="form-section">
+        <div class="section-header">
+          <mat-icon>work</mat-icon>
+          <h2>Role &amp; Department</h2>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Department <span class="req">*</span></mat-label>
+            <mat-select formControlName="deptID">
+              <mat-option value="">— Select —</mat-option>
+              <mat-option *ngFor="let d of departments" [value]="d.deptID">
+                {{ d.deptName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="hasError('deptID', 'required')">Department is required.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Designation <span class="req">*</span></mat-label>
+            <mat-select formControlName="desigID">
+              <mat-option value="">— Select —</mat-option>
+              <mat-option *ngFor="let d of designations" [value]="d.desigID">
+                {{ d.desigName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="hasError('desigID', 'required')">Designation is required.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Employment Type</mat-label>
+            <mat-select formControlName="employmentType">
+              <mat-option *ngFor="let t of employmentTypes" [value]="t.value">{{ t.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Employment Status</mat-label>
+            <mat-select formControlName="employmentStatus">
+              <mat-option *ngFor="let s of employmentStatuses" [value]="s.value">{{ s.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Joining Date</mat-label>
+            <input matInput formControlName="joiningDate" type="date" />
+            <mat-icon matSuffix>event</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Work Location</mat-label>
+            <input matInput formControlName="workLocation" />
+            <mat-icon matSuffix>location_on</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <!-- ── Section: Payroll ───────────────────────────────────── -->
+      <mat-card class="form-section">
+        <div class="section-header">
+          <mat-icon>payments</mat-icon>
+          <h2>Payroll &amp; Banking</h2>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Basic Salary</mat-label>
+            <input matInput formControlName="basicSalary" type="number" min="0" step="0.01" />
+            <span matTextPrefix>$&nbsp;</span>
+            <mat-error *ngIf="hasError('basicSalary', 'min')">Salary must be ≥ 0.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Allowances</mat-label>
+            <input matInput formControlName="allowancesAmount" type="number" min="0" step="0.01" />
+            <span matTextPrefix>$&nbsp;</span>
+            <mat-error *ngIf="hasError('allowancesAmount', 'min')">Allowances must be ≥ 0.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tax Number</mat-label>
+            <input matInput formControlName="taxNumber" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bank Name</mat-label>
+            <input matInput formControlName="bankName" />
+            <mat-icon matSuffix>account_balance</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bank Account Number</mat-label>
+            <input matInput formControlName="bankAccount" />
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <!-- ── Form Actions ──────────────────────────────────────── -->
+      <div class="form-actions">
+        <a mat-stroked-button routerLink="/employees" [disabled]="submitting">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </a>
+        <button mat-raised-button color="primary" type="submit" [disabled]="submitting">
+          <mat-spinner *ngIf="submitting" diameter="18" class="btn-spinner"></mat-spinner>
+          <mat-icon *ngIf="!submitting">save</mat-icon>
+          {{ submitting ? 'Saving…' : 'Save Changes' }}
+        </button>
+      </div>
+
+    </form>
+
+    <!-- ── Section: Documents ──────────────────────────────────── -->
+    <mat-card class="form-section docs-section">
+      <div class="section-header">
+        <mat-icon>folder_open</mat-icon>
+        <h2>Employee Documents</h2>
+        <span class="doc-count">{{ documents.length }} file{{ documents.length !== 1 ? 's' : '' }}</span>
+      </div>
+      <mat-divider></mat-divider>
+
+      <!-- Existing documents list -->
+      <div class="docs-list" *ngIf="documents.length > 0">
+        <div class="doc-item" *ngFor="let doc of documents">
+          <mat-icon class="doc-file-icon">insert_drive_file</mat-icon>
+          <div class="doc-info">
+            <span class="doc-name">{{ doc.docName }}</span>
+            <span class="doc-date">Uploaded {{ doc.uploadedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No documents -->
+      <div class="no-docs" *ngIf="documents.length === 0">
+        <mat-icon>description</mat-icon>
+        <p>No documents uploaded yet.</p>
+      </div>
+
+      <!-- Upload new document -->
+      <div class="doc-upload-area">
+        <p class="upload-label">Upload a new document</p>
+        <div class="upload-row">
+          <div class="upload-zone" [class.has-file]="selectedFile">
+            <input
+              #docFileInput
+              type="file"
+              class="file-input-hidden"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              (change)="onFileSelected($event)"
+            />
+
+            <div *ngIf="!selectedFile" class="upload-placeholder" (click)="docFileInput.click()">
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Select file</span>
+            </div>
+
+            <div *ngIf="selectedFile" class="file-selected-row">
+              <mat-icon class="file-icon">insert_drive_file</mat-icon>
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <button type="button" mat-icon-button (click)="removeFileSelection()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <button
+            mat-raised-button
+            color="accent"
+            type="button"
+            [disabled]="!selectedFile || uploadingDoc"
+            (click)="uploadDocument()"
+          >
+            <mat-spinner *ngIf="uploadingDoc" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="!uploadingDoc">upload</mat-icon>
+            {{ uploadingDoc ? 'Uploading…' : 'Upload' }}
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </ng-container>
+
+</div>

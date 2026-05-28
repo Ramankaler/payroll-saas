@@ -1,0 +1,36 @@
+<div class="container mt-4">
+
+  <h3>Add Company</h3>
+
+  <div class="mb-2">
+    <label>Name</label>
+    <input [(ngModel)]="company.CompanyName" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label>Industry</label>
+    <input [(ngModel)]="company.industry" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label>Country</label>
+    <input [(ngModel)]="company.country" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label>Currency</label>
+    <input [(ngModel)]="company.currency" class="form-control">
+  </div>
+
+  <div class="mb-2">
+    <label>Timezone</label>
+    <input [(ngModel)]="company.timezone" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label>Payroll Cycle</label>
+    <input [(ngModel)]="company.payrollCycle" class="form-control">
+  </div>
+
+  <button class="btn btn-primary" (click)="save()">Save</button>
+</div>

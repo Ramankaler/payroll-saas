@@ -1,0 +1,104 @@
+<div class="container-fluid py-4">
+
+  <div class="row justify-content-center">
+    <div class="col-md">
+      <div class="card">
+        <div class="card-header">New Leave Request</div>
+        <div class="card-body">
+<form action="" #LeaveForm="ngForm">
+  <div class="row mt-2">
+    <div class="col-sm-6">
+      <label for="" class="form-label fw-bold">Employee Code</label>
+      <input type="text"   class="form-control" [(ngModel)]="leave.employeeCode" [ngModelOptions]="{standalone: true}"
+      (input)="onCodeChange($any($event.target).value)" autocomplete="off">
+      <div *ngIf="leave.employeeCode && !selectedEmployeeID" class="text-danger small mt-1">
+      No employee found with this code.
+    </div>
+    </div>
+    <div class="col-sm-6">
+      <label for="" class="form-label fw-bold">Employee Name</label>
+      <input type="text"   class="form-control"
+      [ngModelOptions]="{standalone: true}" [(ngModel)]="fullName" readonly>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-sm-6">
+<label for="" class="form-label fw-bold">Leave type</label>
+<select class="form-control" [(ngModel)]="leave.leaveTypeID"
+[ngModelOptions]="{standalone: true}" (change)="onleaveselection($event)">
+  <option *ngFor="let leaveType of leaveTypes"
+  [value]="leaveType.leaveTypeID">{{leaveType.leaveName}}</option>
+</select>
+    </div>
+    <div class="col-sm-6">
+      <div class="row">
+        <div class="col-sm-6">
+          <label for="" class="form-label fw-bold">From Date</label>
+          <input type="date" name="startDate" id="" class="form-control"
+          (change)="calculateDays()"[(ngModel)]="leave.startDate">
+        </div>
+        <div class="col-sm-6">
+          <label for="" class="form-label fw-bold">To Date</label>
+          <input type="date" name="endDate" id="" class="form-control"
+          (change)="calculateDays()" [(ngModel)]="leave.endDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3">
+    <div class="col-sm-6">
+      <input type="checkbox" class="form-check-input"
+       [(ngModel)]="leave.isHalfDay" name="halfDay"
+       (change)="onCheckChange($event)">
+      <label for="" class="form-label fw-bold"> Half Day</label>
+    </div>
+    <div *ngIf="leave.isHalfDay" class="col-sm-6">
+      <select name="HalfType" id="" class="form-control" [(ngModel)]="leave.selectedHalf" >
+        <option value="FH">First Half</option>
+        <option value="SH">Second half</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-sm-6">
+      <label for="" class="form-label fw-bold">Total Days</label>
+    <input type="text" name="totalDays" id="" class="form-control" [(ngModel)]="leave.totalDays">
+    </div>
+    <div class="col-sm-6">
+      <label for="" class="form-label fw-bold">Leave Status</label>
+      <input type="text" name="leaveStatus" id="" class="form-control"
+      [(ngModel)]="leave.status" readonly>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col-sm-12">
+      <label for="" class="form-label fw-bold">Rewason for leave</label>
+      <textarea class="form-control" name="leaveReason" id="" [(ngModel)]="leave.leaveReason"></textarea>
+    </div>
+
+  </div>
+
+  <div class="row mt-2">
+    <button type="submit" (click)="saveLeave()"
+    [disabled]="LeaveForm.invalid" class="btn btn-success"> Save </button>
+  </div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+<!-- <select name="" id="" ngModel="selectedEmployeeID" [ngModelOptions]="{standalone: true}" class="form-select">
+<option value="" *ngFor="let emp of employees" [value]="emp.empID">
+{{emp.fullName}}
+</option>
+</select> -->

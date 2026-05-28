@@ -1,0 +1,12 @@
+.attendance-container { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; flex-direction: column; gap: 2rem; }
+.import-card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.table-card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.file-input-wrapper { display: flex; gap: 1rem; align-items: center; margin: 1rem 0; }
+.status-badge { padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+.status-badge.present { background: #e8f5e9; color: #2e7d32; }
+.status-badge.late { background: #fff3e0; color: #ef6c00; }
+.status-badge.absent { background: #ffebee; color: #c62828; }
+.attendance-table { width: 100%; }
+.result { margin-top: 1rem; padding: 0.75rem; border-radius: 4px; }
+.result.success { background: #e8f5e9; color: #2e7d32; }
+.result.error { background: #ffebee; color: #c62828; }

@@ -1,0 +1,66 @@
+
+  <div class="dialog-container">
+
+    <!-- HEADER -->
+    <div class="dialog-header">
+      <h2>
+        {{ isEdit ? 'Edit Department' : 'Add Department' }}
+      </h2>
+      <p class="subtitle">
+        {{ isEdit ? 'Update department details' : 'Create a new department' }}
+      </p>
+    </div>
+
+    <!-- BODY -->
+    <div class="dialog-body">
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Department Name *</mat-label>
+        <input matInput [(ngModel)]="deptName" (ngModelChange)="onNameChange()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Tag</mat-label>
+        <input matInput [(ngModel)]="tag">
+        <mat-hint>Auto-generated if empty</mat-hint>
+      </mat-form-field>
+
+      <!-- PREVIEW -->
+      <div class="tag-preview" *ngIf="deptName">
+        <span class="badge">
+          {{ generateTag(deptName) }}
+        </span>
+        <small>Preview</small>
+      </div>
+
+    </div>
+
+    <div *ngIf="errorMessage" class="error-box">
+  {{ errorMessage }}
+</div>
+
+    <!-- FOOTER -->
+    <div class="dialog-footer">
+
+      <button mat-button (click)="close()">Cancel</button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="save()"
+        [disabled]="!deptName.trim() || isSaving">
+
+        <span *ngIf="!isSaving">
+          {{ isEdit ? 'Update' : 'Save' }}
+        </span>
+
+        <span *ngIf="isSaving">
+          Saving...
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+`

@@ -1,0 +1,91 @@
+<div style="display:flex;justify-content:center;padding:24px;">
+  <mat-card style="width:420px;">
+
+    <h2>Login</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <mat-form-field appearance="fill" style="width:100%;">
+        <mat-label>Company Id</mat-label>
+
+        <input
+          matInput
+          formControlName="compID"
+          placeholder="1">
+
+        <mat-error *ngIf="form.controls.compID.invalid">
+          Company Id is required
+        </mat-error>
+
+      </mat-form-field>
+
+
+
+      <mat-form-field appearance="fill" style="width:100%;">
+        <mat-label>Email</mat-label>
+
+        <input
+          matInput
+          formControlName="email">
+
+        <mat-error *ngIf="form.controls.email.invalid">
+          Valid email required
+        </mat-error>
+
+      </mat-form-field>
+
+
+
+      <mat-form-field appearance="fill" style="width:100%;">
+        <mat-label>Password</mat-label>
+
+        <input
+          matInput
+          type="password"
+          formControlName="PasswordHash">
+
+        <mat-error *ngIf="form.controls.PasswordHash.invalid">
+          Password required
+        </mat-error>
+
+      </mat-form-field>
+
+
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="(authState$ | async)?.loading">
+
+          Login
+
+        </button>
+
+
+        <mat-progress-spinner
+          *ngIf="(authState$ | async)?.loading"
+          diameter="24"
+          mode="indeterminate">
+
+        </mat-progress-spinner>
+
+      </div>
+
+
+
+      <div
+        style="color:#b00020;margin-top:12px;"
+        *ngIf="(authState$ | async)?.error as err">
+
+        {{ err }}
+
+      </div>
+
+
+    </form>
+
+  </mat-card>
+</div>

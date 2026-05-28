@@ -1,0 +1,48 @@
+<p>branch-list works!</p>
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between mb-3">
+    <h3>Branches</h3>
+    <button class="btn btn-primary" routerLink="/branch/create">
+      + Add Branch
+    </button>
+  </div>
+
+  <table class="table table-hover">
+
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let b of branches">
+        <td>{{ b.branchName }}</td>
+        <td>{{ b.location }}</td>
+
+        <td>
+          <button class="btn btn-sm btn-outline-primary me-2"
+                  [routerLink]="['/branch/edit', b.branchID]">
+            Edit
+          </button>
+
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="delete(b.branchID)">
+            Delete
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="branches.length === 0">
+        <td colspan="3" class="text-center text-muted">
+          No branches found
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+
+</div>

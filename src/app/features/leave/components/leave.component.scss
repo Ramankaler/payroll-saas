@@ -1,0 +1,10 @@
+.leave-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.tab-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.leave-card { padding: 1.5rem; }
+.leave-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.leave-header h3 { margin: 0; }
+.leave-body { display: flex; flex-direction: column; gap: 0.25rem; }
+.type { font-weight: 500; }
+.dates { color: #757575; font-size: 0.9rem; }
+.reason { color: #555; margin: 0.5rem 0 0; }
+.approval-actions { display: flex; gap: 0.75rem; margin-top: 1rem; justify-content: flex-end; }

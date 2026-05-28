@@ -1,0 +1,47 @@
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between mb-3">
+    <h3>Companies</h3>
+    <button class="btn btn-primary" routerLink="/company/create">
+      + Add Company
+    </button>
+  </div>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Industry</th>
+        <th>Country</th>
+        <th>Currency</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let c of companies">
+        <td>{{ c.companyName }}</td>
+        <td>{{ c.industry }}</td>
+        <td>{{ c.country }}</td>
+        <td>{{ c.currency }}</td>
+
+        <td>
+          <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(c.compID)">
+            Edit
+          </button>
+
+          <button class="btn btn-sm btn-outline-danger" (click)="delete(c.compID)">
+            Delete
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="companies.length === 0">
+        <td colspan="5" class="text-center text-muted">
+          No companies found
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

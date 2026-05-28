@@ -1,0 +1,60 @@
+
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>Dashboard Overview</h1>
+    <p>Company: {{ company?.companyName || 'Loading...' }} | {{ company?.currency || 'USD' }}</p>
+  </header>
+
+  <div class="kpi-grid">
+    <mat-card class="kpi-card" *ngFor="let kpi of kpis; trackBy: trackByFn">
+      <div class="kpi-value">{{ kpi.value }}</div>
+      <div class="kpi-label">{{ kpi.label }}</div>
+      <div class="kpi-trend" [ngClass]="kpi.type">
+        {{ kpi.trend }}
+        <mat-icon>{{ kpi.type === 'up' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="dashboard-charts">
+    <mat-card class="chart-container">
+      <h3>Payroll Trend (Last 6 Months)</h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="chartData"
+          [labels]="chartLabels"
+          [options]="chartOptions"
+          [legend]="true"
+          type="bar">
+        </canvas>
+      </div>
+    </mat-card>
+
+    <mat-card class="recent-activity">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let activity of recentActivities; trackBy: trackByFn">
+          <div class="activity-avatar" [style.background-color]="'hsl(' + (activity.id * 60 % 360) + ', 70%, 60%)'">
+            {{ activity.user.charAt(0) }}
+          </div>
+          <div class="activity-content">
+            <div class="activity-message">{{ activity.message }}</div>
+            <div class="activity-time">{{ activity.time }}</div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="dashboard-actions">
+    <button mat-raised-button color="primary" (click)="onQuickAction('employees')">
+      <mat-icon>group</mat-icon>
+      Manage Employees
+    </button>
+    <button mat-raised-button color="accent" (click)="onQuickAction('payroll')">
+      <mat-icon>account_balance_wallet</mat-icon>
+      Run Payroll
+    </button>
+  </div>
+</div>
+

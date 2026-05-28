@@ -1,0 +1,59 @@
+<div class="dialog-container">
+
+  <!-- HEADER -->
+  <div class="dialog-header">
+    <h2>{{ isEdit ? 'Edit Designation' : 'Add Designation' }}</h2>
+    <p class="subtitle">
+      {{ isEdit ? 'Update designation details' : 'Create a new designation' }}
+    </p>
+  </div>
+
+  <!-- BODY -->
+  <div class="dialog-body">
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Designation Name *</mat-label>
+      <input matInput [(ngModel)]="desigName" (ngModelChange)="clearError()" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Tag</mat-label>
+      <input matInput [(ngModel)]="tag">
+      <mat-hint>Auto-generated if empty</mat-hint>
+    </mat-form-field>
+
+    <!-- TAG PREVIEW -->
+    <div class="tag-preview" *ngIf="desigName">
+      <span class="badge">
+        {{ generateTag(desigName) }}
+      </span>
+      <small>Preview</small>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dialog-footer">
+    <button mat-button (click)="close()">Cancel</button>
+
+    <button mat-raised-button color="primary"
+      (click)="save()"
+      [disabled]="!desigName.trim() || isSaving">
+
+      <span *ngIf="!isSaving">
+        {{ isEdit ? 'Update' : 'Save' }}
+      </span>
+
+      <span *ngIf="isSaving">
+        Saving...
+      </span>
+
+    </button>
+  </div>
+
+</div>

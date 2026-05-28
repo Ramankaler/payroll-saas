@@ -1,0 +1,55 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Edit Reimbursement Claim</h4>
+          <a routerLink="/reimbursement" class="btn btn-sm btn-outline-secondary">
+            Back
+          </a>
+        </div>
+        <div class="card-body">
+<form>
+            <div class="mb-3">
+              <label class="form-label">Employee</label>
+              <select [(ngModel)]="reimbursementData.empID" name="empID" class="form-select">
+                <option value="">Select Employee</option>
+                <option *ngFor="let emp of employees" [value]="emp.empID">
+                  {{ emp.firstName }} {{ emp.lastName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Amount</label>
+                <input [(ngModel)]="reimbursementData.amount" name="amount" type="number" step="0.01" class="form-control">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Expense Type</label>
+                <select [(ngModel)]="reimbursementData.expenseType" name="expenseType" class="form-select">
+                  <option value="">Select Type</option>
+                  <option *ngFor="let type of expenseTypes" [value]="type">{{ type }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Description</label>
+              <textarea [(ngModel)]="reimbursementData.description" name="description" rows="4"
+                class="form-control"></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="button" (click)="save()" class="btn btn-primary">
+                Update Claim
+              </button>
+              <a routerLink="/reimbursement" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

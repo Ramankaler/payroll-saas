@@ -1,0 +1,616 @@
+<div class="container py-4">
+<div class="card">
+  <div class="card-header">
+<h4>Add New Employee</h4>
+  </div>
+
+  <div class="card-body">
+
+
+  <!-- Profile Photo -->
+  <div class="row mb-4">
+    <div class="col-8">
+
+    </div>
+
+    <div class="col-4 text-end">
+     <div class="text-center">
+
+  <img
+    [src]="previewUrl || 'https://via.placeholder.com/120'"
+    class="rounded-circle border shadow-sm mb-2"
+    width="120"
+    height="120"
+    style="object-fit: cover;"
+  >
+
+  <div class="d-flex justify-content-center gap-2">
+
+    <label class="btn btn-outline-primary btn-sm mb-0">
+      Upload
+      <input type="file" hidden (change)="onPhotoChange($event)">
+    </label>
+
+    <button class="btn btn-outline-danger btn-sm" type="button" (click)="removePhoto()">
+      Remove
+    </button>
+
+  </div>
+
+</div>
+    </div>
+  </div>
+
+  <mat-tab-group>
+
+    <!-- ================= GENERAL ================= -->
+    <mat-tab label="General">
+      <div class="p-3 row g-3">
+
+        <div class="col-md-4">
+          <label>Employee Code *</label>
+          <input class="form-control" [(ngModel)]="employee.empCode" name="empCode">
+        </div>
+
+        <div class="col-md-4">
+          <label>First Name *</label>
+          <input class="form-control" [(ngModel)]="employee.firstName" name="firstName">
+        </div>
+
+        <div class="col-md-4">
+          <label>Last Name</label>
+          <input class="form-control" [(ngModel)]="employee.lastName" name="lastName">
+        </div>
+
+        <div class="col-md-6">
+          <label>Email *</label>
+          <input class="form-control" [(ngModel)]="employee.email" name="email">
+        </div>
+
+        <div class="col-md-6">
+          <label>Phone *</label>
+          <input class="form-control" [(ngModel)]="employee.phone" name="phone">
+        </div>
+
+        <div class="col-md-4">
+          <label>Gender</label>
+          <select class="form-select" [(ngModel)]="employee.gender" name="gender">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label>Date of Birth</label>
+          <input type="date" class="form-control" [(ngModel)]="employee.dob" name="dob">
+        </div>
+
+        <div class="col-md-4">
+       <label>Marital Status</label>
+<select class="form-select" [(ngModel)]="employee.maritalStatus" name="maritalStatus">
+  <option value="">Select</option>
+  <option>Single</option>
+  <option>Married</option>
+  <option>Divorced</option>
+  <option>Widowed</option>
+</select>
+        </div>
+
+        <div class="col-md-4">
+          <label>Nationality</label>
+          <input class="form-control" [(ngModel)]="employee.nationality" name="nationality">
+        </div>
+
+        <div class="col-md-4">
+          <label>National ID</label>
+<input class="form-control" [(ngModel)]="employee.nationalId" name="nationalId">
+        </div>
+
+        <div class="col-md-4">
+          <label>Passport</label>
+          <input class="form-control" [(ngModel)]="employee.passportNo" name="passportNo">
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ================= WORK ================= -->
+    <mat-tab label="Work">
+      <div class="p-3 row g-3">
+
+        <div class="col-md-6">
+        <label>Department</label>
+<div class="d-flex gap-2">
+  <select class="form-select" [(ngModel)]="employee.deptID" name="deptID">
+    <option value="">Select</option>
+    <option *ngFor="let d of departments" [value]="d.deptID">
+      {{d.deptName}}
+    </option>
+  </select>
+
+  <button class="btn btn-outline-primary" type="button" (click)="openDeptDialog()">
+    +
+  </button>
+</div>
+        </div>
+
+        <div class="col-md-6">
+         <label>Designation</label>
+<div class="d-flex gap-2">
+  <select class="form-select" [(ngModel)]="employee.desigID" name="desigID">
+    <option value="">Select</option>
+    <option *ngFor="let d of designations" [value]="d.desigID">
+      {{d.desigName}}
+    </option>
+  </select>
+
+  <button class="btn btn-outline-primary" type="button" (click)="openDesigDialog()">
+    +
+  </button>
+</div>
+        </div>
+
+        <div class="col-md-4">
+          <label>Joining Date</label>
+          <input type="date" class="form-control" [(ngModel)]="employee.joiningDate" name="joiningDate">
+        </div>
+
+        <div class="col-md-4">
+          <label>Manager</label>
+          <input class="form-control" [(ngModel)]="employee.managerID" name="managerID">
+        </div>
+
+        <div class="col-md-4">
+          <label>Work Location</label>
+          <input class="form-control" [(ngModel)]="employee.workLocation" name="workLocation">
+        </div>
+        <div class="mb-2">
+  <label>Branch</label>
+  <select [(ngModel)]="employee.branchID" class="form-control">
+    <option [ngValue]="null">Select Branch</option>
+    <option *ngFor="let b of branches" [ngValue]="b.branchID">
+      {{ b.branchName }}
+    </option>
+  </select>
+</div>
+
+        <div class="col-md-4">
+         <label>Employment Type</label>
+<select class="form-select" [(ngModel)]="employee.employmentType" name="employmentType">
+  <option value="">Select</option>
+  <option>Permanent</option>
+  <option>Full-Time</option>
+  <option>Part-Time</option>
+  <option>Contract</option>
+  <option>Intern</option>
+</select>
+        </div>
+
+        <div class="col-md-4">
+          <label>Shift ID</label>
+          <input class="form-control" [(ngModel)]="employee.shiftID" name="shiftID">
+        </div>
+
+        <div class="col-md-4">
+          <label>Status</label>
+          <select class="form-select" [(ngModel)]="employee.employmentStatus" name="employmentStatus">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ================= ADDRESS ================= -->
+    <mat-tab label="Address">
+      <div class="p-3 row g-3">
+
+        <div class="col-md-6">
+          <label>Address Line 1</label>
+          <input class="form-control" [(ngModel)]="employee.addressLine1" name="addressLine1">
+        </div>
+
+        <div class="col-md-6">
+          <label>Address Line 2</label>
+          <input class="form-control" [(ngModel)]="employee.addressLine2" name="addressLine2">
+        </div>
+
+        <div class="col-md-4">
+          <label>City</label>
+          <input class="form-control" [(ngModel)]="employee.city" name="city">
+        </div>
+
+        <div class="col-md-4">
+          <label>Country</label>
+          <input class="form-control" [(ngModel)]="employee.country" name="country">
+        </div>
+
+        <div class="col-md-4">
+          <label>Postal Code</label>
+          <input class="form-control" [(ngModel)]="employee.postalCode" name="postalCode">
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ================= PAYROLL ================= -->
+    <mat-tab label="Payroll">
+      <div class="p-3 row g-3">
+
+        <div class="col-md-3">
+          <label>Basic Salary</label>
+          <input class="form-control" [(ngModel)]="employee.basicSalary" name="basicSalary">
+        </div>
+
+        <div class="col-md-3">
+          <label>Allowances</label>
+          <input class="form-control" [(ngModel)]="employee.allowancesAmount" name="allowancesAmount">
+        </div>
+
+        <div class="col-md-3">
+        <label>Payment Mode</label>
+<select class="form-select" [(ngModel)]="employee.paymentMode" name="paymentMode">
+  <option value="">Select</option>
+  <option [value]="1">Bank Transfer</option>
+  <option [value]="2">Cash</option>
+  <option [value]="3">Cheque</option>
+</select>
+        </div>
+
+        <div class="col-md-3">
+          <label>Tax Number</label>
+          <input class="form-control" [(ngModel)]="employee.taxNumber" name="taxNumber">
+        </div>
+
+        <div class="col-md-6">
+          <label>Bank Name</label>
+          <input class="form-control" [(ngModel)]="employee.bankName" name="bankName">
+        </div>
+
+        <div class="col-md-6">
+          <label>Bank Account</label>
+          <input class="form-control" [(ngModel)]="employee.bankAccount" name="bankAccount">
+        </div>
+
+      </div>
+    </mat-tab>
+
+
+    <!--  ============================ Documents ============================== -->
+
+    <mat-tab label="Documents">
+
+  <div class="card shadow-sm p-3">
+
+    <!-- ================= OFFICIAL DOCUMENT ================= -->
+    <h5>Official Documents</h5>
+
+    <div class="row g-2 mb-3">
+
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="doc.docType" name="docType">
+          <option value="">Type</option>
+          <option>Passport</option>
+          <option>Visa</option>
+          <option>Emirates ID</option>
+          <option>Labour Card</option>
+          <option>Medical Card</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <input class="form-control" placeholder="Number"
+               [(ngModel)]="doc.docNumber" name="docNumber">
+      </div>
+
+      <div class="col-md-2">
+        <input type="date" class="form-control"
+               [(ngModel)]="doc.issueDate" name="issueDate">
+      </div>
+
+      <div class="col-md-2">
+        <input type="date" class="form-control"
+               [(ngModel)]="doc.expiryDate" name="expiryDate">
+      </div>
+
+      <div class="col-md-2">
+        <input class="form-control" placeholder="Remarks"
+               [(ngModel)]="doc.remarks" name="remarks">
+      </div>
+
+      <div class="col-md-1">
+        <select class="form-select"
+                [(ngModel)]="doc.status" name="status">
+          <option>Active</option>
+          <option>Expired</option>
+        </select>
+      </div>
+
+      <div class="col-md-1">
+        <input type="file" (change)="onDocFileChange($event)">
+      </div>
+
+      <div class="col-md-1">
+        <button class="btn btn-success w-100"
+                (click)="addDocument()">+</button>
+      </div>
+
+    </div>
+
+    <!-- TABLE -->
+  <table class="table table-bordered table-hover align-middle">
+
+  <thead class="table-light">
+    <tr>
+      <th>Type</th>
+      <th>Number</th>
+      <th>Issue</th>
+      <th>Expiry</th>
+      <th>Status</th>
+      <th>File</th>
+      <th style="width: 80px;">Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let d of documents; let i = index">
+
+      <td>
+        <span class="fw-semibold">{{d.docType}}</span>
+      </td>
+
+      <td>{{d.docNumber}}</td>
+
+      <td>{{d.issueDate || '-'}}</td>
+
+      <td>{{d.expiryDate || '-'}}</td>
+
+      <!-- STATUS BADGE -->
+      <td>
+        <span
+          class="badge"
+          [ngClass]="{
+            'bg-success': d.status === 'Active',
+            'bg-danger': d.status === 'Expired',
+            'bg-secondary': !d.status
+          }"
+        >
+          {{d.status || 'N/A'}}
+        </span>
+      </td>
+
+      <!-- FILE NAME -->
+      <td>
+        <small class="text-muted">
+          {{d.fileName || 'No file'}}
+        </small>
+      </td>
+
+      <!-- DELETE BUTTON -->
+      <td>
+        <button
+          class="btn btn-sm btn-outline-danger"
+          (click)="removeDocument(i)">
+          ✕
+        </button>
+      </td>
+
+    </tr>
+  </tbody>
+
+</table>
+
+    <!-- ================= OTHER DOCUMENT ================= -->
+    <h5 class="mt-4">Other Documents</h5>
+
+    <div class="row g-2 mb-3">
+
+      <div class="col-md-2">
+        <input type="date" class="form-control"
+               [(ngModel)]="otherDoc.date" name="otherDate">
+      </div>
+
+      <div class="col-md-3">
+        <select class="form-select"
+                [(ngModel)]="otherDoc.type" name="otherType">
+          <option>Warning</option>
+          <option>Offer Letter</option>
+          <option>Certificate</option>
+          <option>Increment Letter</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <input class="form-control"
+               placeholder="Comments"
+               [(ngModel)]="otherDoc.comments"
+               name="comments">
+      </div>
+
+      <div class="col-md-2">
+        <input type="file" (change)="onOtherFileChange($event)">
+      </div>
+
+      <div class="col-md-1">
+        <button class="btn btn-success w-100"
+                (click)="addOtherDocument()">+</button>
+      </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Comments</th>
+          <th>File</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of otherDocuments; let i = index">
+          <td>{{d.date}}</td>
+          <td>{{d.type}}</td>
+          <td>{{d.comments}}</td>
+          <td>{{d.fileName}}</td>
+          <td>
+            <button class="btn btn-danger btn-sm"
+                    (click)="removeOtherDocument(i)">X</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</mat-tab>
+
+    <!-- ================= EMERGENCY ================= -->
+    <mat-tab label="Emergency">
+      <div class="p-3 row g-3">
+
+        <div class="col-md-4">
+          <label>Contact Name</label>
+          <input class="form-control" [(ngModel)]="employee.emergencyContactName" name="emergencyContactName">
+        </div>
+
+        <div class="col-md-4">
+          <label>Phone</label>
+          <input class="form-control" [(ngModel)]="employee.emergencyContactPhone" name="emergencyContactPhone">
+        </div>
+
+        <div class="col-md-4">
+          <label>Relation</label>
+<select class="form-select" [(ngModel)]="employee.emergencyRelation" name="emergencyRelation">
+  <option value="">Select</option>
+  <option>Father</option>
+  <option>Mother</option>
+  <option>Spouse</option>
+  <option>Brother</option>
+  <option>Sister</option>
+  <option>Friend</option>
+  <option>Other</option>
+</select>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ================= EDUCATION ================= -->
+    <mat-tab label="Education">
+      <div class="card shadow-sm p-3">
+
+     <div class="row g-3">
+
+  <div class="col-md-3">
+    <label>Qualification</label>
+    <input class="form-control" [(ngModel)]="education.qualification" name="qualification">
+  </div>
+
+  <div class="col-md-3">
+    <label>Institute</label>
+    <input class="form-control" [(ngModel)]="education.institute" name="institute">
+  </div>
+
+  <div class="col-md-2">
+    <label>Year</label>
+    <input class="form-control" [(ngModel)]="education.year" name="year">
+  </div>
+
+  <div class="col-md-2">
+    <label>Percentage</label>
+    <input class="form-control" [(ngModel)]="education.percentage" name="percentage">
+  </div>
+
+  <div class="col-md-2">
+    <label>Upload Document</label>
+    <input type="file" class="form-control" (change)="onEduFileChange($event)">
+  </div>
+
+  <div class="col-md-2">
+    <button class="btn btn-success w-100 mt-4" (click)="addEducation()">Add</button>
+  </div>
+
+</div>
+
+        <table class="table mt-3">
+          <tr *ngFor="let e of educationList; let i = index">
+            <td>{{e.qualification}}</td>
+            <td>{{e.institute}}</td>
+            <td>{{e.year}}</td>
+            <td><button class="btn btn-danger btn-sm" (click)="removeEducation(i)">Delete</button></td>
+          </tr>
+        </table>
+
+      </div>
+    </mat-tab>
+
+    <!-- ================= EXPERIENCE ================= -->
+    <mat-tab label="Experience">
+      <div class="card shadow-sm p-3">
+
+        <div class="row g-2">
+          <div class="col-md-3">
+            <input class="form-control" [(ngModel)]="experience.companyName" name="companyName" placeholder="Company">
+          </div>
+          <div class="col-md-3">
+            <input class="form-control" [(ngModel)]="experience.designation" name="designation" placeholder="Designation">
+          </div>
+          <div class="col-md-2">
+            <input type="date" class="form-control" [(ngModel)]="experience.startDate" name="startDate">
+          </div>
+          <div class="col-md-2">
+            <input type="date" class="form-control" [(ngModel)]="experience.endDate" name="endDate">
+          </div>
+
+          <div class="col-md-2">
+  <label>Upload Document</label>
+  <input type="file" class="form-control" (change)="onExpFileChange($event)">
+</div>
+
+          <div class="col-md-2">
+            <button class="btn btn-success w-100" (click)="addExperience()">Add</button>
+          </div>
+        </div>
+
+        <table class="table mt-3">
+          <tr *ngFor="let e of experienceList; let i = index">
+            <td>{{e.companyName}}</td>
+            <td>{{e.designation}}</td>
+            <td><button class="btn btn-danger btn-sm" (click)="removeExperience(i)">Delete</button></td>
+          </tr>
+        </table>
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+  <!-- SAVE -->
+  <div class="mt-4 text-end">
+ <button
+  class="btn btn-primary px-4"
+  (click)="saveEmployee()"
+  [disabled]="isSaving"
+>
+
+  <span *ngIf="!isSaving">
+    💾 Save Employee
+  </span>
+
+  <span *ngIf="isSaving">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Saving...
+  </span>
+
+</button>
+  </div>
+  </div>
+
+</div>
+</div>

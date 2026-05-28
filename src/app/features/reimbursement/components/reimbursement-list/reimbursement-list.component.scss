@@ -1,0 +1,19 @@
+.badge {
+  font-size: 0.75em;
+  padding: 0.35em 0.65em;
+}
+
+.table th {
+  font-weight: 600;
+}
+
+.material-icons {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .w-25 {
+    width: 100% !important;
+  }
+}
+

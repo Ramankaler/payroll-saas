@@ -1,0 +1,94 @@
+<div class="app-shell">
+  <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed">
+    <div class="brand">
+      <div class="brand__logo">P</div>
+      <div class="brand__meta" *ngIf="!isSidebarCollapsed">
+        <h1>PayrollPro</h1>
+        <p>Enterprise HRMS</p>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <ng-container *ngFor="let item of navItems">
+        <a
+          *ngIf="item.route"
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="nav-item--active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        >
+          <span class="nav-item__icon" [attr.data-icon]="item.icon"></span>
+          <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
+        </a>
+        <details *ngIf="item.children" class="nav-dropdown">
+          <summary class="nav-item nav-item--parent">
+            <span class="nav-item__icon" [attr.data-icon]="item.icon"></span>
+            <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
+          </summary>
+          <div class="nav-dropdown__children">
+            <a
+              *ngFor="let child of item.children"
+              class="nav-item nav-item--child"
+              [routerLink]="child.route"
+              routerLinkActive="nav-item--active"
+            >
+              <span class="nav-item__icon" [attr.data-icon]="child.icon"></span>
+              <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ child.label }}</span>
+            </a>
+          </div>
+        </details>
+      </ng-container>
+    </nav>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="icon-btn" type="button" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+          <span class="hamburger"></span>
+        </button>
+        <div class="search-box">
+          <span class="search-box__icon"></span>
+          <input
+            type="text"
+            placeholder="Search employees, payroll runs, reports..."
+            [(ngModel)]="search"
+          />
+        </div>
+      </div>
+
+      <div class="topbar__right">
+        <button class="icon-btn" type="button" aria-label="Notifications">
+          <span class="bell-icon"></span>
+          <span class="badge">3</span>
+        </button>
+
+        <button class="icon-btn ai-chat-toggle" type="button" (click)="toggleAiChat()" aria-label="AI Assistant">
+          <span>✨</span>
+        </button>
+
+        <details class="profile-menu">
+          <summary>
+            <span class="avatar">SA</span>
+            <span class="profile-meta">
+              <strong>Super Admin</strong>
+            <small>superadmin&#64;default.com</small>
+            </span>
+          </summary>
+          <div class="profile-menu__panel">
+            <button type="button" (click)="onProfileMenu('profile')">Profile</button>
+            <button type="button" (click)="onProfileMenu('logout')">Logout</button>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </section>
+
+  <!-- Floating AI Chat Widget -->
+  <app-ai-chat *ngIf="showAiChat" class="ai-chat-widget"></app-ai-chat>
+</div>
+

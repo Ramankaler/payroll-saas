@@ -1,0 +1,56 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Pending Reimbursement Approvals</h2>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Manager Approval Queue</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Employee</th>
+                  <th>Amount</th>
+                  <th>Expense Type</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let reim of reimbursements">
+                  <td>{{ getEmployeeName(reim.empID) }}</td>
+                  <td>${{ reim.amount | number:'1.2-2' }}</td>
+                  <td>{{ reim.expenseType }}</td>
+                  <td>{{ reim.description }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button (click)="approve(reim.reimID)" class="btn btn-success">
+                        Approve
+                      </button>
+                      <button (click)="reject(reim.reimID)" class="btn btn-danger">
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="reimbursements.length === 0">
+                  <td colspan="5" class="text-center py-5 text-muted">
+                    No pending reimbursements
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

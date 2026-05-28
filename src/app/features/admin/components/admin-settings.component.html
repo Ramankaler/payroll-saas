@@ -1,0 +1,33 @@
+<div class="settings-container">
+  <mat-card>
+    <h2>Admin Settings (MVP)</h2>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Payroll Cycle</mat-label>
+        <input matInput [(ngModel)]="req.payrollCycle" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Working Days</mat-label>
+        <input matInput type="number" [(ngModel)]="req.workingDays" />
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Currency</mat-label>
+        <input matInput [(ngModel)]="req.currency" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Timezone</mat-label>
+        <input matInput [(ngModel)]="req.timezone" />
+      </mat-form-field>
+    </div>
+
+    <button mat-raised-button color="primary" (click)="save()">Save</button>
+
+    <div *ngIf="result" class="result">
+      <pre>{{ result | json }}</pre>
+    </div>
+  </mat-card>
+</div>

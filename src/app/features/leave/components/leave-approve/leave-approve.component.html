@@ -1,0 +1,69 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Pending Leave Approvals</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Manager Approval Queue</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Employee</th>
+                  <th>Leave Type</th>
+                  <th>Dates</th>
+                  <th>Half Day</th>
+                  <th>Reason</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let leave of leaves">
+                  <td>{{ getEmployeeName(leave.empID) }}</td>
+                  <td>{{ leave.leaveTypeID }}</td>
+                  <td>
+                    {{ leave.startDate | date:'shortDate' }} - {{ leave.endDate | date:'shortDate' }}
+                  </td>
+                  <td>{{ leave.isHalfDay ? leave.halfDayType : '' }}</td>
+                  <td>{{ leave.reason }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button (click)="approveLeave(leave.leaveID)" class="btn btn-success"
+                        [disabled]="processingId === leave.leaveID">
+
+                        <span *ngIf="processingId !== leave.leaveID">Approve</span>
+                        <span *ngIf="processingId === leave.leaveID">Processing...</span>
+                      </button>
+
+                      <button (click)="rejectLeave(leave.leaveID)" class="btn btn-danger"
+                        [disabled]="processingId === leave.leaveID">
+
+                        <span *ngIf="processingId !== leave.leaveID">Reject</span>
+                        <span *ngIf="processingId === leave.leaveID">Processing...</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="leaves.length === 0">
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="material-icons fs-1">check_circle</i>
+                    <div class="mt-2">No pending leave requests</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,235 @@
+.emp-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+// ── Breadcrumb ────────────────────────────────────────────────────────────────
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+
+    &:hover { color: #1d4ed8; }
+
+    mat-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+  }
+
+  .sep { font-size: 1rem; height: 1rem; width: 1rem; }
+}
+
+// ── Page Title ────────────────────────────────────────────────────────────────
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1.5rem;
+}
+
+// ── Lookups loading ───────────────────────────────────────────────────────────
+.lookups-loading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+// ── Form Sections ─────────────────────────────────────────────────────────────
+.form-section {
+  margin-bottom: 1.5rem;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1.5rem;
+
+  mat-icon {
+    color: #4f46e5;
+  }
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+  }
+
+  .required-note,
+  .optional-note {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    font-weight: 400;
+  }
+}
+
+// ── Form Grid ─────────────────────────────────────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem 1rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  .field-md {
+    max-width: 220px;
+  }
+}
+
+// ── Required asterisk ──────────────────────────────────────────────────────────
+.req {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+// ── Upload Area ───────────────────────────────────────────────────────────────
+.upload-area {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 2rem;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+
+  &:hover,
+  &.has-file {
+    border-color: #6366f1;
+    background: #f5f3ff;
+  }
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9ca3af;
+  user-select: none;
+
+  .upload-icon {
+    font-size: 3rem;
+    height: 3rem;
+    width: 3rem;
+    color: #c4b5fd;
+  }
+
+  .upload-text {
+    font-weight: 500;
+    color: #4b5563;
+    margin: 0;
+  }
+
+  .upload-hint {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .file-icon {
+    font-size: 2rem;
+    height: 2rem;
+    width: 2rem;
+    color: #6366f1;
+  }
+
+  .file-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+
+    .file-name {
+      font-weight: 600;
+      color: #1f2937;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+  }
+}
+
+.remove-file-btn {
+  flex-shrink: 0;
+}
+
+.upload-note {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0.75rem 0 0;
+}
+
+// ── Form Actions ──────────────────────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.5rem;
+
+  button,
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .emp-form-container { padding: 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column-reverse; }
+  .field-md { max-width: 100%; }
+}
+
+
+
+.table td, .table th {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 5px 8px;
+}

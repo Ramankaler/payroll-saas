@@ -1,0 +1,59 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">New Reimbursement Claim</h4>
+        </div>
+        <div class="card-body">
+          <form #reimForm="ngForm">
+            <div class="mb-3">
+              <label class="form-label">Employee <span class="text-danger">*</span></label>
+              <select [(ngModel)]="reimbursement.empID" name="empID" class="form-select" required>
+                <option value="">Select Employee</option>
+                <option *ngFor="let emp of employees" [value]="emp.empID">
+                  {{ emp.firstName }} {{ emp.lastName }} ({{ emp.empCode }})
+                </option>
+              </select>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Amount <span class="text-danger">*</span></label>
+                <input [(ngModel)]="reimbursement.amount" name="amount" type="number" step="0.01"
+                  class="form-control" placeholder="0.00" required min="0">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Expense Type <span class="text-danger">*</span></label>
+                <select [(ngModel)]="reimbursement.expenseType" name="expenseType" class="form-select" required>
+                  <option *ngFor="let type of expenseTypes" [value]="type">{{ type }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description <span class="text-danger">*</span></label>
+              <textarea [(ngModel)]="reimbursement.description" name="description" rows="3"
+                class="form-control" placeholder="Describe the expense..." required></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Bill/Receipt File <span class="text-danger">*</span></label>
+              <input type="file" (change)="onFileChange($event)" accept="image/*,.pdf" class="form-control">
+              <div class="form-text">Upload bill/receipt (JPG, PNG, PDF)</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="button" (click)="save()" [disabled]="!reimbursement.billFile || !reimForm.form.valid"
+                class="btn btn-primary">
+                Submit Claim
+              </button>
+              <a routerLink="/reimbursement" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

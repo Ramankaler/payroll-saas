@@ -1,0 +1,32 @@
+<div class="chat-container" style="height: 500px!important;">
+  <mat-card style="height: 450px!important;">
+    <h2>AI Assistant (MVP)</h2>
+
+    <div class="messages">
+      <div *ngFor="let m of messages" [ngClass]="m.from">
+        <strong>{{ m.from === 'user' ? 'You' : 'AI' }}:</strong> {{ m.text }}
+      </div>
+    </div>
+
+    <div class="input-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Ask something</mat-label>
+        <input matInput [(ngModel)]="message" (keydown.enter)="send()" placeholder="e.g., How to generate salary?" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="send()">Send</button>
+    </div>
+
+    <div *ngIf="suggestions?.length" class="suggestions">
+      <div><strong>Suggested:</strong></div>
+      <div class="suggestion-chips">
+       <span
+  *ngFor="let s of suggestions"
+  class="chip"
+  (click)="selectSuggestion(s)"
+>
+  {{ s }}
+</span>
+      </div>
+    </div>
+  </mat-card>
+</div>

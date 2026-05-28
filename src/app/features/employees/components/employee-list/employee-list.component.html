@@ -1,0 +1,206 @@
+<div class="emp-list-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-text">
+      <h1 class="page-title">Employees</h1>
+      <p class="page-subtitle">Manage your team members and their payroll details</p>
+    </div>
+    <a mat-raised-button color="primary" routerLink="/employees/create" class="add-btn">
+      <mat-icon>add</mat-icon>
+      Add Employee
+    </a>
+  </div>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search employees</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          [value]="searchTerm"
+          (input)="onSearch($event)"
+          placeholder="Name, code, email, phone…"
+          autocomplete="off"
+        />
+        <button
+          *ngIf="searchTerm"
+          matSuffix
+          mat-icon-button
+          aria-label="Clear search"
+          (click)="clearSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <div class="toolbar-right">
+        <span class="count-badge" *ngIf="!loading">
+          {{ dataSource.data.length }} of {{ allEmployees.length }} employees
+        </span>
+        <button mat-icon-button (click)="loadEmployees()" matTooltip="Refresh" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading employees…</p>
+    </div>
+
+    <!-- Empty state: no employees at all -->
+    <div class="empty-state" *ngIf="hasNoData">
+      <mat-icon class="empty-icon">groups</mat-icon>
+      <h3>No employees yet</h3>
+      <p>Add your first employee to get started with payroll management.</p>
+      <a mat-raised-button color="primary" routerLink="/employees/create">
+        <mat-icon>person_add</mat-icon>
+        Add First Employee
+      </a>
+    </div>
+
+    <!-- Empty state: search returned nothing -->
+    <div class="empty-state" *ngIf="hasNoSearchResults">
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <h3>No results found</h3>
+      <p>No employees match "<strong>{{ searchTerm }}</strong>". Try a different search term.</p>
+      <button mat-stroked-button (click)="clearSearch()">
+        <mat-icon>clear</mat-icon>
+        Clear Search
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!loading && !hasNoData">
+      <table mat-table [dataSource]="dataSource" matSort class="emp-table">
+
+        <!-- empCode -->
+        <ng-container matColumnDef="empCode">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
+          <td mat-cell *matCellDef="let emp">
+            <span class="code-chip">{{ emp.empCode || '–' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- fullName -->
+        <ng-container matColumnDef="fullName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let emp">
+            <div class="emp-name-cell">
+              <div
+                class="avatar"
+                [style.background]="'hsl(' + (emp.empID * 37 % 360) + ',60%,55%)'"
+              >
+                {{ emp.firstName?.charAt(0) | uppercase }}{{ emp.lastName?.charAt(0) | uppercase }}
+              </div>
+              <div class="emp-meta">
+                <span class="emp-fullname">{{ emp.fullName }}</span>
+                <span class="emp-email">{{ emp.email }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- email (hidden on mobile, shown via emp-meta above) -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.email }}</td>
+        </ng-container>
+
+        <!-- phone -->
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef>Phone</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.phone || '–' }}</td>
+        </ng-container>
+
+        <!-- deptID -->
+        <ng-container matColumnDef="deptID">
+          <th mat-header-cell *matHeaderCellDef>Dept ID</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.deptID ?? '–' }}</td>
+        </ng-container>
+
+        <!-- desigID -->
+        <ng-container matColumnDef="desigID">
+          <th mat-header-cell *matHeaderCellDef>Desig ID</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.desigID ?? '–' }}</td>
+        </ng-container>
+
+        <!-- status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let emp">
+            <button
+              class="status-badge"
+              [class.active]="emp.isActive"
+              [class.inactive]="!emp.isActive"
+              (click)="toggleActive(emp)"
+              [matTooltip]="emp.isActive ? 'Click to deactivate' : 'Click to activate'"
+            >
+              <mat-icon class="status-icon">{{ emp.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ emp.isActive ? 'Active' : 'Inactive' }}
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- basicSalary -->
+        <ng-container matColumnDef="basicSalary">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Salary</th>
+          <td mat-cell *matCellDef="let emp">
+            {{ emp.basicSalary != null ? (emp.basicSalary | number:'1.2-2') : '–' }}
+          </td>
+        </ng-container>
+
+        <!-- actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let emp" class="actions-cell">
+            <a
+              mat-icon-button
+              [routerLink]="['/employees/edit', emp.empID]"
+              matTooltip="Edit employee"
+            >
+              <mat-icon>edit</mat-icon>
+            </a>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteEmployee(emp.empID)"
+              [disabled]="deletingId === emp.empID"
+              matTooltip="Delete employee"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;"
+          class="emp-row"
+        ></tr>
+
+        <!-- No filter match row (handled by empty-state block above, but keep for MatTable) -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+            No matching employees found.
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        showFirstLastButtons
+        [pageSize]="10"
+        aria-label="Select page"
+      ></mat-paginator>
+    </div>
+
+  </mat-card>
+</div>
