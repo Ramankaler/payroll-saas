@@ -29,7 +29,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 # Payroll SaaS – Progress Update
 
-## ✅ Leave Module Improvements
+## Leave Module Improvements
 
 * Rebuilt Leave Create screen from scratch
 * Added employee code based employee search
@@ -41,9 +41,13 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 * Added applied-on display field
 * Improved overall leave form UI structure and symmetry
 
+
+
+*Leave edit component update button working.
+
 ---
 
-## ✅ Backend Leave Improvements
+##  Backend Leave Improvements
 
 * Added automatic pending status on leave creation
 * Added CreatedAt handling
