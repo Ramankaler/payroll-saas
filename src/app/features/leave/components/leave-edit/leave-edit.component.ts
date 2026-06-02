@@ -110,10 +110,28 @@ export class LeaveEditComponent implements OnInit {
 
 
 updateLeave(){
+this.leaveService.update(this.leaveID, {
+  startDate:this.leave.startDate,
+  endDate:this.leave.endDate,
+  reason:this.leave.reason,
+  leaveTypeID:this.leave.leaveTypeID,
+}).subscribe({
+  next: (res: any) => {
+    this.snackBar.open('Leave updated successfully', 'Close', { duration: 3000 });
+    this.router.navigate(['/leaves']);
+  },
+  error: (err) => {
+    console.error('Error updating leave', err);
+    this.snackBar.open('Error updating leave', 'Close', { duration: 3000 });
+  }
+});
+}
+
+
 
 }
 
 
 
 
-}
+
