@@ -1,83 +1,61 @@
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+<div class="container-fluid">
+
+  <div class="row mt-1">
+    <div class="col-sm">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h4 class="mb-0">Edit Leave Request</h4>
-          <a routerLink="/leave" class="btn btn-sm btn-outline-secondary">
-            <i class="material-icons">arrow_back</i> Back
-          </a>
-        </div>
+        <div class="card-header">Edit Leave</div>
         <div class="card-body">
-          <div *ngIf="isReadonly" class="alert alert-warning">
-  This leave request is already {{ leave.status }} and cannot be edited.
-</div>
-          <form #leaveForm="ngForm">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Employee</label>
-                <select [(ngModel)]="leave.empID" name="empID" class="form-select">
-                  <option value="">Select Employee</option>
-                  <option *ngFor="let emp of employees" [value]="emp.empID">
-                    {{ emp.firstName }} {{ emp.lastName }} ({{ emp.empCode }})
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Leave Type</label>
-                <select [(ngModel)]="leave.leaveTypeID" name="leaveTypeID" class="form-select">
-                  <option value="">Select Leave Type</option>
-                  <option *ngFor="let type of leaveTypes" [value]="type.leaveTypeID">
-                    {{ type.leaveTypeName }}
-                  </option>
-                </select>
-              </div>
+          <div class="row m1-2">
+            <div class="col-sm-6">
+              <label for="">Leave ID</label>
+              <input type="text" class="form-control fw-bold" [(ngModel)]="leave.leaveID" readonly>
+
+            </div>
+            <div class="col-sm-6">
+              <label for="">Employee Name</label>
+              <input type="text" class="form-control fw-bold" [(ngModel)]="leave.EMPLOYEENAME" readonly>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-sm-6">
+              <label for="" class="fw-bold"> Start Date </label>
+              <input class="form-control" type="date" [(ngModel)]="leave.startDate">
+            </div>
+            <div class="col-sm-6">
+              <label for="" class="fw-bold"> End Date </label>
+              <input class="form-control" type="date" [(ngModel)]="leave.endDate">
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-sm-6">
+              <label for="" class="fw-bold">Leave Types</label>
+
+              <select class="form-control" [(ngModel)]="leave.leaveTypeID">
+                <option *ngFor="let leaveType of leaveTypes" [value]="leaveType.leaveTypeID">
+                  {{ leaveType.leaveName }}
+                </option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="fw-bold">Created Date</label>
+              <input type="text" class="form-control" [(ngModel)]="leave.createdAt" readonly>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-sm">
+              <label for="" class="fw-bold">Reason</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="leave.reason"></textarea>
             </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">From Date</label>
-                <input [(ngModel)]="leave.startDate" name="startDate" type="date" class="form-control" [disabled]="isReadonly">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">To Date</label>
-                <input [(ngModel)]="leave.endDate" name="endDate" type="date" class="form-control" [disabled]="isReadonly">
-              </div>
+          <div class="row mt-2">
+            <div class="col-sm-6">
+              <button class="btn btn-primary" (click)="updateLeave()">Update</button>
             </div>
-
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <div class="form-check">
-                  <input [(ngModel)]="leave.isHalfDay" name="isHalfDay" class="form-check-input" type="checkbox" id="halfDay" [disabled]="isReadonly">
-                  <label class="form-check-label" for="halfDay">
-                    Half Day
-                  </label>
-                </div>
-              </div>
-              <div class="col-md-6" *ngIf="leave.isHalfDay">
-                <label class="form-label">Half Day Type</label>
-                <select [(ngModel)]="leave.halfDayType" name="halfDayType" class="form-select" [disabled]="isReadonly">
-                  <option *ngFor="let type of halfDayTypes" [value]="type">{{ type }}</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label">Reason</label>
-              <textarea [(ngModel)]="leave.reason" name="reason" rows="4"
-                class="form-control" placeholder="Enter reason..." [disabled]="isReadonly"></textarea>
-            </div>
-
-            <div class="d-flex gap-2">
-              <button type="button" (click)="save()" class="btn btn-primary" [disabled]="isReadonly">
-                Update Leave Request
-              </button>
-              <a routerLink="/leaves" class="btn btn-secondary">Cancel</a>
-            </div>
-          </form>
         </div>
       </div>
     </div>
   </div>
 </div>
-
