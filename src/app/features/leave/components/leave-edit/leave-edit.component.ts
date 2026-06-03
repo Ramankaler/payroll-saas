@@ -24,6 +24,8 @@ export class LeaveEditComponent implements OnInit {
   leaveID: any;
   startDate: any;
   endDate: any;
+  createdAt:any;
+
   // createdAt: any = new Date().toISOString().split('T')[0];
   constructor(
     private route: ActivatedRoute,
@@ -43,7 +45,6 @@ export class LeaveEditComponent implements OnInit {
     if (this.leaveID) {
       this.leaveID = parseInt(this.leaveID);
 
-      // SIRF employees load karo
       this.loadEmployees();
     } else {
       this.snackBar.open('No Leave ID provided', 'Close', { duration: 3000 });
@@ -65,18 +66,18 @@ export class LeaveEditComponent implements OnInit {
   loadLeave(id: number) {
     this.leaveService.getById(id).subscribe({
       next: (res: any) => {
-        this.leave = res;
-        this.leave.startDate = this.leave.startDate.split('T')[0];
+        // this.leave = res;
+        this.leave.startDate = res.startDate.split('T')[0];
 
-        this.leave.endDate = this.leave.endDate.split('T')[0];
-        this.leave.createdAt = new Date(this.leave.createdAt).toLocaleDateString('en-GB');
+        this.leave.endDate = res.endDate.split('T')[0];
+        this.leave.createdAt = new Date(res.createdAt).toLocaleDateString('en-GB');
 
-        console.log('Leave', this.leave);
-        console.log('start date', this.leave.startDate);
-        console.log('End date', this.leave.endDate);
+        console.log('Leave', res);
+        console.log('start date', res.startDate);
+        console.log('End date', res.endDate);
 
         const employee = this.employees.find(
-          (x) => x.empID === this.leave.empID,
+          (x) => x.empID === res.empID,
         );
 
         console.log('FOUND EMPLOYEE', employee);

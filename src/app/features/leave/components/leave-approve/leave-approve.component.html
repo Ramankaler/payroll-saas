@@ -21,8 +21,9 @@
                   <th>Employee</th>
                   <th>Leave Type</th>
                   <th>Dates</th>
-                  <th>Half Day</th>
+                  <!-- <th>Half Day</th> -->
                   <th>Reason</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -33,18 +34,19 @@
                   <td>
                     {{ leave.startDate | date:'shortDate' }} - {{ leave.endDate | date:'shortDate' }}
                   </td>
-                  <td>{{ leave.isHalfDay ? leave.halfDayType : '' }}</td>
+                  <!-- <td>{{ leave.isHalfDay ? leave.halfDayType : '' }}</td> -->
                   <td>{{ leave.reason }}</td>
+                  <td >{{ leave.status }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group">
-                      <button (click)="approveLeave(leave.leaveID)" class="btn btn-success"
+                      <button *ngIf="status=='pending'" (click)="approveLeave(leave)" class="btn btn-success"
                         [disabled]="processingId === leave.leaveID">
 
                         <span *ngIf="processingId !== leave.leaveID">Approve</span>
                         <span *ngIf="processingId === leave.leaveID">Processing...</span>
                       </button>
 
-                      <button (click)="rejectLeave(leave.leaveID)" class="btn btn-danger"
+                      <button *ngIf="status=='pending'" (click)="rejectLeave(leave)" class="btn btn-danger"
                         [disabled]="processingId === leave.leaveID">
 
                         <span *ngIf="processingId !== leave.leaveID">Reject</span>

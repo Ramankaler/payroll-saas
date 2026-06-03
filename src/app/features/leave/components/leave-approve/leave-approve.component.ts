@@ -16,6 +16,7 @@ export class LeaveApproveComponent implements OnInit {
   leaves: LeaveDto[] = [];
   employees: any[] = [];
   compId = 1;
+  status:any;
   processingId: number | null = null;
 
   constructor(
@@ -30,7 +31,8 @@ export class LeaveApproveComponent implements OnInit {
 
   loadData(): void {
     this.leaveService.getAll(this.compId).subscribe(leaves => {
-      this.leaves = leaves.filter(l => l.status === 'pending');
+      this.leaves = leaves;
+      // filter(l => l.status === 'pending');
     });
 
     this.employeeService.getAll(this.compId).subscribe(employees => {
@@ -43,44 +45,88 @@ export class LeaveApproveComponent implements OnInit {
     return emp ? `${emp.firstName} ${emp.lastName}` : 'Unknown';
   }
 
-approveLeave(id: number): void {
 
-  this.processingId = id;
-
-  this.leaveService.approve(id, 'approved').subscribe({
-
+  approveLeave(leave:any){
+console.log('Approving leave:', leave);
+if(leave==null){
+  this.snackBar.open('Invalid leave ID', 'Close', { duration: 3000 });
+  return;
+}
+if(leave.status !== 'pending'){
+  this.snackBar.open('Only pending leaves can be approved', 'Close', { duration: 3000 });
+  return;
+}
+else {
+  this.leaveService.approve(leave.leaveID).subscribe({
     next: () => {
-      this.processingId = null;
-      this.loadData();
       this.snackBar.open('Leave approved', 'Close', { duration: 3000 });
-    },
-
-    error: () => {
-      this.processingId = null;
-      this.snackBar.open('Action failed', 'Close', { duration: 3000 });
-    }
-
-  });
-}
-
-  rejectLeave(id: number): void {
-
-  this.processingId = id;
-
-  this.leaveService.approve(id, 'rejected').subscribe({
-
-    next: () => {
-      this.processingId = null;
       this.loadData();
-      this.snackBar.open('Leave rejected', 'Close', { duration: 3000 });
     },
-
     error: () => {
-      this.processingId = null;
       this.snackBar.open('Action failed', 'Close', { duration: 3000 });
     }
-
   });
 }
 }
+rejectLeave(leave:any){
 
+   this.leaveService
+   .reject(leave.leaveID)
+   .subscribe({
+
+      next:()=>{
+
+         this.snackBar.open(
+            'Leave Rejected',
+            'Close',
+            { duration:3000 }
+         );
+
+         this.loadData();
+
+      }
+
+   });
+
+}
+}
+
+// approveLeave(id: number): void {
+
+//   this.processingId = id;
+
+//   this.leaveService.approve(id, 'approved').subscribe({
+
+//     next: () => {
+//       this.processingId = null;
+//       this.loadData();
+//       this.snackBar.open('Leave approved', 'Close', { duration: 3000 });
+//     },
+
+//     error: () => {
+//       this.processingId = null;
+//       this.snackBar.open('Action failed', 'Close', { duration: 3000 });
+//     }
+
+//   });
+// }
+
+//   rejectLeave(id: number): void {
+
+//   this.processingId = id;
+
+//   this.leaveService.approve(id, 'rejected').subscribe({
+
+//     next: () => {
+//       this.processingId = null;
+//       this.loadData();
+//       this.snackBar.open('Leave rejected', 'Close', { duration: 3000 });
+//     },
+
+//     error: () => {
+//       this.processingId = null;
+//       this.snackBar.open('Action failed', 'Close', { duration: 3000 });
+//     }
+
+//   });
+// }

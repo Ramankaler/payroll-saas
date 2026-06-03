@@ -52,8 +52,14 @@ return this.http.get<any>(`${this.apiUrl}/requests/${compId}/employee/${empId}` 
     return this.http.delete(`${this.apiUrl}/requests/${id}`);
   }
 
-  approve(id: number, status: string): Observable<LeaveDto> {
-    return this.http.put<LeaveDto>(`${this.apiUrl}/requests/status${id}?status=${ status }`, {});
+  approve(id: number): Observable<LeaveDto> {
+    return this.http.put<LeaveDto>(`${this.apiUrl}/requests/status/${id}`, {});
   }
+
+  reject(id: number): Observable<LeaveDto> {
+    return this.http.put<LeaveDto>(`${this.apiUrl}/requests/reject/${id}`, {});
+  }
+
+
 }
 
