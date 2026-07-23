@@ -1,57 +1,46 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { API_ROUTES } from '../../../core/config/api.config';
 import { Observable } from 'rxjs';
 
-export interface LoginRequest {
-  compID: string;
-  email: string;
-  PasswordHash: string;
-}
+import { API_ROUTES } from '../../../core/config/api.config';
 
-export interface RefreshRequest {
-  refreshToken: string;
+export interface LoginRequest {
+  compID: number;
+  username: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  // accessToken: string;
-  refreshToken: string;
-  accessTokenExpiresAtUtc: string;
-  // compID: number;
-  // userId: string;
-  roles: string[];
-  permissions: string[];
-    token: string;
+  accessToken: string;
+  tokenType: string;
+  expiresAtUtc: string;
   userID: number;
   compID: number;
-}
-
-export interface RegisterRequest {
-  companyName: string;
-  companyCurrency: string;
-  country: string;
-  timezone: string;
-  payrollCycle: string;
-  adminEmail: string;
-  adminPassword: string;
-  adminFirstName?: string | null;
-  adminLastName?: string | null;
+  employeeID: number | null;
+  username: string;
+  mustChangePassword: boolean;
+  roles: string[];
+  permissions: string[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthApi {
   constructor(private readonly http: HttpClient) {}
 
-  login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(API_ROUTES.login, req);
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(
+      API_ROUTES.login,
+      request
+    );
   }
 
-  refresh(req: RefreshRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(API_ROUTES.refresh, req);
-  }
-
-  register(req: RegisterRequest): Observable<void> {
-    return this.http.post<void>(API_ROUTES.register, req);
+  changePassword(request: {
+    currentPassword: string;
+    newPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      API_ROUTES.changePassword,
+      request
+    );
   }
 }
-

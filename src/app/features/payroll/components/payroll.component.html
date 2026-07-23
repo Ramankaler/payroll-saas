@@ -1,22 +1,33 @@
 <div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Salary</div>
+      <h1 class="page-title">Payroll</h1>
+      <p class="page-subtitle">Run monthly payroll and review generated salary slips.</p>
+    </div>
+  </div>
+
   <mat-card class="run-panel" *ngIf="!isRunning">
     <div class="panel-header">
       <h2>Run Payroll</h2>
+      <p class="section-note">Choose month and year, then generate slips for all active employees.</p>
     </div>
+
     <div class="controls">
-      <select [(ngModel)]="selectedMonth" class="select-input">
-        <option>January</option><option>February</option><option>March</option>
-        <option>April</option><option>May</option><option>June</option>
-        <option>July</option><option>August</option><option>September</option>
-        <option>October</option><option>November</option><option>December</option>
+      <select [(ngModel)]="selectedMonth" class="select-input" (change)="loadPayrollRegister()">
+        <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
       </select>
-      <select [(ngModel)]="selectedYear" class="select-input">
-        <option>2024</option><option>2025</option><option>2026</option>
+      <select [(ngModel)]="selectedYear" class="select-input" (change)="loadPayrollRegister()">
+        <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
       </select>
-      <button mat-raised-button color="primary" (click)="runPayroll()">
-        Run Payroll
+
+      <button mat-raised-button color="primary" (click)="runPayroll()" title="Run Payroll For All Employees">
+        <mat-icon>play_arrow</mat-icon>
+        Run Payroll For All Employees
       </button>
     </div>
+
+    <p class="message" *ngIf="message">{{ message }}</p>
   </mat-card>
 
   <mat-progress-bar *ngIf="isRunning" mode="indeterminate" color="primary"></mat-progress-bar>
@@ -40,6 +51,18 @@
         <th mat-header-cell *matHeaderCellDef>Basic</th>
         <td mat-cell *matCellDef="let slip">{{ slip.basic | number:'1.2-2' }}</td>
       </ng-container>
+      <ng-container matColumnDef="paidLeave">
+        <th mat-header-cell *matHeaderCellDef>Paid Leave</th>
+        <td mat-cell *matCellDef="let slip">
+          {{ slip.paidAnnualLeaveDays | number:'1.0-2' }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="deductionDays">
+        <th mat-header-cell *matHeaderCellDef>Deduction Days</th>
+        <td mat-cell *matCellDef="let slip">
+          {{ (slip.absentDays + slip.leaveDeductionDays) | number:'1.0-2' }}
+        </td>
+      </ng-container>
       <ng-container matColumnDef="allowances">
         <th mat-header-cell *matHeaderCellDef>Allowances</th>
         <td mat-cell *matCellDef="let slip">{{ slip.allowances | number:'1.2-2' }}</td>
@@ -55,15 +78,19 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let slip">
-          <mat-chip [color]="slip.status === 'Paid' ? 'primary' : 'accent'" selected>{{ slip.status }}</mat-chip>
+          <mat-chip color="primary" selected>Generated</mat-chip>
         </td>
       </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let slip">
-          <button mat-icon-button (click)="viewSlip(slip)"><mat-icon>visibility</mat-icon></button>
-          <button mat-icon-button (click)="downloadSlip(slip.id)"><mat-icon>download</mat-icon></button>
-          <button mat-icon-button (click)="sendPayslip(slip)" *ngIf="slip.status !== 'Paid'">
+          <button mat-icon-button (click)="viewSlip(slip)" title="View Payslip" aria-label="View Payslip">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button (click)="downloadSlip(slip)" title="Download Payslip" aria-label="Download Payslip">
+            <mat-icon>download</mat-icon>
+          </button>
+          <button mat-icon-button (click)="sendPayslip()" title="Send Payslip" aria-label="Send Payslip">
             <mat-icon>send</mat-icon>
           </button>
         </td>
@@ -71,5 +98,13 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+
+    <div class="empty-state" *ngIf="salarySlips.length === 0">
+      <div>
+        <mat-icon>receipt_long</mat-icon>
+        <h3>No salary slips yet</h3>
+        <p>Select month and year, then run payroll.</p>
+      </div>
+    </div>
   </mat-card>
 </div>

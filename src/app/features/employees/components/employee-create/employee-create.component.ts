@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -13,6 +13,8 @@ import { DepartmentDialogComponent } from '../../../departments/components/depar
 import { DesignationDialogComponent } from '../../../designations/components/designation-dialog/designation-dialog.component';
 import { Router } from '@angular/router';
 import { BranchService } from '../../../branches/services/branch.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
+import { Shift, ShiftService } from '../../../shifts/services/shift.service';
 
 @Component({
   selector: 'app-employee-create',
@@ -24,6 +26,7 @@ import { BranchService } from '../../../branches/services/branch.service';
   templateUrl: './employee-create.component.html'
 })
 export class EmployeeCreateComponent {
+  private readonly authSession =   inject(AuthSessionService);
   departments: any[] = [];
   designations: any[] = [];
   documents: any[] = [];
@@ -35,10 +38,41 @@ export class EmployeeCreateComponent {
   isSaving = false;
   successMessage = '';
   eduFile: File | null = null;
+  employees: any[] = [];
+  managerSearch = '';
+  addressMessage = '';
+
+  readonly countries = [
+    'United Arab Emirates',
+    'India',
+    'Saudi Arabia',
+    'Qatar',
+    'Oman',
+    'Bahrain',
+    'Kuwait',
+    'Pakistan',
+    'Nepal',
+    'Sri Lanka',
+    'Bangladesh',
+    'Philippines',
+    'United Kingdom',
+    'United States'
+  ];
+
+  readonly postalCityMap: any = {
+    India: {
+      '110001': 'New Delhi',
+      '160017': 'Chandigarh',
+      '400001': 'Mumbai',
+      '560001': 'Bengaluru',
+      '700001': 'Kolkata'
+    }
+  };
 
   // ================= EMPLOYEE OBJECT =================
     employee: any = {
     empCode: '',
+    bioID: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -82,7 +116,7 @@ export class EmployeeCreateComponent {
 
     profilePhoto: '',
 
-    compID: 1,
+    compID: this.authSession.companyId,
     isActive: true
   };
 
@@ -109,32 +143,124 @@ export class EmployeeCreateComponent {
     };
 
 branches: any[] = [];
+shifts: Shift[] = [];
 
   constructor(
     private deptSrv: DepartmentService,    private desigSrv: DesignationService,
     private empSrv: EmployeeService,    private dialog: MatDialog,
-    private router : Router,    private branchService: BranchService
+    private router : Router,    private branchService: BranchService,
+    private shiftService: ShiftService
     ) {}
 
   ngOnInit() {
     this.loadDepartments();
     this.loadDesignations();
-    this.branchService.getAll(1).subscribe(res => {
+    this.loadEmployees();
+    this.branchService.getAll(this.authSession.companyId).subscribe(res => {
   this.branches = res;
 });
+    this.loadShifts();
   }
 
   // ================= LOAD DATA =================
   loadDepartments() {
-    this.deptSrv.getAll(1).subscribe({
+    this.deptSrv.getAll(this.authSession.companyId).subscribe({
       next: (res: any) => this.departments = res || []
     });
   }
 
   loadDesignations() {
-    this.desigSrv.getAll(1).subscribe({
+    this.desigSrv.getAll(this.authSession.companyId).subscribe({
       next: (res: any) => this.designations = res || []
     });
+  }
+
+  loadShifts() {
+    this.shiftService.getAll(this.authSession.companyId).subscribe({
+      next: shifts => {
+        this.shifts = shifts.filter(shift => shift.isActive);
+      }
+    });
+  }
+
+  loadEmployees() {
+    this.empSrv.getAll(this.authSession.companyId).subscribe({
+      next: (res: any[]) => {
+        this.employees = res || [];
+        this.setNextEmployeeCode();
+      }
+    });
+  }
+
+  setNextEmployeeCode() {
+    if (this.employee.empCode) {
+      return;
+    }
+
+    const numericCodes = this.employees
+      .map(emp => String(emp.empCode || '').trim())
+      .filter(code => /^\d+$/.test(code));
+
+    const maxCode = numericCodes.length
+      ? Math.max(...numericCodes.map(code => Number(code)))
+      : 0;
+
+    const longestLength = numericCodes.length
+      ? Math.max(...numericCodes.map(code => code.length), 4)
+      : 4;
+
+    this.employee.empCode = String(maxCode + 1).padStart(longestLength, '0');
+  }
+
+  managerLabel(emp: any): string {
+    const code = emp.empCode || emp.empID;
+    const name = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+    return `${code} - ${name}`;
+  }
+
+  selectManager() {
+    const selected = this.employees.find(emp =>
+      this.managerLabel(emp).toLowerCase() === this.managerSearch.trim().toLowerCase()
+    );
+
+    this.employee.managerID = selected ? selected.empID : null;
+  }
+
+  onBranchChange() {
+    const selected = this.branches.find(branch =>
+      Number(branch.branchID) === Number(this.employee.branchID)
+    );
+
+    this.employee.workLocation = selected?.location || selected?.branchName || '';
+  }
+
+  onCountryChange() {
+    this.onPostalCodeChange();
+  }
+
+  onPostalCodeChange() {
+    const country = String(this.employee.country || '').trim();
+    const postalCode = String(this.employee.postalCode || '').trim();
+    this.addressMessage = '';
+
+    if (!country || !postalCode) {
+      return;
+    }
+
+    const city = this.postalCityMap[country]?.[postalCode];
+
+    if (city) {
+      this.employee.city = city;
+      this.addressMessage = 'City filled from postal code.';
+      return;
+    }
+
+    if (country === 'United Arab Emirates') {
+      this.addressMessage = 'UAE normally uses PO Box / area instead of fixed pincode. Please type city manually.';
+      return;
+    }
+
+    this.addressMessage = 'Postal lookup table is not connected for this country yet. Please type city manually.';
   }
 
   // ================= PHOTO =================
@@ -244,6 +370,7 @@ finishSuccess(){
   resetForm() {
     this.employee = {
       empCode: '',
+      bioID: '',
       firstName: '',
       lastName: '',
       email: '',
@@ -287,15 +414,18 @@ finishSuccess(){
 
       profilePhoto: '',
 
-      compID: 1,
+      compID: this.authSession.companyId,
       isActive: true
     };
 
     this.educationList = [];
     this.experienceList = [];
+    this.managerSearch = '';
+    this.addressMessage = '';
 
     this.previewUrl = null;
     this.selectedPhoto = null;
+    this.setNextEmployeeCode();
   }
   // ================= EDUCATION =================
 addEducation() {

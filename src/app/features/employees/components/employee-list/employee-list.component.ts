@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
+  Observable,
   Subject,
   debounceTime,
   distinctUntilChanged,
@@ -17,7 +18,10 @@ import {
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import {
+  MatPaginatorModule,
+  PageEvent,
+} from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,8 +31,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { EmployeeService } from '../../employee.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
-const DEFAULT_COMP_ID = 1;
 
 @Component({
   selector: 'app-employee-list',
@@ -54,19 +58,18 @@ const DEFAULT_COMP_ID = 1;
 })
 export class EmployeeListComponent implements OnInit, OnDestroy {
   private readonly svc = inject(EmployeeService);
+  private readonly authSession = inject(AuthSessionService);
   private readonly snack = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject = new Subject<string>();
 
-  @ViewChild(MatPaginator) set paginator(p: MatPaginator) {
-    if (p) this.dataSource.paginator = p;
-  }
   @ViewChild(MatSort) set sort(s: MatSort) {
     if (s) this.dataSource.sort = s;
   }
 
   readonly displayedColumns = [
     'empCode',
+    'bioID',
     'fullName',
     'email',
     'phone',
@@ -79,6 +82,9 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
 
   dataSource = new MatTableDataSource<any>([]);
   allEmployees: any[] = [];
+  totalRecords = 0;
+  pageIndex = 0;
+  pageSize = 25;
   loading = true;
   searchTerm = '';
   deletingId: number | null = null;
@@ -88,7 +94,10 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
 
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((term) => this.applyFilter(term));
+      .subscribe(() => {
+        this.pageIndex = 0;
+        this.loadEmployees();
+      });
   }
 
   ngOnDestroy(): void {
@@ -99,18 +108,24 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   loadEmployees(): void {
     this.loading = true;
     this.svc
-      .getAll(DEFAULT_COMP_ID)
+      .getPage(
+        this.authSession.companyId,
+        this.pageIndex + 1,
+        this.pageSize,
+        this.searchTerm
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (list) => {
-          this.allEmployees = list ?? [];
+        next: (result) => {
+          this.allEmployees = result?.data ?? [];
+          this.totalRecords = result?.totalRecords ?? 0;
           this.dataSource.data = this.enrichList(this.allEmployees);
-          this.applyFilter(this.searchTerm);
           this.loading = false;
         },
         error: () => {
           this.allEmployees = [];
           this.dataSource.data = [];
+          this.totalRecords = 0;
           this.loading = false;
           this.snack.open('Failed to load employees.', 'Dismiss', { duration: 4000 });
         },
@@ -125,46 +140,43 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
 
   clearSearch(): void {
     this.searchTerm = '';
-    this.searchSubject.next('');
+    this.pageIndex = 0;
+    this.loadEmployees();
   }
 
-  deleteEmployee(id: number): void {
-    if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
-    this.deletingId = id;
-    this.svc
-      .delete(id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.snack.open('Employee deleted successfully.', 'OK', { duration: 3000 });
-          this.deletingId = null;
-          this.loadEmployees();
-        },
-        error: () => {
-          this.snack.open('Failed to delete employee.', 'Dismiss', { duration: 4000 });
-          this.deletingId = null;
-        },
-      });
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadEmployees();
   }
 
-  toggleActive(emp: any): void {
-    this.svc
-      .toggleActive(emp.empID)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          emp.isActive = !emp.isActive;
-          this.snack.open(
-            `Employee ${emp.isActive ? 'activated' : 'deactivated'}.`,
-            'OK',
-            { duration: 3000 },
-          );
-          this.dataSource.data = this.enrichList(this.allEmployees);
-        },
-        error: () =>
-          this.snack.open('Failed to update status.', 'Dismiss', { duration: 4000 }),
-      });
-  }
+toggleActive(emp: any): void {
+  const newStatus = !emp.isActive;
+
+  this.svc
+    .updateStatus(emp.empID, newStatus)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: () => {
+        emp.isActive = newStatus;
+
+        this.snack.open(
+          `Employee ${newStatus ? 'activated' : 'deactivated'}.`,
+          'OK',
+          { duration: 3000 }
+        );
+
+        this.dataSource.data = this.enrichList(this.allEmployees);
+      },
+      error: () => {
+        this.snack.open(
+          'Failed to update status.',
+          'Dismiss',
+          { duration: 4000 }
+        );
+      },
+    });
+}
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -177,33 +189,14 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private applyFilter(term: string): void {
-    const t = term.trim().toLowerCase();
-    if (!t) {
-      this.dataSource.data = this.enrichList(this.allEmployees);
-      return;
-    }
-    this.dataSource.data = this.enrichList(
-      this.allEmployees.filter(
-        (e) =>
-          e.empCode?.toLowerCase().includes(t) ||
-          e.firstName?.toLowerCase().includes(t) ||
-          e.lastName?.toLowerCase().includes(t) ||
-          e.email?.toLowerCase().includes(t) ||
-          e.phone?.toLowerCase().includes(t),
-      ),
-    );
-  }
-
   get hasNoData(): boolean {
-    return !this.loading && this.allEmployees.length === 0;
+    return !this.loading && this.totalRecords === 0 && !this.searchTerm.trim();
   }
 
   get hasNoSearchResults(): boolean {
     return (
       !this.loading &&
-      this.allEmployees.length > 0 &&
-      this.dataSource.data.length === 0 &&
+      this.totalRecords === 0 &&
       this.searchTerm.trim().length > 0
     );
   }

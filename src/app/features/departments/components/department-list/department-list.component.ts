@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { DepartmentService } from '../../services/department.service';
 import { DepartmentDialogComponent } from '../department-dialog/department-dialog.component';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 interface DepartmentDto {
   deptID: number;
@@ -38,6 +39,7 @@ interface DepartmentDto {
   styleUrls: ['./department-list.component.scss']
 })
 export class DepartmentListComponent implements OnInit {
+  private readonly authSession =  inject(AuthSessionService);
   departments: DepartmentDto[] = [];
   filteredDepartments: DepartmentDto[] = [];
   displayedColumns: string[] = ['deptName', 'actions'];
@@ -58,7 +60,7 @@ pagedDepartments: any[] = [];
   }
 
   loadDepartments(): void {
-    this.deptSrv.getAll(1).subscribe({
+    this.deptSrv.getAll( this.authSession.companyId).subscribe({
       next: (res: any[]) => {
         this.departments = res || [];
         this.filteredDepartments = [...this.departments];
@@ -103,36 +105,6 @@ this.updatePagedData();
       }
     });
   }
-
-deleteDepartment(dept: DepartmentDto) {
-
-  const confirmDelete = confirm(`Delete "${dept.deptName}" department?`);
-
-  if (!confirmDelete) return;
-
-  this.deptSrv.delete(dept.deptID).subscribe({
-
-    next: () => {
-      this.loadDepartments();
-      this.snackBar.open('Department deleted', 'Close', { duration: 3000 });
-    },
-
-    error: (err) => {
-
-      // 🔥 IMPORTANT PART
-      if (err.status === 400) {
-        this.snackBar.open(err.error || 'Cannot delete department', 'Close', {
-          duration: 4000
-        });
-      } else {
-        this.snackBar.open('Delete failed', 'Close', { duration: 3000 });
-      }
-
-      console.error(err);
-    }
-
-  });
-}
 
 sortData(sort: Sort) {
 

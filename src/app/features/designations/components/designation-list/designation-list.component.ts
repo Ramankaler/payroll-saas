@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
 import { DesignationService } from '../../services/designation.service';
 import { DesignationDialogComponent } from '../designation-dialog/designation-dialog.component';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 interface DesignationDto {
   desigID: number;
@@ -36,6 +37,7 @@ interface DesignationDto {
   styleUrls: ['./designation-list.component.scss']
 })
 export class DesignationListComponent implements OnInit {
+  private readonly authSession =  inject(AuthSessionService);
   designations: DesignationDto[] = [];
   filteredDesignations: DesignationDto[] = [];
   displayedColumns: string[] = ['desigName', 'actions'];
@@ -52,7 +54,7 @@ export class DesignationListComponent implements OnInit {
   }
 
   fetch(): void {
-    this.desigSrv.getAll(1).subscribe({
+    this.desigSrv.getAll(this.authSession.companyId).subscribe({
       next: (res: any[]) => {
         this.designations = res || [];
         this.filteredDesignations = [...this.designations];
@@ -95,33 +97,5 @@ export class DesignationListComponent implements OnInit {
     });
   }
 
-  deleteDesignation(desig: any) {
-
-  const confirmDelete = confirm(`Delete "${desig.desigName}" designation?`);
-
-  if (!confirmDelete) return;
-
-  this.desigSrv.delete(desig.desigID).subscribe({
-
-    next: () => {
-      this.fetch();
-      this.snackBar.open('Designation deleted', 'Close', { duration: 3000 });
-    },
-
-    error: (err) => {
-
-      if (err.status === 400) {
-        this.snackBar.open(err.error || 'Cannot delete designation', 'Close', {
-          duration: 4000
-        });
-      } else {
-        this.snackBar.open('Delete failed', 'Close', { duration: 3000 });
-      }
-
-      console.error(err);
-    }
-
-  });
-}
 }
 

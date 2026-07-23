@@ -1,47 +1,44 @@
-<div class="container-fluid mt-4">
-
-  <div class="d-flex justify-content-between mb-3">
-    <h3>Companies</h3>
-    <button class="btn btn-primary" routerLink="/company/create">
-      + Add Company
-    </button>
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Setup</div>
+      <h1 class="page-title">Company</h1>
+      <p class="page-subtitle">Review and update the current company profile.</p>
+    </div>
   </div>
 
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Industry</th>
-        <th>Country</th>
-        <th>Currency</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+  <div class="card" *ngIf="company as c">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5>{{ c.companyName }}</h5>
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="edit(c.compID)"
+        title="Edit Company">
+        <span class="material-icons">edit</span>
+        Edit
+      </button>
+    </div>
 
-    <tbody>
-      <tr *ngFor="let c of companies">
-        <td>{{ c.companyName }}</td>
-        <td>{{ c.industry }}</td>
-        <td>{{ c.country }}</td>
-        <td>{{ c.currency }}</td>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Industry</th>
+            <th>Country</th>
+            <th>Currency</th>
+          </tr>
+        </thead>
 
-        <td>
-          <button class="btn btn-sm btn-outline-primary me-2" (click)="edit(c.compID)">
-            Edit
-          </button>
-
-          <button class="btn btn-sm btn-outline-danger" (click)="delete(c.compID)">
-            Delete
-          </button>
-        </td>
-      </tr>
-
-      <tr *ngIf="companies.length === 0">
-        <td colspan="5" class="text-center text-muted">
-          No companies found
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
+        <tbody>
+          <tr>
+            <td class="fw-semibold">{{ c.companyName }}</td>
+            <td>{{ c.industry || '-' }}</td>
+            <td>{{ c.country || '-' }}</td>
+            <td>{{ c.currency || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

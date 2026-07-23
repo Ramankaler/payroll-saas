@@ -1,9 +1,18 @@
 <div class="container-fluid py-4">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Employee Time</div>
+      <h1 class="page-title">New Leave Request</h1>
+      <p class="page-subtitle">Create a leave request and check available balance.</p>
+    </div>
+  </div>
 
   <div class="row justify-content-center">
     <div class="col-md">
       <div class="card">
-        <div class="card-header">New Leave Request</div>
+        <div class="card-header">
+          <h4 class="mb-0">Leave Details</h4>
+        </div>
         <div class="card-body">
 <form action="" #LeaveForm="ngForm">
   <div class="row mt-2">
@@ -30,6 +39,9 @@
   <option *ngFor="let leaveType of leaveTypes"
   [value]="leaveType.leaveTypeID">{{leaveType.leaveName}}</option>
 </select>
+<div *ngIf="balanceMessage" class="text-info small mt-1">
+  {{ balanceMessage }}
+</div>
     </div>
     <div class="col-sm-6">
       <div class="row">
@@ -76,15 +88,21 @@
 
   <div class="row mt-2">
     <div class="col-sm-12">
-      <label for="" class="form-label fw-bold">Rewason for leave</label>
+      <label for="" class="form-label fw-bold">Reason for leave</label>
       <textarea class="form-control" name="leaveReason" id="" [(ngModel)]="leave.leaveReason"></textarea>
     </div>
 
   </div>
 
-  <div class="row mt-2">
+  <div class="form-actions">
     <button type="submit" (click)="saveLeave()"
-    [disabled]="LeaveForm.invalid" class="btn btn-success"> Save </button>
+    [disabled]="LeaveForm.invalid" class="btn btn-success">
+      <span class="material-icons">save</span>
+      Save Leave
+    </button>
+  </div>
+  <div *ngIf="saveMessage" class="alert alert-info mt-2">
+    {{ saveMessage }}
   </div>
 </form>
 </div>

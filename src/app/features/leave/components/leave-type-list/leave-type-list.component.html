@@ -1,19 +1,18 @@
 <div class="container-fluid py-4">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Leave Types</h2>
-        <div class="input-group w-25">
-          <input [(ngModel)]="searchTerm" (input)="applyFilter()" class="form-control" placeholder="Search types...">
-        </div>
-      </div>
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Leave Setup</div>
+      <h1 class="page-title">Leave Types</h1>
+      <p class="page-subtitle">Create and search leave categories.</p>
     </div>
+
+    <input [(ngModel)]="searchTerm" (input)="applyFilter()" class="form-control search-box" placeholder="Search types...">
   </div>
 
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <div class="card-header bg-light">
+        <div class="card-header">
           <div class="row align-items-center">
             <div class="col">
               <h5>Add New Leave Type</h5>
@@ -21,12 +20,14 @@
             <div class="col-auto">
               <div class="input-group input-group-sm">
                 <input [(ngModel)]="newTypeName" (keyup.enter)="addType()" class="form-control" placeholder="Type name">
-                <button (click)="addType()" [disabled]="!newTypeName.trim()" class="btn btn-primary">Add</button>
+                <button (click)="addType()" [disabled]="!newTypeName.trim()" class="btn btn-primary" title="Add Leave Type">
+                  <span class="material-icons">add</span>
+                  Add
+                </button>
               </div>
             </div>
           </div>
         </div>
-        <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-hover mb-0">
               <thead class="table-light">
@@ -39,20 +40,16 @@
                 <tr *ngFor="let type of filteredTypes">
                   <td>{{ type.leaveName }}</td>
                   <td>
-                    <button (click)="deleteType(type.leaveTypeID)" class="btn btn-sm btn-outline-danger">
-                      <i class="material-icons">delete</i> Delete
-                    </button>
                   </td>
                 </tr>
                 <tr *ngIf="filteredTypes.length === 0">
-                  <td colspan="2" class="text-center py-4 text-muted">
+                  <td colspan="2" class="empty-row">
                     No leave types found
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
       </div>
     </div>
   </div>

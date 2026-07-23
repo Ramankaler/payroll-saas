@@ -1,44 +1,84 @@
 <div class="container-fluid">
-<div class="row mt-1">
-  <div class="col-sm">
-    <div class="card">
-      <div class="card-header">
-        <h3>
-          Leave List
-        </h3>
-        <Button class="btn btn-primary" (click)="addLeave()">Add Leave</Button>
-      </div>
-      <div class="card-body">
-        <table class="mat-table mat-elevation-z9 table-striped w-100">
-          <thead>
-            <tr>
-              <th>Sr. No.</th>
-              <th>Name</th>
-              <th>From Date</th>
-              <th>To Date</th>
-              <th>Reason</th>
-              <th>status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let leave of leaves,index as i">
-              <td>{{i + 1}}</td>
-              <td>{{getEmployeeName(leave.empID)}}</td>
-              <td>{{leave.startDate | date}}</td>
-              <td>{{leave.endDate | date}}</td>
-              <td>{{leave.reason}}</td>
-              <td>{{leave.status}}</td>
-              <td>
-                <button class="btn btn-sm btn-primary" (click)="editLeave(leave.leaveID)"> <i class="bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger" (click)="deleteLeave(leave.leaveID)"> <i class="bi-trash3-fill"></i> </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Employee Time</div>
+      <h1 class="page-title">Leave Requests</h1>
+      <p class="page-subtitle">View, edit, and cancel pending leave requests.</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="addLeave()" title="Add Leave">
+      <span class="material-icons">event_available</span>
+      Add Leave
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5>Leave List</h5>
+      <span class="status-pill">{{ leaves.length }} records</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Sr. No.</th>
+            <th>Name</th>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let leave of leaves; index as i">
+            <td>{{ i + 1 }}</td>
+            <td class="fw-semibold">{{ getEmployeeName(leave.empID) }}</td>
+            <td>{{ leave.startDate | date }}</td>
+            <td>{{ leave.endDate | date }}</td>
+            <td>{{ leave.reason || leave.leaveReason || '-' }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [class.warning]="leave.status === 'pending'"
+                [class.success]="leave.status === 'approved'"
+                [class.danger]="leave.status === 'rejected' || leave.status === 'cancelled'">
+                {{ leave.status || '-' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  type="button"
+                  (click)="editLeave(leave.leaveID)"
+                  title="Edit Leave">
+                  <span class="material-icons">edit</span>
+                  Edit
+                </button>
+
+                <button
+                  *ngIf="leave.status === 'pending'"
+                  class="btn btn-sm btn-outline-danger"
+                  type="button"
+                  (click)="cancelLeave(leave.leaveID)"
+                  title="Cancel Leave">
+                  <span class="material-icons">cancel</span>
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="leaves.length === 0">
+            <td colspan="7" class="empty-row">
+              No leave requests found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-</div>
-
 </div>

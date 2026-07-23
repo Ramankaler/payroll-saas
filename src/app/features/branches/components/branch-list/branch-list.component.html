@@ -1,48 +1,73 @@
-<p>branch-list works!</p>
-<div class="container mt-4">
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Setup</div>
+      <h1 class="page-title">Branches</h1>
+      <p class="page-subtitle">Create and manage company locations.</p>
+    </div>
 
-  <div class="d-flex justify-content-between mb-3">
-    <h3>Branches</h3>
-    <button class="btn btn-primary" routerLink="/branch/create">
-      + Add Branch
+    <button class="btn btn-primary" routerLink="/branch/create" title="Add Branch">
+      <span class="material-icons">add_business</span>
+      <span class="btn-icon-text">Add Branch</span>
     </button>
   </div>
 
-  <table class="table table-hover">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5>Branch List</h5>
+      <span class="status-pill">{{ branches.length }} records</span>
+    </div>
 
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Location</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
 
-    <tbody>
-      <tr *ngFor="let b of branches">
-        <td>{{ b.branchName }}</td>
-        <td>{{ b.location }}</td>
+        <tbody>
+          <tr *ngFor="let b of branches">
+            <td class="fw-semibold">{{ b.branchName }}</td>
+            <td>{{ b.location || '-' }}</td>
+            <td>
+              <span class="status-pill" [class.success]="b.isActive" [class.danger]="!b.isActive">
+                {{ b.isActive ? 'Active' : 'Disabled' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  [routerLink]="['/branch/edit', b.branchID]"
+                  title="Edit Branch">
+                  <span class="material-icons">edit</span>
+                  Edit
+                </button>
 
-        <td>
-          <button class="btn btn-sm btn-outline-primary me-2"
-                  [routerLink]="['/branch/edit', b.branchID]">
-            Edit
-          </button>
+                <button
+                  class="btn btn-sm"
+                  [class.btn-outline-danger]="b.isActive"
+                  [class.btn-outline-success]="!b.isActive"
+                  (click)="toggleStatus(b)"
+                  [title]="b.isActive ? 'Disable Branch' : 'Enable Branch'">
+                  <span class="material-icons">{{ b.isActive ? 'block' : 'check_circle' }}</span>
+                  {{ b.isActive ? 'Disable' : 'Enable' }}
+                </button>
+              </div>
+            </td>
+          </tr>
 
-          <button class="btn btn-sm btn-outline-danger"
-                  (click)="delete(b.branchID)">
-            Delete
-          </button>
-        </td>
-      </tr>
-
-      <tr *ngIf="branches.length === 0">
-        <td colspan="3" class="text-center text-muted">
-          No branches found
-        </td>
-      </tr>
-    </tbody>
-
-  </table>
-
+          <tr *ngIf="branches.length === 0">
+            <td colspan="4" class="empty-row">
+              No branches found. Add your first branch to continue.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

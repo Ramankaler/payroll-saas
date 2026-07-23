@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ReimbursementService } from '../../services/reimbursement.service';
 import { EmployeeService } from '../../../employees/employee.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-reimbursement-create',
@@ -14,6 +15,7 @@ import { EmployeeService } from '../../../employees/employee.service';
   styleUrls: ['./reimbursement-create.component.scss']
 })
 export class ReimbursementCreateComponent implements OnInit {
+  private readonly authSession =   inject(AuthSessionService);
   reimbursement = {
     empID: 0,
     amount: 0,
@@ -23,7 +25,9 @@ export class ReimbursementCreateComponent implements OnInit {
   };
 
   employees: any[] = [];
-  compId = 1;
+ get compId(): number {
+  return this.authSession.companyId;
+}
   expenseTypes = ['Travel', 'Food', 'Medical', 'Office Expense', 'Other'];
 
   constructor(
@@ -67,7 +71,14 @@ export class ReimbursementCreateComponent implements OnInit {
         this.snackBar.open('Reimbursement claim created', 'Close', { duration: 3000 });
         this.router.navigate(['/reimbursement']);
       },
-      error: () => this.snackBar.open('Create failed', 'Close')
+      error: (err) => {
+        const message =
+          err?.error?.message ??
+          err?.error?.error ??
+          'Create failed';
+
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      }
     });
   }
 }

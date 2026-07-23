@@ -1,0 +1,163 @@
+<div class="container-fluid py-4">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Attendance Rules</div>
+      <h1 class="page-title">Shifts</h1>
+      <p class="page-subtitle">Manage work timings, grace minutes, and overnight shifts.</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="mb-0">Shifts</h4>
+    </div>
+
+    <div class="card-body">
+      <div class="alert alert-info" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Shift Name</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.shiftName"
+            name="shiftName"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Start</label>
+          <input
+            type="time"
+            class="form-control"
+            [(ngModel)]="form.startTime"
+            name="startTime"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">End</label>
+          <input
+            type="time"
+            class="form-control"
+            [(ngModel)]="form.endTime"
+            name="endTime"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Grace Minutes</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="form.graceMinutes"
+            name="graceMinutes"
+            min="0"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Standard Hours</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="form.standardHours"
+            name="standardHours"
+            min="1"
+            step="0.25"
+          />
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button
+          class="btn btn-primary"
+          type="button"
+          [disabled]="isSaving"
+          (click)="save()"
+          title="Save Shift"
+        >
+          <span class="material-icons">{{ editingId === null ? 'add' : 'save' }}</span>
+          {{ editingId === null ? 'Add Shift' : 'Save Shift' }}
+        </button>
+
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="reset()"
+          title="Clear Form"
+        >
+          <span class="material-icons">restart_alt</span>
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Grace</th>
+            <th>Hours</th>
+            <th>Overnight</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let shift of shifts">
+            <td>{{ shift.shiftName }}</td>
+            <td>{{ shift.startTime }}</td>
+            <td>{{ shift.endTime }}</td>
+            <td>{{ shift.graceMinutes }} min</td>
+            <td>{{ shift.standardHours }}</td>
+            <td>{{ shift.isOvernight ? 'Yes' : 'No' }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.bg-success]="shift.isActive"
+                [class.bg-secondary]="!shift.isActive"
+              >
+                {{ shift.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-outline-primary me-2"
+                type="button"
+                (click)="edit(shift)"
+                title="Edit Shift"
+              >
+                <span class="material-icons">edit</span>
+                Edit
+              </button>
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                type="button"
+                (click)="toggleStatus(shift)"
+                [title]="shift.isActive ? 'Disable Shift' : 'Enable Shift'"
+              >
+                <span class="material-icons">{{ shift.isActive ? 'block' : 'check_circle' }}</span>
+                {{ shift.isActive ? 'Disable' : 'Enable' }}
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="shifts.length === 0">
+            <td colspan="8" class="empty-row">
+              No shifts added yet.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

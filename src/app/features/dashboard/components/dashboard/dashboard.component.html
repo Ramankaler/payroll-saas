@@ -2,51 +2,56 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
     <h1>Dashboard Overview</h1>
-    <p>Company: {{ company?.companyName || 'Loading...' }} | {{ company?.currency || 'USD' }}</p>
+    <p *ngIf="!isEmployee">Company: {{ company?.companyName || 'Loading...' }} | {{ company?.currency || 'USD' }}</p>
+    <p *ngIf="isEmployee && selfDashboard">
+      Welcome {{ selfDashboard.employee.firstName }} {{ selfDashboard.employee.lastName }}
+      ({{ selfDashboard.employee.empCode }})
+    </p>
   </header>
 
   <div class="kpi-grid">
     <mat-card class="kpi-card" *ngFor="let kpi of kpis; trackBy: trackByFn">
       <div class="kpi-value">{{ kpi.value }}</div>
       <div class="kpi-label">{{ kpi.label }}</div>
-      <div class="kpi-trend" [ngClass]="kpi.type">
+      <div class="kpi-trend" [ngClass]="kpi.type" *ngIf="kpi.trend">
         {{ kpi.trend }}
         <mat-icon>{{ kpi.type === 'up' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
       </div>
     </mat-card>
   </div>
 
-  <div class="dashboard-charts">
-    <mat-card class="chart-container">
-      <h3>Payroll Trend (Last 6 Months)</h3>
-      <div class="chart-wrapper">
-        <canvas baseChart
-          [data]="chartData"
-          [labels]="chartLabels"
-          [options]="chartOptions"
-          [legend]="true"
-          type="bar">
-        </canvas>
-      </div>
-    </mat-card>
+  <p class="message" *ngIf="dashboardMessage">{{ dashboardMessage }}</p>
 
-    <mat-card class="recent-activity">
-      <h3>Recent Activity</h3>
-      <div class="activity-list">
-        <div class="activity-item" *ngFor="let activity of recentActivities; trackBy: trackByFn">
-          <div class="activity-avatar" [style.background-color]="'hsl(' + (activity.id * 60 % 360) + ', 70%, 60%)'">
-            {{ activity.user.charAt(0) }}
-          </div>
-          <div class="activity-content">
-            <div class="activity-message">{{ activity.message }}</div>
-            <div class="activity-time">{{ activity.time }}</div>
-          </div>
+  <div class="dashboard-simple-grid" *ngIf="!isEmployee">
+    <mat-card>
+      <h3>Upcoming Birthdays</h3>
+
+      <div *ngIf="upcomingBirthdays.length === 0" class="empty-text">
+        No birthdays in the next 30 days.
+      </div>
+
+      <div class="birthday-row" *ngFor="let item of upcomingBirthdays; trackBy: trackByFn">
+        <div>
+          <strong>{{ item.firstName }} {{ item.lastName }}</strong>
+          <span>{{ item.empCode }}</span>
+        </div>
+        <div class="birthday-date">
+          {{ item.birthdayDate | date:'dd MMM' }}
+          <small *ngIf="item.daysLeft === 0">Today</small>
+          <small *ngIf="item.daysLeft > 0">in {{ item.daysLeft }} days</small>
         </div>
       </div>
     </mat-card>
+
+    <mat-card>
+      <h3>Payroll Notes</h3>
+      <p class="note-line">Annual leave is paid when approved.</p>
+      <p class="note-line">Sick leave follows full / half / unpaid stages.</p>
+      <p class="note-line">Gratuity report is available in Reports.</p>
+    </mat-card>
   </div>
 
-  <div class="dashboard-actions">
+  <div class="dashboard-actions" *ngIf="!isEmployee">
     <button mat-raised-button color="primary" (click)="onQuickAction('employees')">
       <mat-icon>group</mat-icon>
       Manage Employees

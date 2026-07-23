@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface Company {
   compID: number;
-  CompanyName: string;
+  companyName: string;
   industry: string;
   country: string;
   currency: string;
@@ -19,9 +19,10 @@ export class CompanyService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Company[]> {
-    return this.http.get<Company[]>(this.apiUrl);
-  }
+  getCurrent(): Observable<Company> {
+  return this.http.get<Company>(this.apiUrl);
+}
+
 
   create(data: any): Observable<Company> {
     return this.http.post<Company>(this.apiUrl, data);
@@ -31,7 +32,4 @@ export class CompanyService {
     return this.http.put<Company>(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
 }

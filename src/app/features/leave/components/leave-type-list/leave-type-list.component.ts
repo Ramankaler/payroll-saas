@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LeaveTypeService, LeaveTypeDto } from '../../services/leave-type.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-type-list',
@@ -13,11 +14,14 @@ import { LeaveTypeService, LeaveTypeDto } from '../../services/leave-type.servic
   styleUrls: ['./leave-type-list.component.scss']
 })
 export class LeaveTypeListComponent implements OnInit {
+  private readonly authSession =   inject(AuthSessionService);
   leaveTypes: LeaveTypeDto[] = [];
   filteredTypes: LeaveTypeDto[] = [];
   newTypeName = '';
   searchTerm = '';
-  compId = 1;
+  get compId(): number {
+  return this.authSession.companyId;
+}
 
   constructor(
     private leaveTypeService: LeaveTypeService,
@@ -56,16 +60,6 @@ export class LeaveTypeListComponent implements OnInit {
     );
   }
 
-  deleteType(id: number): void {
-    if (confirm('Delete this leave type?')) {
-      this.leaveTypeService.delete(id).subscribe({
-        next: () => {
-          this.loadTypes();
-          this.snackBar.open('Leave type deleted', 'Close', { duration: 3000 });
-        },
-        error: () => this.snackBar.open('Delete failed', 'Close')
-      });
-    }
-  }
+
 }
 

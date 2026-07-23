@@ -28,60 +28,43 @@
   margin-bottom: 2.5rem;
 }
 
-.dashboard-charts {
+.dashboard-simple-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.chart-wrapper {
-  position: relative;
-  height: 400px;
-  margin-top: 1rem;
-}
-
-.recent-activity {
-  height: fit-content;
-}
-
-.activity-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.activity-item {
+.birthday-row {
   display: flex;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 1.5rem;
   padding: 1rem 0;
   border-bottom: 1px solid var(--border);
 }
 
-.activity-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: white;
-  flex-shrink: 0;
-}
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-message {
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.activity-time {
+.birthday-row span,
+.birthday-date small,
+.empty-text,
+.note-line,
+.message {
   color: var(--text-muted);
+}
+
+.birthday-row span {
+  display: block;
+  margin-top: 0.25rem;
   font-size: 0.875rem;
+}
+
+.birthday-date {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.birthday-date small {
+  display: block;
+  margin-top: 0.25rem;
 }
 
 .dashboard-actions {
@@ -99,7 +82,7 @@
 }
 
 @media (max-width: 1024px) {
-  .dashboard-charts {
+  .dashboard-simple-grid {
     grid-template-columns: 1fr;
   }
 

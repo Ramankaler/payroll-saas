@@ -1,58 +1,99 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
+import { API_BASE_URL } from '../../../core/config/api.config';
+import { AuthSessionService } from '../../../core/services/auth-session.service';
 
 interface AttendanceLog {
-  id: string;
-  employeeName: string;
-  punchIn: string;
-  punchOut: string;
-  shift: string;
-  status: 'Present' | 'Late' | 'Absent';
-  date: string;
+  attID: number;
+  empID: number;
+  empCode: string;
+  firstName: string;
+  lastName: string;
+  punchTime: string;
+  punchType: string;
+  deviceID: string;
 }
 
 @Component({
   selector: 'app-attendance',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressBarModule, MatTableModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatTableModule],
   templateUrl: './attendance.component.html',
   styleUrls: ['./attendance.component.scss'],
 })
-export class AttendanceComponent {
-  displayedColumns: string[] = ['employeeName', 'punchIn', 'punchOut', 'shift', 'status'];
-  attendanceLogs: AttendanceLog[] = [
-    { id: '1', employeeName: 'John Doe', punchIn: '09:02', punchOut: '18:15', shift: '9-6', status: 'Late', date: '2024-05-20' },
-    { id: '2', employeeName: 'Sarah Wilson', punchIn: '08:55', punchOut: '17:45', shift: '9-6', status: 'Present', date: '2024-05-20' },
-    { id: '3', employeeName: 'Mike Johnson', punchIn: '09:30', punchOut: '17:30', shift: '9-6', status: 'Late', date: '2024-05-20' },
-    { id: '4', employeeName: 'Emma Davis', punchIn: '', punchOut: '', shift: '9-6', status: 'Absent', date: '2024-05-20' },
-    { id: '5', employeeName: 'David Brown', punchIn: '09:00', punchOut: '18:00', shift: '9-6', status: 'Present', date: '2024-05-20' },
+export class AttendanceComponent implements OnInit {
+  readonly displayedColumns = [
+    'employee',
+    'punchTime',
+    'punchType',
+    'device',
   ];
-  uploading = false;
-  uploadProgress = 0;
-  importResult: { success: boolean; message: string } | null = null;
+
+  attendanceLogs: AttendanceLog[] = [];
   file: File | null = null;
+  loading = false;
+  message = '';
+  error = '';
+
+  constructor(
+    private readonly http: HttpClient,
+    private readonly session: AuthSessionService
+  ) {}
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.http.get<AttendanceLog[]>(
+      `${API_BASE_URL}/api/attendance/company/${this.session.companyId}`
+    ).subscribe({
+      next: (logs) => {
+        this.attendanceLogs = logs;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = error?.error?.message ?? 'Attendance could not be loaded.';
+      },
+    });
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.file = input.files?.[0] || null;
+    this.file = input.files?.[0] ?? null;
   }
 
   importCsv(): void {
     if (!this.file) return;
-    this.uploading = true;
-    this.uploadProgress = 0;
-    const interval = setInterval(() => {
-      this.uploadProgress = Math.min(this.uploadProgress + 10, 100);
-      if (this.uploadProgress >= 100) {
-        clearInterval(interval);
-        this.uploading = false;
-        this.importResult = { success: true, message: 'Import completed' };
-      }
-    }, 200);
+
+    const form = new FormData();
+    form.append('file', this.file);
+
+    this.loading = true;
+    this.error = '';
+    this.message = '';
+
+    this.http.post<any>(
+      `${API_BASE_URL}/api/attendance/import?compId=${this.session.companyId}`,
+      form
+    ).subscribe({
+      next: (result) => {
+        this.loading = false;
+        this.message = `${result.importedRecords ?? 0} attendance records imported.`;
+        this.load();
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = error?.error?.message ?? 'CSV import failed.';
+      },
+    });
   }
 }

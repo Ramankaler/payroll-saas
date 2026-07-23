@@ -12,9 +12,18 @@ export class AuthEffects {
       switchMap((action) =>
         this.api.login(action.request).pipe(
           map((response) => loginSucceeded({ response })),
-          catchError((err) =>
-            of(loginFailed({ error: err?.error?.detail ?? 'Login failed' }))
-          )
+       catchError((error) => {
+  const message =
+    typeof error?.error?.message === 'string'
+      ? error.error.message
+      : 'Login failed.';
+
+  return of(
+    loginFailed({
+      error: message,
+    })
+  );
+})
         )
       )
     )

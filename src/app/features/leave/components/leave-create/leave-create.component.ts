@@ -1,4 +1,4 @@
-import { Component, importProvidersFrom, OnInit } from '@angular/core';
+import { Component, importProvidersFrom, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgSelectOption } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { LeaveTypeService } from '../../services/leave-type.service';
 import { HttpClient } from '@angular/common/http';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { map } from 'rxjs';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-create',
@@ -18,7 +19,7 @@ import { map } from 'rxjs';
   styleUrls: ['./leave-create.component.scss']
 })
 export class LeaveCreateComponent implements OnInit {
-DEFAULT_COMP_ID = 1;
+private readonly authSession =   inject(AuthSessionService);
 leave:any={
    startDate:'',
   endDate:'',
@@ -29,6 +30,9 @@ isHalfDay:false,
 selectedHalf:''
 
 };
+get DEFAULT_COMP_ID(): number {
+  return this.authSession.companyId;
+}
 leaves:any[]=[];
 employees:any[]=[];
 isHalfDay:boolean=false;
@@ -39,6 +43,9 @@ empDept:any;
 selectedEmployeeID:any;
 SelectedLeaveType:any;
 selectedHalf:any;
+annualBalance:any;
+balanceMessage = '';
+saveMessage = '';
 
 
 constructor(private http:HttpClient,private router:Router,
@@ -64,6 +71,7 @@ const foundEmp = this.employees.find((emp:any) =>
   this.selectedEmployeeID = foundEmp.empID;
   console.log(this.selectedEmployeeID);
   this.fullName = `${foundEmp.firstName} ${foundEmp.lastName}`;
+  this.loadAnnualBalance();
   // this.empDept = foundEmp.deptID? `Department ID: ${foundEmp.deptID}`
  }
  else{
@@ -110,13 +118,25 @@ loadLeaveTypes(){
 
 // Leave Save service
 saveLeave(){
+  this.saveMessage = '';
+
+  if (!this.selectedEmployeeID) {
+    this.saveMessage = 'Please select a valid employee code.';
+    return;
+  }
+
+  if (!this.leave.leaveTypeID) {
+    this.saveMessage = 'Please select leave type.';
+    return;
+  }
+
   const payload = {
     empID : this.selectedEmployeeID,
-    leaveTypeId: this.leave.leaveTypeID,
+    leaveTypeID: Number(this.leave.leaveTypeID),
     startDate: this.leave.startDate,
     endDate: this.leave.endDate,
     reason: this.leave.leaveReason,
-    totalDays : this.leave.totalDays,
+    totalDays : Number(this.leave.totalDays || 0),
     isHalfDay:this.leave.isHalfDay,
     halfDayType:this.leave.selectedHalf
   }
@@ -124,7 +144,12 @@ saveLeave(){
   this.leaveService.create(payload).subscribe({
     next:(res)=>{
       console.log("response",res);
+      this.saveMessage = 'Leave request saved.';
 
+    },
+    error:(err)=>{
+      this.saveMessage =
+        err?.error?.message ?? err?.error ?? 'Leave request failed.';
     }
   })
 }
@@ -134,10 +159,13 @@ saveLeave(){
     this.selectedEmployeeID = null;
     this.fullName = '';
     this.empDept = '';
+    this.annualBalance = null;
+    this.balanceMessage = '';
   }
 
   onleaveselection(event:any){
 console.log(event.target.value);
+this.loadAnnualBalance();
   }
   onCheckChange(event:any){
 console.log(event.target.value);
@@ -153,8 +181,42 @@ console.log(event.target.value);
       const timeDiff = to.getTime()-from.getTime();
 const daysDiff = timeDiff/(1000*60*60*24)+1;
 this.leave.totalDays = daysDiff;
+this.loadAnnualBalance();
     }
 
+  }
+
+  loadAnnualBalance(): void {
+    this.balanceMessage = '';
+
+    if (!this.selectedEmployeeID) {
+      return;
+    }
+
+    const leaveType = this.leaveTypes.find((item:any) =>
+      Number(item.leaveTypeID) === Number(this.leave.leaveTypeID)
+    );
+
+    const leaveName = leaveType?.leaveName?.toLowerCase() ?? '';
+
+    if (
+      !leaveName.includes('annual') &&
+      !leaveName.includes('vacation')
+    ) {
+      this.annualBalance = null;
+      return;
+    }
+
+    this.leaveService.getAnnualBalance(this.selectedEmployeeID).subscribe({
+      next:(res)=>{
+        this.annualBalance = res;
+        this.balanceMessage =
+          `Available annual leave: ${res.availableDays} days`;
+      },
+      error:()=>{
+        this.balanceMessage = 'Could not load annual leave balance.';
+      }
+    });
   }
 }
 

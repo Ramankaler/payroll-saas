@@ -44,14 +44,29 @@ return this.http.get<any>(`${this.apiUrl}/requests/${compId}/employee/${empId}` 
     return this.http.post<LeaveDto>(`${this.apiUrl}/requests`, data);
   }
 
+  getAnnualBalance(empId: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.apiUrl}/annual-balance/${empId}`
+    );
+  }
+
+  previewAnnualLeave(data: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/annual-preview`,
+      data
+    );
+  }
+
   update(id: number, data: any): Observable<LeaveDto> {
     return this.http.put<LeaveDto>(`${this.apiUrl}/requests/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/requests/${id}`);
-  }
-
+cancel(id: number): Observable<LeaveDto> {
+  return this.http.put<LeaveDto>(
+    `${this.apiUrl}/requests/cancel/${id}`,
+    {}
+  );
+}
   approve(id: number): Observable<LeaveDto> {
     return this.http.put<LeaveDto>(`${this.apiUrl}/requests/status/${id}`, {});
   }

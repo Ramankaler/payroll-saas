@@ -6,6 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ReimbursementService } from '../../services/reimbursement.service';
 import { EmployeeService } from '../../../employees/employee.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-reimbursement-edit',
@@ -14,6 +15,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   templateUrl: './reimbursement-edit.component.html'
 })
 export class ReimbursementEditComponent implements OnInit {
+  private readonly authSession =  inject(AuthSessionService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
@@ -21,7 +23,7 @@ export class ReimbursementEditComponent implements OnInit {
   private employeeService = inject(EmployeeService);
 
   reimbursementData: any = {
-    reimID: 0,
+    reimbID: 0,
     empID: 0,
     amount: 0,
     expenseType: '',
@@ -41,7 +43,7 @@ export class ReimbursementEditComponent implements OnInit {
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll(1).subscribe({
+    this.employeeService.getAll( this.authSession.companyId).subscribe({
       next: (res: any) => this.employees = res || [],
       error: (err: any) => console.error('Failed to load employees:', err)
     });

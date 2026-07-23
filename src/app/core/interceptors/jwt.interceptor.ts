@@ -1,34 +1,82 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import {
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+} from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 import { API_BASE_URL } from '../config/api.config';
+
+interface StoredAuthentication {
+  accessToken?: string | null;
+  expiresAtUtc?: string | null;
+}
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = this.getAccessToken();
-    if (!token) return next.handle(req);
+  intercept(
+    request: HttpRequest<unknown>,
+    next: HttpHandler
+  ): Observable<HttpEvent<unknown>> {
+    const requestIsForApi =
+      request.url.startsWith(API_BASE_URL);
 
-    const isApi = req.url.startsWith(API_BASE_URL);
-    if (!isApi) return next.handle(req);
+    if (!requestIsForApi) {
+      return next.handle(request);
+    }
 
-    const authReq = req.clone({
+    const accessToken = this.getValidAccessToken();
+
+    if (!accessToken) {
+      return next.handle(request);
+    }
+
+    const authenticatedRequest = request.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
-    return next.handle(authReq);
+
+    return next.handle(authenticatedRequest);
   }
 
-  private getAccessToken(): string | null {
+  private getValidAccessToken(): string | null {
     try {
       const raw = localStorage.getItem('auth');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { accessToken?: string | null };
-      return parsed.accessToken ?? null;
+
+      if (!raw) {
+        return null;
+      }
+
+      const authentication =
+        JSON.parse(raw) as StoredAuthentication;
+
+      if (
+        !authentication.accessToken ||
+        !authentication.expiresAtUtc
+      ) {
+        localStorage.removeItem('auth');
+        return null;
+      }
+
+      const expirationTime =
+        Date.parse(authentication.expiresAtUtc);
+
+      const tokenIsExpired =
+        !Number.isFinite(expirationTime) ||
+        expirationTime <= Date.now();
+
+      if (tokenIsExpired) {
+        localStorage.removeItem('auth');
+        return null;
+      }
+
+      return authentication.accessToken;
     } catch {
+      localStorage.removeItem('auth');
       return null;
     }
   }
 }
-

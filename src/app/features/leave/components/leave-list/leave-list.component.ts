@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -9,6 +9,7 @@ import { LeaveService, LeaveDto } from '../../services/leave.service';
 import { EmployeeService } from '../../../employees/employee.service';
 import { LeaveTypeService } from '../../services/leave-type.service';
 import { Router } from '@angular/router';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-list',
@@ -18,14 +19,16 @@ import { Router } from '@angular/router';
   styleUrls: ['./leave-list.component.scss']
 })
 export class LeaveListComponent implements OnInit {
-  DEFAULT_COMP_ID = 1;
+ private readonly authSession =  inject(AuthSessionService);
 leaves:any[]=[];
 employees:any[]=[];
 constructor(private leaveService:LeaveService, private snackBar: MatSnackBar,
   private employeeService: EmployeeService, private router:Router) {
 
 }
-
+get DEFAULT_COMP_ID(): number {
+  return this.authSession.companyId;
+}
 
   ngOnInit(): void {
     // throw new Error('Method not implemented.');
@@ -68,6 +71,27 @@ addLeave(){
 }
 
 
-deleteLeave(id:number){
+cancelLeave(id: number): void {
+  if (!confirm('Cancel this leave request?')) {
+    return;
+  }
+
+  this.leaveService.cancel(id).subscribe({
+    next: () => {
+      this.snackBar.open('Leave request cancelled.', 'Close', {
+        duration: 3000
+      });
+
+      this.loadData();
+    },
+    error: (err) => {
+      const message =
+        err?.error?.message || 'Failed to cancel leave request.';
+
+      this.snackBar.open(message, 'Close', {
+        duration: 4000
+      });
+    }
+  });
 }
 }

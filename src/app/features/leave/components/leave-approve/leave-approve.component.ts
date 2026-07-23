@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LeaveService, LeaveDto } from '../../services/leave.service';
 import { EmployeeService } from '../../../employees/employee.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-approve',
@@ -13,9 +14,12 @@ import { EmployeeService } from '../../../employees/employee.service';
   styleUrls: ['./leave-approve.component.scss']
 })
 export class LeaveApproveComponent implements OnInit {
+private readonly authSession =  inject(AuthSessionService);
   leaves: LeaveDto[] = [];
   employees: any[] = [];
-  compId = 1;
+  get compId(): number {
+  return this.authSession.companyId;
+}
   status:any;
   processingId: number | null = null;
 

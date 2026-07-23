@@ -25,8 +25,6 @@ private apiUrl = 'http://localhost:5236/api/designation';
     return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
+
 }
 

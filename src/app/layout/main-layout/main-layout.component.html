@@ -131,6 +131,8 @@
           (click)="closeMobileSidebar()"
           routerLinkActive="active"
           class="menu-link"
+          [title]="item.label"
+          [attr.aria-label]="item.label"
         >
           <span class="material-icons icon">
             {{ item.icon }}
@@ -147,6 +149,8 @@
   <div
     class="menu-link parent-link"
     (click)="toggleMenu(item.label)"
+    [title]="item.label"
+    [attr.aria-label]="item.label"
   >
 
     <div class="menu-title">
@@ -185,6 +189,8 @@
       (click)="closeMobileSidebar()"
       routerLinkActive="active"
       class="submenu-link"
+      [title]="child.label"
+      [attr.aria-label]="child.label"
     >
 
       <span class="material-icons small-icon">
@@ -211,7 +217,7 @@
     <!-- TOPBAR -->
     <header class="topbar">
 
-      <button class="toggle-btn" (click)="toggleSidebar()">
+      <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle menu" aria-label="Toggle menu">
         <span class="material-icons">menu</span>
       </button>
 
@@ -227,13 +233,17 @@
 
       <div class="profile">
         <div class="avatar">
-          SA
+          {{ avatar }}
         </div>
 
         <div class="profile-info">
-          <strong>Super Admin</strong>
-          <small>superadmin&#64;default.com</small>
+          <strong>{{ roleName }}</strong>
+          <small>{{ username }}</small>
         </div>
+        <button class="logout-btn" type="button" (click)="onProfileMenu('logout')" title="Logout" aria-label="Logout">
+          <span class="material-icons">logout</span>
+          <span class="logout-text">Logout</span>
+        </button>
       </div>
 
     </header>

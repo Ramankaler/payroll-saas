@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Branch, BranchService } from '../../services/branch.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-branch-list',
@@ -14,8 +15,11 @@ import { RouterModule } from '@angular/router';
 export class BranchListComponent {
 
   branches: Branch[] = [];
-  compId = 1; // later dynamic
+  private readonly authSession =  inject(AuthSessionService);
 
+  get compId(): number {
+  return this.authSession.companyId;
+}
   constructor(private branchService: BranchService) {}
 
   ngOnInit(): void {
@@ -28,11 +32,18 @@ export class BranchListComponent {
     });
   }
 
-  delete(id: number) {
-    if (!confirm('Delete this branch?')) return;
+toggleStatus(branch: Branch): void {
+  const newStatus = !branch.isActive;
 
-    this.branchService.delete(id).subscribe(() => {
-      this.load();
+  this.branchService
+    .updateStatus(branch.branchID, newStatus)
+    .subscribe({
+      next: () => {
+        branch.isActive = newStatus;
+      },
+      error: () => {
+        alert('Failed to update branch status.');
+      },
     });
-  }
+}
 }

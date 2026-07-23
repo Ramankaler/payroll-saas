@@ -25,9 +25,9 @@ export class CompanyEditComponent {
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
 
-    this.companyService.getAll().subscribe(res => {
-      this.company = res.find(x => x.compID == id);
-    });
+  this.companyService.getCurrent().subscribe(company => {
+  this.company = company;
+});
   }
 
   save() {

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface ReimbursementDto {
-  reimID: number;
+  reimbID: number;
   empID: number;
   amount: number;
   expenseType: string;
@@ -36,12 +36,32 @@ export class ReimbursementService {
     return this.http.put<ReimbursementDto>(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
+ cancel(id: number): Observable<ReimbursementDto> {
+  return this.http.put<ReimbursementDto>(
+    `${this.apiUrl}/${id}/cancel`,
+    {}
+  );
+}
 
-  approve(id: number, status: string): Observable<ReimbursementDto> {
-    return this.http.put<ReimbursementDto>(`${this.apiUrl}/${id}/status`, status);
-  }
+approve(
+  id: number,
+  status: 'approved' | 'rejected'
+): Observable<ReimbursementDto> {
+  return this.http.put<ReimbursementDto>(
+    `${this.apiUrl}/${id}/status`,
+    { status }
+  );
+}
+}
+export interface ReimbursementDto {
+  reimbID: number;
+  empID: number;
+  amount: number;
+  expenseType: string;
+  description: string;
+  billFile: string;
+  status: string;
+  approvedBy: number;
+  CreatedAt: string;
 }
 

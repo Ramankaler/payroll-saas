@@ -14,8 +14,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { EmployeeService } from '../../employee.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
+import { Shift, ShiftService } from '../../../shifts/services/shift.service';
+import { BranchService } from '../../../branches/services/branch.service';
 
-const DEFAULT_COMP_ID = 1;
 
 @Component({
   selector: 'app-employee-edit',
@@ -39,20 +41,55 @@ const DEFAULT_COMP_ID = 1;
   styleUrls: ['./employee-edit.component.scss'],
 })
 export class EmployeeEditComponent implements OnInit, OnDestroy {
+  private readonly authSession =  inject(AuthSessionService);
   private readonly svc     = inject(EmployeeService);
   private readonly fb      = inject(FormBuilder);
   private readonly router  = inject(Router);
   private readonly route   = inject(ActivatedRoute);
   private readonly snack   = inject(MatSnackBar);
+  private readonly shiftService = inject(ShiftService);
+  private readonly branchService = inject(BranchService);
   private readonly destroy$ = new Subject<void>();
 
   employee: any = null;
   departments:  any[]  = [];
   designations: any[] = [];
+  shifts: Shift[] = [];
+  branches: any[] = [];
+  employees: any[] = [];
   documents:    any[] = [];
   loadingPage = true;
   submitting  = false;
   empId!: number;
+  managerSearch = '';
+  addressMessage = '';
+
+  readonly countries = [
+    'United Arab Emirates',
+    'India',
+    'Saudi Arabia',
+    'Qatar',
+    'Oman',
+    'Bahrain',
+    'Kuwait',
+    'Pakistan',
+    'Nepal',
+    'Sri Lanka',
+    'Bangladesh',
+    'Philippines',
+    'United Kingdom',
+    'United States'
+  ];
+
+  readonly postalCityMap: any = {
+    India: {
+      '110001': 'New Delhi',
+      '160017': 'Chandigarh',
+      '400001': 'Mumbai',
+      '560001': 'Bengaluru',
+      '700001': 'Kolkata'
+    }
+  };
 
   // ── Document upload state ─────────────────────────────────────────────────
   selectedFile:    File | null = null;
@@ -64,9 +101,10 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
 
   // ── Form ──────────────────────────────────────────────────────────────────
   form = this.fb.group({
-    // Required
-    empCode:   ['', [Validators.required, Validators.maxLength(20)]],
-    firstName: ['', [Validators.required, Validators.maxLength(100)]],
+  // Required
+  empCode:   ['', [Validators.required, Validators.maxLength(20)]],
+  bioID: [''],
+  firstName: ['', [Validators.required, Validators.maxLength(100)]],
     lastName:  ['', [Validators.required, Validators.maxLength(100)]],
     deptID:    [null as number | null, Validators.required],
     desigID:   [null as number | null, Validators.required],
@@ -76,9 +114,15 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     gender:           [''],
     dob:              [''],
     joiningDate:      [''],
+    managerID:        [null as number | null],
+    branchID:         [null as number | null],
     employmentType:   ['full_time'],
     taxNumber:        [''],
     workLocation:     [''],
+    shiftID:          [null as number | null],
+    city:             [''],
+    country:          [''],
+    postalCode:       [''],
     basicSalary:      [null as number | null, Validators.min(0)],
     allowancesAmount: [null as number | null, Validators.min(0)],
     bankName:         [''],
@@ -99,18 +143,25 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
 
     forkJoin({
       employee:     this.svc.getById(this.empId),
-      departments:  this.svc.getDepartments(DEFAULT_COMP_ID),
-      designations: this.svc.getDesignations(DEFAULT_COMP_ID),
+      departments:  this.svc.getDepartments(this.authSession.companyId),
+      designations: this.svc.getDesignations(this.authSession.companyId),
+      shifts:       this.shiftService.getAll(this.authSession.companyId),
+      branches:     this.branchService.getAll(this.authSession.companyId),
+      employees:    this.svc.getAll(this.authSession.companyId),
       documents:    this.svc.getDocuments(this.empId),
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ employee, departments, designations, documents }) => {
+        next: ({ employee, departments, designations, shifts, branches, employees, documents }) => {
           this.employee     = employee;
           this.departments  = departments  ?? [];
           this.designations = designations ?? [];
+          this.shifts       = (shifts ?? []).filter(shift => shift.isActive);
+          this.branches     = branches ?? [];
+          this.employees    = (employees ?? []).filter(emp => emp.empID !== this.empId);
           this.documents    = documents    ?? [];
           this.patchForm(employee);
+          this.setManagerSearch(employee.managerID);
           this.loadingPage = false;
 
           // Profile photo preview
@@ -152,8 +203,9 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   // ── Patch form with existing data ─────────────────────────────────────────
   private patchForm(e: any): void {
     this.form.patchValue({
-      empCode:          e.empCode ?? '',
-      firstName:        e.firstName ?? '',
+    empCode:          e.empCode ?? '',
+    bioID:      e.bioID ?? '',
+    firstName:        e.firstName ?? '',
       lastName:         e.lastName ?? '',
       deptID:           e.deptID ?? null,
       desigID:          e.desigID ?? null,
@@ -162,9 +214,15 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
       gender:           e.gender ?? '',
       dob:              e.dob ? e.dob.split('T')[0] : '',
       joiningDate:      e.joiningDate ? e.joiningDate.split('T')[0] : '',
+      managerID:        e.managerID ?? null,
+      branchID:         e.branchID ?? null,
       employmentType:   e.employmentType ?? 'full_time',
       taxNumber:        e.taxNumber ?? '',
       workLocation:     e.workLocation ?? '',
+      shiftID:          e.shiftID ?? null,
+      city:             e.city ?? '',
+      country:          e.country ?? '',
+      postalCode:       e.postalCode ?? '',
       basicSalary:      e.basicSalary ?? null,
       allowancesAmount: e.allowancesAmount ?? null,
       bankName:         e.bankName ?? '',
@@ -252,6 +310,72 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     return ctrl?.hasError(error) && (ctrl.dirty || ctrl.touched);
   }
 
+  managerLabel(emp: any): string {
+    const code = emp.empCode || emp.empID;
+    const name = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+    return `${code} - ${name}`;
+  }
+
+  setManagerSearch(managerID: number | null): void {
+    if (!managerID) {
+      this.managerSearch = '';
+      return;
+    }
+
+    const manager = this.employees.find(emp => emp.empID === managerID);
+    this.managerSearch = manager ? this.managerLabel(manager) : '';
+  }
+
+  selectManager(): void {
+    const selected = this.employees.find(emp =>
+      this.managerLabel(emp).toLowerCase() === this.managerSearch.trim().toLowerCase()
+    );
+
+    this.form.patchValue({
+      managerID: selected ? selected.empID : null
+    });
+  }
+
+  onBranchChange(): void {
+    const branchID = this.form.get('branchID')?.value;
+    const selected = this.branches.find(branch =>
+      Number(branch.branchID) === Number(branchID)
+    );
+
+    this.form.patchValue({
+      workLocation: selected?.location || selected?.branchName || ''
+    });
+  }
+
+  onCountryChange(): void {
+    this.onPostalCodeChange();
+  }
+
+  onPostalCodeChange(): void {
+    const country = String(this.form.get('country')?.value || '').trim();
+    const postalCode = String(this.form.get('postalCode')?.value || '').trim();
+    this.addressMessage = '';
+
+    if (!country || !postalCode) {
+      return;
+    }
+
+    const city = this.postalCityMap[country]?.[postalCode];
+
+    if (city) {
+      this.form.patchValue({ city });
+      this.addressMessage = 'City filled from postal code.';
+      return;
+    }
+
+    if (country === 'United Arab Emirates') {
+      this.addressMessage = 'UAE normally uses PO Box / area instead of fixed pincode. Please type city manually.';
+      return;
+    }
+
+    this.addressMessage = 'Postal lookup table is not connected for this country yet. Please type city manually.';
+  }
+
   readonly genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
   readonly employmentTypes = [
     { value: 'full_time', label: 'Full Time' },
@@ -266,4 +390,3 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     { value: 'terminated', label: 'Terminated' },
   ];
 }
-

@@ -1,71 +1,91 @@
-<div class="container-fluid py-4">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Reimbursement Claims</h2>
-        <a routerLink="create" class="btn btn-primary">
-          <i class="material-icons">add</i> New Claim
-        </a>
-      </div>
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Claims</div>
+      <h1 class="page-title">Reimbursement Claims</h1>
+      <p class="page-subtitle">Track employee expenses, bills, and claim status.</p>
     </div>
+
+    <a routerLink="create" class="btn btn-primary" title="New Claim">
+      <span class="material-icons">add</span>
+      New Claim
+    </a>
   </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between">
-          <h5>Claims List</h5>
-          <input [(ngModel)]="searchTerm" (input)="applyFilter()" class="form-control w-25" placeholder="Search...">
-        </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Amount</th>
-                  <th>Expense Type</th>
-                  <th>Description</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let reim of filteredReimbursements">
-                  <td>{{ getEmployeeName(reim.empID) }}</td>
-                  <td>${{ reim.amount | number:'1.2-2' }}</td>
-                  <td>{{ reim.expenseType }}</td>
-                  <td>{{ reim.description }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="{
-                      'bg-success': reim.status === 'approved',
-                      'bg-warning': reim.status === 'pending',
-                      'bg-danger': reim.status === 'rejected'
-                    }">
-                      {{ reim.status }}
-                    </span>
-                  </td>
-                  <td>{{ reim.CreatedAt | date:'short' }}</td>
-                  <td>
-                    <a [routerLink]="['edit', reim.reimID]" class="btn btn-sm btn-outline-primary me-1">
-                      Edit
-                    </a>
-                    <button (click)="deleteReimbursement(reim.reimID)" class="btn btn-sm btn-outline-danger">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="filteredReimbursements.length === 0">
-                  <td colspan="7" class="text-center py-4 text-muted">
-                    No reimbursements found
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5>Claims List</h5>
+        <p class="section-note">{{ filteredReimbursements.length }} claims shown</p>
       </div>
+
+      <input
+        [(ngModel)]="searchTerm"
+        (input)="applyFilter()"
+        class="form-control search-box"
+        placeholder="Search employee, type, status..."
+        autocomplete="off">
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Amount</th>
+            <th>Expense Type</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let reim of filteredReimbursements">
+            <td class="fw-semibold">{{ getEmployeeName(reim.empID) }}</td>
+            <td>{{ reim.amount | number:'1.2-2' }}</td>
+            <td>{{ reim.expenseType }}</td>
+            <td>{{ reim.description || '-' }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [class.success]="reim.status === 'approved'"
+                [class.warning]="reim.status === 'pending'"
+                [class.danger]="reim.status === 'rejected' || reim.status === 'cancelled'">
+                {{ reim.status }}
+              </span>
+            </td>
+            <td>{{ reim.CreatedAt | date:'short' }}</td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <a
+                  [routerLink]="['edit', reim.reimbID]"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Edit Claim">
+                  <span class="material-icons">edit</span>
+                  Edit
+                </a>
+
+                <button
+                  *ngIf="reim.status.toLowerCase() === 'pending'"
+                  (click)="cancelReimbursement(reim.reimbID)"
+                  class="btn btn-sm btn-outline-danger"
+                  title="Cancel Claim">
+                  <span class="material-icons">cancel</span>
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredReimbursements.length === 0">
+            <td colspan="7" class="empty-row">
+              No reimbursements found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

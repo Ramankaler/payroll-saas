@@ -1,0 +1,142 @@
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Assets</div>
+      <h1 class="page-title">Asset Allocation</h1>
+      <p class="page-subtitle">Issue assets to employees and record returns.</p>
+    </div>
+
+    <button class="btn btn-outline-primary" type="button" (click)="load()" title="Refresh Allocations">
+      <span class="material-icons">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <h5>Issue Asset</h5>
+      <p class="section-note">Search by asset code/name and employee code/name.</p>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label>Asset</label>
+          <input
+            class="form-control"
+            [(ngModel)]="assetSearch"
+            list="assetOptions"
+            (change)="selectAsset()"
+            placeholder="Search asset">
+          <datalist id="assetOptions">
+            <option *ngFor="let asset of availableAssets" [value]="assetLabel(asset)"></option>
+          </datalist>
+          <small class="text-muted">Selected Asset ID: {{ form.assetID || 'None' }}</small>
+        </div>
+
+        <div class="col-md-4">
+          <label>Employee</label>
+          <input
+            class="form-control"
+            [(ngModel)]="employeeSearch"
+            list="employeeAssetOptions"
+            (change)="selectEmployee()"
+            placeholder="Search employee">
+          <datalist id="employeeAssetOptions">
+            <option *ngFor="let employee of employees" [value]="employeeLabel(employee)"></option>
+          </datalist>
+          <small class="text-muted">Selected Employee ID: {{ form.empID || 'None' }}</small>
+        </div>
+
+        <div class="col-md-4">
+          <label>Issue Date</label>
+          <input type="date" class="form-control" [(ngModel)]="form.issuedOn" name="issuedOn">
+        </div>
+
+        <div class="col-md-12">
+          <label>Issue Note</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="form.note" name="note"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="button" (click)="allocate()" [disabled]="saving">
+          <span class="material-icons">assignment_ind</span>
+          {{ saving ? 'Saving...' : 'Allocate Asset' }}
+        </button>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="reset()">
+          <span class="material-icons">restart_alt</span>
+          Clear
+        </button>
+      </div>
+
+      <div class="alert alert-info mt-3" *ngIf="message">{{ message }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5>Allocation History</h5>
+        <p class="section-note">{{ allocations.length }} records</p>
+      </div>
+    </div>
+
+    <div class="loading-container" *ngIf="loading">Loading allocation data...</div>
+
+    <div class="table-responsive" *ngIf="!loading">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Employee</th>
+            <th>Issued</th>
+            <th>Returned</th>
+            <th>Status</th>
+            <th>Note</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let allocation of allocations">
+            <td>
+              <strong>{{ allocation.assetCode }}</strong>
+              <small class="d-block text-muted">{{ allocation.assetName }}</small>
+            </td>
+            <td>{{ allocation.empCode }} - {{ allocation.firstName }} {{ allocation.lastName }}</td>
+            <td>{{ allocation.issuedOn | date:'mediumDate' }}</td>
+            <td>{{ allocation.returnedOn ? (allocation.returnedOn | date:'mediumDate') : '-' }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [class.warning]="allocation.status === 'Issued'"
+                [class.success]="allocation.status === 'Returned'">
+                {{ allocation.status }}
+              </span>
+            </td>
+            <td>{{ allocation.issueNote || allocation.returnNote || '-' }}</td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button
+                  *ngIf="allocation.status === 'Issued'"
+                  class="btn btn-sm btn-outline-success"
+                  type="button"
+                  (click)="returnAsset(allocation)"
+                  title="Return Asset">
+                  <span class="material-icons">assignment_return</span>
+                  Return
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="allocations.length === 0">
+            <td colspan="7" class="empty-row">No allocation records found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

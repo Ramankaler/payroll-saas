@@ -50,6 +50,13 @@
         <div class="col-md-4">
           <label>Employee Code *</label>
           <input class="form-control" [(ngModel)]="employee.empCode" name="empCode">
+          <small class="text-muted">Auto suggested from last employee code. You can still edit if needed.</small>
+        </div>
+
+        <div class="col-md-4">
+          <label>Biometric ID</label>
+          <input class="form-control" [(ngModel)]="employee.bioID" name="bioID">
+          <small class="text-muted">Device enroll number, like 157 or 00001.</small>
         </div>
 
         <div class="col-md-4">
@@ -159,22 +166,42 @@
 
         <div class="col-md-4">
           <label>Manager</label>
-          <input class="form-control" [(ngModel)]="employee.managerID" name="managerID">
+          <input
+            class="form-control"
+            [(ngModel)]="managerSearch"
+            name="managerSearch"
+            list="managerOptions"
+            (change)="selectManager()"
+            placeholder="Search manager by code or name">
+          <datalist id="managerOptions">
+            <option *ngFor="let emp of employees" [value]="managerLabel(emp)"></option>
+          </datalist>
+          <small class="text-muted">Selected Manager ID: {{ employee.managerID || 'None' }}</small>
+        </div>
+
+        <div class="col-md-4">
+          <label>Branch</label>
+          <select
+            [(ngModel)]="employee.branchID"
+            name="branchID"
+            class="form-select"
+            (change)="onBranchChange()">
+            <option [ngValue]="null">Select Branch</option>
+            <option *ngFor="let b of branches" [ngValue]="b.branchID">
+              {{ b.branchName }}
+            </option>
+          </select>
         </div>
 
         <div class="col-md-4">
           <label>Work Location</label>
-          <input class="form-control" [(ngModel)]="employee.workLocation" name="workLocation">
+          <input
+            class="form-control"
+            [(ngModel)]="employee.workLocation"
+            name="workLocation"
+            readonly>
+          <small class="text-muted">Auto filled from selected branch location.</small>
         </div>
-        <div class="mb-2">
-  <label>Branch</label>
-  <select [(ngModel)]="employee.branchID" class="form-control">
-    <option [ngValue]="null">Select Branch</option>
-    <option *ngFor="let b of branches" [ngValue]="b.branchID">
-      {{ b.branchName }}
-    </option>
-  </select>
-</div>
 
         <div class="col-md-4">
          <label>Employment Type</label>
@@ -189,8 +216,19 @@
         </div>
 
         <div class="col-md-4">
-          <label>Shift ID</label>
-          <input class="form-control" [(ngModel)]="employee.shiftID" name="shiftID">
+          <label>Shift</label>
+          <select
+            class="form-select"
+            [(ngModel)]="employee.shiftID"
+            name="shiftID">
+            <option [ngValue]="null">Select Shift</option>
+            <option
+              *ngFor="let shift of shifts"
+              [ngValue]="shift.shiftID">
+              {{ shift.shiftName }}
+              ({{ shift.startTime }} - {{ shift.endTime }})
+            </option>
+          </select>
         </div>
 
         <div class="col-md-4">
@@ -219,18 +257,35 @@
         </div>
 
         <div class="col-md-4">
-          <label>City</label>
-          <input class="form-control" [(ngModel)]="employee.city" name="city">
-        </div>
-
-        <div class="col-md-4">
           <label>Country</label>
-          <input class="form-control" [(ngModel)]="employee.country" name="country">
+          <input
+            class="form-control"
+            [(ngModel)]="employee.country"
+            name="country"
+            list="countryOptions"
+            (change)="onCountryChange()"
+            placeholder="Search country">
+          <datalist id="countryOptions">
+            <option *ngFor="let country of countries" [value]="country"></option>
+          </datalist>
         </div>
 
         <div class="col-md-4">
           <label>Postal Code</label>
-          <input class="form-control" [(ngModel)]="employee.postalCode" name="postalCode">
+          <input
+            class="form-control"
+            [(ngModel)]="employee.postalCode"
+            name="postalCode"
+            (input)="onPostalCodeChange()">
+        </div>
+
+        <div class="col-md-4">
+          <label>City</label>
+          <input class="form-control" [(ngModel)]="employee.city" name="city">
+        </div>
+
+        <div class="col-md-12" *ngIf="addressMessage">
+          <div class="alert alert-info mb-0">{{ addressMessage }}</div>
         </div>
 
       </div>

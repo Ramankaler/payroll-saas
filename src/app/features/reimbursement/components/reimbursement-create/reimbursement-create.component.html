@@ -1,9 +1,17 @@
 <div class="container-fluid py-4">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Claims</div>
+      <h1 class="page-title">New Reimbursement Claim</h1>
+      <p class="page-subtitle">Enter expense details and attach the bill or receipt.</p>
+    </div>
+  </div>
+
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
       <div class="card">
         <div class="card-header">
-          <h4 class="mb-0">New Reimbursement Claim</h4>
+          <h4 class="mb-0">Claim Details</h4>
         </div>
         <div class="card-body">
           <form #reimForm="ngForm">
@@ -39,16 +47,20 @@
 
             <div class="mb-4">
               <label class="form-label">Bill/Receipt File <span class="text-danger">*</span></label>
-              <input type="file" (change)="onFileChange($event)" accept="image/*,.pdf" class="form-control">
-              <div class="form-text">Upload bill/receipt (JPG, PNG, PDF)</div>
+              <input type="file" (change)="onFileChange($event)" accept=".jpg,.jpeg,.png,.webp,.pdf" class="form-control">
+              <div class="form-text">Upload JPG, PNG, WEBP, or PDF. Maximum 5 MB.</div>
             </div>
 
             <div class="d-flex gap-2">
               <button type="button" (click)="save()" [disabled]="!reimbursement.billFile || !reimForm.form.valid"
                 class="btn btn-primary">
+                <span class="material-icons">save</span>
                 Submit Claim
               </button>
-              <a routerLink="/reimbursement" class="btn btn-secondary">Cancel</a>
+              <a routerLink="/reimbursement" class="btn btn-secondary">
+                <span class="material-icons">arrow_back</span>
+                Cancel
+              </a>
             </div>
           </form>
         </div>

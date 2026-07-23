@@ -1,0 +1,205 @@
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Assets</div>
+      <h1 class="page-title">Asset Details</h1>
+      <p class="page-subtitle">Create company assets and maintain purchase, branch, and status details.</p>
+    </div>
+
+    <button class="btn btn-outline-primary" type="button" (click)="load()" title="Refresh Assets">
+      <span class="material-icons">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <h5>{{ editingId ? 'Edit Asset' : 'Add Asset' }}</h5>
+      <p class="section-note">Leave Asset Code blank to let backend create AST0001, AST0002...</p>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label>Asset Code</label>
+          <input class="form-control" [(ngModel)]="form.assetCode" name="assetCode" placeholder="Auto if blank">
+        </div>
+
+        <div class="col-md-3">
+          <label>Asset Name *</label>
+          <input class="form-control" [(ngModel)]="form.assetName" name="assetName">
+        </div>
+
+        <div class="col-md-3">
+          <label>Category</label>
+          <select class="form-select" [(ngModel)]="form.category" name="category">
+            <option value="">Select</option>
+            <option>Laptop</option>
+            <option>Desktop</option>
+            <option>Mobile</option>
+            <option>Printer</option>
+            <option>Vehicle</option>
+            <option>Furniture</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label>Condition</label>
+          <select class="form-select" [(ngModel)]="form.condition" name="condition">
+            <option>Good</option>
+            <option>Repair Needed</option>
+            <option>Damaged</option>
+            <option>Lost</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label>Brand</label>
+          <input class="form-control" [(ngModel)]="form.brand" name="brand">
+        </div>
+
+        <div class="col-md-3">
+          <label>Model No</label>
+          <input class="form-control" [(ngModel)]="form.modelNo" name="modelNo">
+        </div>
+
+        <div class="col-md-3">
+          <label>Serial No</label>
+          <input class="form-control" [(ngModel)]="form.serialNo" name="serialNo">
+        </div>
+
+        <div class="col-md-3">
+          <label>Cost</label>
+          <input type="number" class="form-control" [(ngModel)]="form.cost" name="cost" min="0">
+        </div>
+
+        <div class="col-md-3">
+          <label>Purchase Date</label>
+          <input type="date" class="form-control" [(ngModel)]="form.purchaseDate" name="purchaseDate">
+        </div>
+
+        <div class="col-md-3">
+          <label>Branch</label>
+          <select class="form-select" [(ngModel)]="form.branchID" name="branchID" (change)="onBranchChange()">
+            <option [ngValue]="null">Select Branch</option>
+            <option *ngFor="let branch of branches" [ngValue]="branch.branchID">
+              {{ branch.branchName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label>Location</label>
+          <input class="form-control" [(ngModel)]="form.location" name="location">
+        </div>
+
+        <div class="col-md-3">
+          <label>Status</label>
+          <input class="form-control" [(ngModel)]="form.status" name="status" readonly>
+        </div>
+
+        <div class="col-md-12">
+          <label>Notes</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="form.notes" name="notes"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">
+          <span class="material-icons">save</span>
+          {{ saving ? 'Saving...' : (editingId ? 'Update Asset' : 'Save Asset') }}
+        </button>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="reset()">
+          <span class="material-icons">restart_alt</span>
+          Clear
+        </button>
+      </div>
+
+      <div class="alert alert-info mt-3" *ngIf="message">{{ message }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5>Asset List</h5>
+        <p class="section-note">{{ filteredAssets.length }} assets shown</p>
+      </div>
+
+      <input
+        class="form-control search-box"
+        [(ngModel)]="searchText"
+        placeholder="Search assets..."
+        autocomplete="off">
+    </div>
+
+    <div class="loading-container" *ngIf="loading">
+      Loading assets...
+    </div>
+
+    <div class="table-responsive" *ngIf="!loading">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Asset</th>
+            <th>Serial</th>
+            <th>Branch</th>
+            <th>Allocated To</th>
+            <th>Status</th>
+            <th>Condition</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let asset of filteredAssets">
+            <td class="fw-semibold">{{ asset.assetCode }}</td>
+            <td>
+              <strong>{{ asset.assetName }}</strong>
+              <small class="d-block text-muted">{{ asset.category || '-' }}</small>
+            </td>
+            <td>{{ asset.serialNo || '-' }}</td>
+            <td>{{ asset.branchName || asset.location || '-' }}</td>
+            <td>{{ asset.currentEmployee || '-' }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [class.success]="asset.status === 'Available'"
+                [class.warning]="asset.status === 'Allocated'"
+                [class.danger]="asset.status === 'Inactive'">
+                {{ asset.status }}
+              </span>
+            </td>
+            <td>{{ asset.condition || '-' }}</td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button class="btn btn-sm btn-outline-primary" type="button" (click)="edit(asset)" title="Edit Asset">
+                  <span class="material-icons">edit</span>
+                  Edit
+                </button>
+
+                <button
+                  class="btn btn-sm"
+                  [class.btn-outline-danger]="asset.isActive"
+                  [class.btn-outline-success]="!asset.isActive"
+                  type="button"
+                  (click)="toggleStatus(asset)"
+                  [title]="asset.isActive ? 'Disable Asset' : 'Enable Asset'">
+                  <span class="material-icons">{{ asset.isActive ? 'block' : 'check_circle' }}</span>
+                  {{ asset.isActive ? 'Disable' : 'Enable' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredAssets.length === 0">
+            <td colspan="8" class="empty-row">No assets found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,9 @@
 <div class="container-fluid py-4">
-  <div class="row">
-    <div class="col-12">
-      <h2 class="mb-4">Pending Reimbursement Approvals</h2>
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Approvals</div>
+      <h1 class="page-title">Pending Reimbursement Approvals</h1>
+      <p class="page-subtitle">Approve or reject employee expense claims.</p>
     </div>
   </div>
 
@@ -11,7 +13,6 @@
         <div class="card-header">
           <h5>Manager Approval Queue</h5>
         </div>
-        <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-hover mb-0">
               <thead class="table-light">
@@ -25,30 +26,31 @@
               </thead>
               <tbody>
                 <tr *ngFor="let reim of reimbursements">
-                  <td>{{ getEmployeeName(reim.empID) }}</td>
-                  <td>${{ reim.amount | number:'1.2-2' }}</td>
+                  <td class="fw-semibold">{{ getEmployeeName(reim.empID) }}</td>
+                  <td>{{ reim.amount | number:'1.2-2' }}</td>
                   <td>{{ reim.expenseType }}</td>
-                  <td>{{ reim.description }}</td>
+                  <td>{{ reim.description || '-' }}</td>
                   <td>
-                    <div class="btn-group btn-group-sm">
-                      <button (click)="approve(reim.reimID)" class="btn btn-success">
+                    <div class="action-buttons">
+                      <button (click)="approve(reim.reimbID)" class="btn btn-success" title="Approve Claim">
+                        <span class="material-icons">check_circle</span>
                         Approve
                       </button>
-                      <button (click)="reject(reim.reimID)" class="btn btn-danger">
+                      <button (click)="reject(reim.reimbID)" class="btn btn-danger" title="Reject Claim">
+                        <span class="material-icons">cancel</span>
                         Reject
                       </button>
                     </div>
                   </td>
                 </tr>
                 <tr *ngIf="reimbursements.length === 0">
-                  <td colspan="5" class="text-center py-5 text-muted">
+                  <td colspan="5" class="empty-row">
                     No pending reimbursements
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
       </div>
     </div>
   </div>

@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ReimbursementService } from '../../services/reimbursement.service';
 import { EmployeeService } from '../../../employees/employee.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-reimbursement-list',
@@ -13,11 +14,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   templateUrl: './reimbursement-list.component.html'
 })
 export class ReimbursementListComponent implements OnInit {
+  private readonly authSession =  inject(AuthSessionService);
   reimbursements: any[] = [];
   filteredReimbursements: any[] = [];
   employees: any[] = [];
   searchTerm = '';
-  compId = 1;
+  get compId(): number {
+  return this.authSession.companyId;
+}
 
   constructor(
     private reimbursementService: ReimbursementService,
@@ -55,15 +59,27 @@ export class ReimbursementListComponent implements OnInit {
     });
   }
 
-  deleteReimbursement(id: number): void {
-    if (confirm('Delete this claim?')) {
-      this.reimbursementService.delete(id).subscribe({
-        next: () => {
-          this.loadData();
-          this.snackBar.open('Deleted!', 'X', { duration: 2000 });
-        },
-        error: () => this.snackBar.open('Error!', 'X')
+cancelReimbursement(id: number): void {
+  if (!confirm('Cancel this reimbursement claim?')) {
+    return;
+  }
+
+  this.reimbursementService.cancel(id).subscribe({
+    next: () => {
+      this.loadData();
+
+      this.snackBar.open('Reimbursement cancelled.', 'Close', {
+        duration: 3000
+      });
+    },
+    error: (err) => {
+      const message =
+        err?.error?.message || 'Failed to cancel reimbursement.';
+
+      this.snackBar.open(message, 'Close', {
+        duration: 4000
       });
     }
-  }
+  });
+}
 }

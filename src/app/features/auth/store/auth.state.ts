@@ -1,55 +1,68 @@
 export interface AuthState {
   accessToken: string | null;
-  refreshToken: string | null;
+  tokenType: string | null;
+  expiresAtUtc: string | null;
   roles: string[];
   permissions: string[];
-  accessTokenExpiresAtUtc: string | null;
-  compID: string | null;
-  userId: string | null;
+  compID: number | null;
+  userID: number | null;
+  employeeID: number | null;
+  username: string | null;
+  mustChangePassword: boolean;
   loading: boolean;
   error: string | null;
 }
 
+const emptyAuthState = (): AuthState => ({
+  accessToken: null,
+  tokenType: null,
+  expiresAtUtc: null,
+  roles: [],
+  permissions: [],
+  compID: null,
+  userID: null,
+  employeeID: null,
+  username: null,
+  mustChangePassword: false,
+  loading: false,
+  error: null,
+});
+
 export const initialAuthState: AuthState = (() => {
   try {
     const raw = localStorage.getItem('auth');
+
     if (!raw) {
-      return {
-        accessToken: null,
-        refreshToken: null,
-        roles: [],
-        permissions: [],
-        accessTokenExpiresAtUtc: null,
-        compID: null,
-        userId: null,
-        loading: false,
-        error: null,
-      };
+      return emptyAuthState();
     }
+
     const parsed = JSON.parse(raw) as Partial<AuthState>;
+
     return {
       accessToken: parsed.accessToken ?? null,
-      refreshToken: parsed.refreshToken ?? null,
+      tokenType: parsed.tokenType ?? null,
+      expiresAtUtc: parsed.expiresAtUtc ?? null,
       roles: parsed.roles ?? [],
       permissions: parsed.permissions ?? [],
-      accessTokenExpiresAtUtc: parsed.accessTokenExpiresAtUtc ?? null,
-      compID: parsed.compID ?? null,
-      userId: parsed.userId ?? null,
+      compID:
+        typeof parsed.compID === 'number'
+          ? parsed.compID
+          : null,
+      userID:
+        typeof parsed.userID === 'number'
+          ? parsed.userID
+          : null,
+      employeeID:
+        typeof parsed.employeeID === 'number'
+          ? parsed.employeeID
+          : null,
+      username: parsed.username ?? null,
+      mustChangePassword:
+        parsed.mustChangePassword === true,
       loading: false,
       error: null,
     };
   } catch {
-    return {
-      accessToken: null,
-      refreshToken: null,
-      roles: [],
-      permissions: [],
-      accessTokenExpiresAtUtc: null,
-      compID: null,
-      userId: null,
-      loading: false,
-      error: null,
-    };
+    return emptyAuthState();
   }
 })();
-

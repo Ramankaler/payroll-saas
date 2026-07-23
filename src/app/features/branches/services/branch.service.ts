@@ -7,6 +7,7 @@ export interface Branch {
   branchName: string;
   compID: number;
   location?: string;
+  isActive: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,7 +29,10 @@ export class BranchService {
     return this.http.put<Branch>(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
+updateStatus(id: number, isActive: boolean): Observable<any> {
+  return this.http.put(
+    `${this.apiUrl}/${id}/status`,
+    { isActive }
+  );
+}
 }

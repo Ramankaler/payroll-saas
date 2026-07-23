@@ -74,6 +74,12 @@
             <mat-error *ngIf="hasError('empCode', 'maxlength')">Max 20 characters.</mat-error>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" class="field-sm">
+            <mat-label>Biometric ID</mat-label>
+            <input matInput formControlName="bioID" />
+            <mat-hint>Device enroll number</mat-hint>
+          </mat-form-field>
+
           <mat-form-field appearance="outline">
             <mat-label>First Name <span class="req">*</span></mat-label>
             <input matInput formControlName="firstName" />
@@ -167,10 +173,92 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Work Location</mat-label>
-            <input matInput formControlName="workLocation" />
-            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-label>Manager</mat-label>
+            <input
+              matInput
+              [value]="managerSearch"
+              [attr.list]="'managerEditOptions'"
+              (input)="managerSearch = $any($event.target).value"
+              (change)="selectManager()"
+              placeholder="Search manager by code or name" />
+            <mat-icon matSuffix>supervisor_account</mat-icon>
+            <mat-hint>Selected Manager ID: {{ form.get('managerID')?.value || 'None' }}</mat-hint>
           </mat-form-field>
+
+          <datalist id="managerEditOptions">
+            <option *ngFor="let emp of employees" [value]="managerLabel(emp)"></option>
+          </datalist>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Branch</mat-label>
+            <mat-select formControlName="branchID" (selectionChange)="onBranchChange()">
+              <mat-option [value]="null">Select Branch</mat-option>
+              <mat-option *ngFor="let branch of branches" [value]="branch.branchID">
+                {{ branch.branchName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Shift</mat-label>
+            <mat-select formControlName="shiftID">
+              <mat-option [value]="null">Select Shift</mat-option>
+              <mat-option
+                *ngFor="let shift of shifts"
+                [value]="shift.shiftID">
+                {{ shift.shiftName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Work Location</mat-label>
+            <input matInput formControlName="workLocation" readonly />
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-hint>Auto filled from selected branch.</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <!-- Address -->
+      <mat-card class="form-section">
+        <div class="section-header">
+          <mat-icon>home_pin</mat-icon>
+          <h2>Address</h2>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input
+              matInput
+              formControlName="country"
+              [attr.list]="'countryEditOptions'"
+              (change)="onCountryChange()"
+              placeholder="Search country" />
+            <mat-icon matSuffix>public</mat-icon>
+          </mat-form-field>
+
+          <datalist id="countryEditOptions">
+            <option *ngFor="let country of countries" [value]="country"></option>
+          </datalist>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Postal Code</mat-label>
+            <input matInput formControlName="postalCode" (input)="onPostalCodeChange()" />
+            <mat-icon matSuffix>pin_drop</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+            <mat-icon matSuffix>location_city</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="alert alert-info" *ngIf="addressMessage">
+          {{ addressMessage }}
         </div>
       </mat-card>
 

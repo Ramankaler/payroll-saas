@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
@@ -8,19 +9,47 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { DatePipe } from '@angular/common';
+import { MatDialogModule } from '@angular/material/dialog';
+import { API_ROUTES } from '../../../core/config/api.config';
+import { AuthSessionService } from '../../../core/services/auth-session.service';
 
 interface SalarySlip {
-  id: string;
+  empCode: string;
   employeeName: string;
   department: string;
   basic: number;
   allowances: number;
   deductions: number;
   netPay: number;
-  period: string;
-  status: 'Generated' | 'Paid';
+  absentDays: number;
+  paidAnnualLeaveDays: number;
+  sickHalfPayDays: number;
+  sickUnpaidDays: number;
+  unpaidLeaveDays: number;
+  leaveDeductionDays: number;
+}
+
+interface PayrollRegisterResponse {
+  payrollID: number;
+  status: string;
+  rows: PayrollRegisterRow[];
+}
+
+interface PayrollRegisterRow {
+  empCode: string;
+  firstName: string;
+  lastName: string;
+  departmentName: string;
+  basicSalary: number;
+  allowance: number;
+  deduction: number;
+  netSalary: number;
+  absentDays: number;
+  paidAnnualLeaveDays: number;
+  sickHalfPayDays: number;
+  sickUnpaidDays: number;
+  unpaidLeaveDays: number;
+  leaveDeductionDays: number;
 }
 
 @Component({
@@ -30,46 +59,133 @@ interface SalarySlip {
   templateUrl: './payroll.component.html',
   styleUrls: ['./payroll.component.scss'],
 })
-export class PayrollComponent {
-  selectedMonth = 'January';
-  selectedYear = 2024;
-  isRunning = false;
+export class PayrollComponent implements OnInit {
+  private readonly http = inject(HttpClient);
+  private readonly authSession = inject(AuthSessionService);
 
-  salarySlips: SalarySlip[] = [
-    { id: 'SAL-001', employeeName: 'John Doe', department: 'Engineering', basic: 5000, allowances: 1000, deductions: 500, netPay: 5500, period: 'Jan 2024', status: 'Generated' },
-    { id: 'SAL-002', employeeName: 'Sarah Wilson', department: 'HR', basic: 4800, allowances: 800, deductions: 400, netPay: 5200, period: 'Jan 2024', status: 'Paid' },
-    { id: 'SAL-003', employeeName: 'Mike Johnson', department: 'Sales', basic: 4200, allowances: 1200, deductions: 450, netPay: 4950, period: 'Jan 2024', status: 'Generated' },
+  months = [
+    { value: 1, name: 'January' },
+    { value: 2, name: 'February' },
+    { value: 3, name: 'March' },
+    { value: 4, name: 'April' },
+    { value: 5, name: 'May' },
+    { value: 6, name: 'June' },
+    { value: 7, name: 'July' },
+    { value: 8, name: 'August' },
+    { value: 9, name: 'September' },
+    { value: 10, name: 'October' },
+    { value: 11, name: 'November' },
+    { value: 12, name: 'December' },
   ];
 
-  displayedColumns = ['employeeName', 'department', 'basic', 'allowances', 'deductions', 'netPay', 'status', 'actions'];
+  years = [2024, 2025, 2026, 2027];
+  selectedMonth = new Date().getMonth() + 1;
+  selectedYear = new Date().getFullYear();
+  isRunning = false;
+  message = '';
+  salarySlips: SalarySlip[] = [];
+
+  displayedColumns = [
+    'employeeName',
+    'department',
+    'basic',
+    'paidLeave',
+    'deductionDays',
+    'deductions',
+    'netPay',
+    'status',
+    'actions'
+  ];
+
+  ngOnInit(): void {
+    this.loadPayrollRegister();
+  }
 
   runPayroll(): void {
     this.isRunning = true;
-    setTimeout(() => {
-      this.isRunning = false;
-      this.salarySlips.push({
-        id: 'SAL-004',
-        employeeName: 'New Employee',
-        department: 'Marketing',
-        basic: 4000,
-        allowances: 600,
-        deductions: 350,
-        netPay: 4250,
-        period: 'Jan 2024',
-        status: 'Generated',
-      });
-    }, 2000);
+    this.message = 'Running payroll...';
+
+    this.http.post<any>(API_ROUTES.payrollRun, {
+      compID: this.authSession.companyId,
+      month: this.selectedMonth,
+      year: this.selectedYear,
+    }).subscribe({
+      next: (result) => {
+        this.message = result?.alreadyExists
+          ? 'Payroll refreshed for this month.'
+          : 'Payroll generated successfully.';
+        this.loadPayrollRegister();
+      },
+      error: (err) => {
+        this.isRunning = false;
+        this.message = err?.error?.message ?? err?.error ?? 'Payroll failed.';
+      },
+    });
+  }
+
+  loadPayrollRegister(): void {
+    const params = {
+      month: this.selectedMonth,
+      year: this.selectedYear,
+    };
+
+    this.http.get<PayrollRegisterResponse>(
+      API_ROUTES.payrollRegister,
+      { params: params as any }
+    ).subscribe({
+      next: (result) => {
+        this.isRunning = false;
+        this.salarySlips = (result.rows ?? []).map((row) => ({
+          empCode: row.empCode,
+          employeeName: `${row.firstName} ${row.lastName}`.trim(),
+          department: row.departmentName || '-',
+          basic: row.basicSalary,
+          allowances: row.allowance,
+          deductions: row.deduction,
+          netPay: row.netSalary,
+          absentDays: row.absentDays ?? 0,
+          paidAnnualLeaveDays: row.paidAnnualLeaveDays ?? 0,
+          sickHalfPayDays: row.sickHalfPayDays ?? 0,
+          sickUnpaidDays: row.sickUnpaidDays ?? 0,
+          unpaidLeaveDays: row.unpaidLeaveDays ?? 0,
+          leaveDeductionDays: row.leaveDeductionDays ?? 0,
+        }));
+      },
+      error: () => {
+        this.isRunning = false;
+        this.message = 'Could not load payroll register.';
+      },
+    });
   }
 
   viewSlip(slip: SalarySlip): void {
-    console.log('Viewing slip:', slip);
+    this.message = `${slip.employeeName}: Net salary ${slip.netPay.toFixed(2)}`;
   }
 
-  downloadSlip(id: string): void {
-    console.log('Downloading slip:', id);
+  downloadSlip(slip: SalarySlip): void {
+    const lines = [
+      'Salary Slip',
+      `Employee: ${slip.employeeName}`,
+      `Code: ${slip.empCode}`,
+      `Basic: ${slip.basic.toFixed(2)}`,
+      `Allowances: ${slip.allowances.toFixed(2)}`,
+      `Paid annual leave days: ${slip.paidAnnualLeaveDays}`,
+      `Absent days: ${slip.absentDays}`,
+      `Leave deduction days: ${slip.leaveDeductionDays}`,
+      `Deductions: ${slip.deductions.toFixed(2)}`,
+      `Net Pay: ${slip.netPay.toFixed(2)}`,
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `salary-slip-${slip.empCode}-${this.selectedYear}-${this.selectedMonth}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
-  sendPayslip(slip: SalarySlip): void {
-    slip.status = 'Paid';
+  sendPayslip(): void {
+    this.message = 'Payslip sending is not enabled yet.';
   }
 }

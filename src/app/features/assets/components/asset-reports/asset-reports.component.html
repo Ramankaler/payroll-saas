@@ -1,0 +1,74 @@
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Assets</div>
+      <h1 class="page-title">Asset Reports</h1>
+      <p class="page-subtitle">View asset summary, asset register, and allocation reports.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5>Report Filters</h5>
+        <p class="section-note">Select asset report and load data.</p>
+      </div>
+
+      <div class="action-buttons">
+        <select class="form-select" [(ngModel)]="selectedReport">
+          <option *ngFor="let report of reports" [ngValue]="report.key">
+            {{ report.name }}
+          </option>
+        </select>
+
+        <button class="btn btn-primary" type="button" (click)="load()" [disabled]="loading">
+          <span class="material-icons">analytics</span>
+          {{ loading ? 'Loading...' : 'Load' }}
+        </button>
+
+        <button class="btn btn-outline-primary" type="button" (click)="exportPdf()" [disabled]="loading">
+          <span class="material-icons">picture_as_pdf</span>
+          PDF
+        </button>
+
+        <button class="btn btn-outline-primary" type="button" (click)="exportExcel()" [disabled]="loading">
+          <span class="material-icons">grid_on</span>
+          Excel
+        </button>
+
+        <button class="btn btn-outline-primary" type="button" (click)="exportCsv()">
+          <span class="material-icons">download</span>
+          CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="alert alert-info m-3" *ngIf="message">{{ message }}</div>
+
+    <div class="loading-container" *ngIf="loading">Loading report...</div>
+
+    <div class="table-responsive" *ngIf="!loading && rows.length">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th *ngFor="let column of columns">{{ column }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of rows">
+            <td *ngFor="let column of columns">{{ row[column] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && !rows.length">
+      <div>
+        <span class="material-icons">inventory_2</span>
+        <h3>No asset report data</h3>
+        <p>Click Load to fetch the selected asset report.</p>
+      </div>
+    </div>
+  </div>
+</div>

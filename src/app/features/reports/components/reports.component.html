@@ -1,22 +1,248 @@
 <div class="reports-container">
-  <mat-card>
-    <h2>Reports (MVP)</h2>
+  <section class="reports-top-card">
+    <div class="title-area">
+      <span class="page-kicker">Reports</span>
+      <h1>Reports Center</h1>
+      <p>
+        View HR, payroll, attendance, leave, asset, and document reports from
+        one clean place.
+      </p>
 
-    <div class="form-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>From (UTC)</mat-label>
-        <input matInput type="date" [(ngModel)]="fromUtc" />
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>To (UTC)</mat-label>
-        <input matInput type="date" [(ngModel)]="toUtc" />
-      </mat-form-field>
+      <div class="quick-stats">
+        <span>{{ reportGroups.length }} Categories</span>
+        <span>{{ totalReports }} Reports</span>
+        <span>{{ selectedReportName }}</span>
+      </div>
     </div>
 
-    <button mat-raised-button color="primary" (click)="load()">Load Attendance Report</button>
+    <div class="period-box">
+      <div class="period-title">
+        <span class="material-icons">date_range</span>
+        <div>
+          <strong>Report Period</strong>
+          <small>Used by monthly reports</small>
+        </div>
+      </div>
 
-    <div *ngIf="result" class="result">
-      <pre>{{ result | json }}</pre>
+      <div class="period-fields">
+        <label>
+          Month
+          <select [(ngModel)]="selectedMonth">
+            <option *ngFor="let month of months" [ngValue]="month.value">
+              {{ month.name }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Year
+          <select [(ngModel)]="selectedYear">
+            <option *ngFor="let year of years" [ngValue]="year">
+              {{ year }}
+            </option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="reports-workbench">
+    <aside class="report-sidebar">
+      <div class="sidebar-heading">
+        <span class="material-icons">dashboard_customize</span>
+        <div>
+          <h2>Categories</h2>
+          <p>Select report type</p>
+        </div>
+      </div>
+
+      <button type="button" *ngFor="let group of reportGroups" class="category-row"
+        [class.active]="group.name === activeGroupName" (click)="selectGroup(group)">
+        <span class="material-icons">{{ group.icon }}</span>
+        <span class="category-name">{{ group.name }}</span>
+        <small>{{ group.reports.length }}</small>
+      </button>
+    </aside>
+
+    <main class="report-panel">
+      <div class="panel-top">
+        <div class="active-title">
+          <span class="material-icons">{{ activeGroup.icon }}</span>
+          <div>
+            <h2>{{ activeGroup.name }}</h2>
+            <p>Choose one report, preview it, then export if needed.</p>
+          </div>
+        </div>
+
+        <label class="report-search">
+          <span class="material-icons">search</span>
+          <input type="text" name="reportSearch" [(ngModel)]="reportSearch" placeholder="Search reports..." />
+        </label>
+      </div>
+
+      <div class="selected-report-bar">
+        <div>
+          <span class="bar-label">Selected Report</span>
+          <strong>{{ selectedReportName }}</strong>
+          <small *ngIf="selectedReportInfo">{{
+            selectedReportInfo.note
+            }}</small>
+        </div>
+
+        <div class="bar-actions">
+          <button mat-raised-button color="primary" type="button" (click)="load()" [disabled]="loading"
+            title="Load selected report preview">
+            <span class="material-icons">visibility</span>
+            Preview
+          </button>
+
+          <button mat-icon-button type="button" (click)="exportPdf()" [disabled]="loading"
+            title="Download or print PDF">
+            <span class="material-icons">picture_as_pdf</span>
+          </button>
+
+          <button mat-icon-button type="button" (click)="exportExcel()" [disabled]="loading" title="Download Excel">
+            <span class="material-icons">grid_on</span>
+          </button>
+
+          <button mat-icon-button type="button" (click)="exportCsv()" [disabled]="loading" title="Download CSV">
+            <span class="material-icons">download</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="report-list" *ngIf="filteredActiveReports.length; else noReports">
+        <button type="button" class="report-option" *ngFor="let report of filteredActiveReports"
+          [class.selected]="isActiveReport(report.key)" (click)="selectReport(report.key)">
+          <span class="material-icons report-option-icon">{{
+            report.icon
+            }}</span>
+
+          <span class="report-option-text">
+            <strong>{{ report.name }}</strong>
+            <small>{{ report.note }}</small>
+          </span>
+
+          <span class="material-icons selected-mark">
+            {{
+            isActiveReport(report.key)
+            ? "check_circle"
+            : "radio_button_unchecked"
+            }}
+          </span>
+        </button>
+      </div>
+
+      <ng-template #noReports>
+        <div class="empty-small">
+          <span class="material-icons">search_off</span>
+          No report matched your search.
+        </div>
+      </ng-template>
+    </main>
+  </section>
+
+  <mat-card class="preview-card">
+    <div class="preview-header">
+      <div>
+        <span class="preview-label">Preview</span>
+        <h2>{{ selectedReportName }}</h2>
+        <p>Period: {{ selectedMonth }}/{{ selectedYear }}</p>
+      </div>
+
+      <div class="preview-actions">
+        <button mat-raised-button color="primary" type="button" (click)="load()" [disabled]="loading">
+          <span class="material-icons">refresh</span>
+          {{ loading ? "Loading..." : "Load Preview" }}
+        </button>
+
+        <button mat-stroked-button color="primary" type="button" (click)="exportPdf()" [disabled]="loading">
+          <span class="material-icons">picture_as_pdf</span>
+          PDF
+        </button>
+
+        <button mat-stroked-button color="primary" type="button" (click)="exportExcel()" [disabled]="loading">
+          <span class="material-icons">grid_on</span>
+          Excel
+        </button>
+
+        <button mat-stroked-button color="primary" type="button" (click)="exportCsv()" [disabled]="loading">
+          <span class="material-icons">download</span>
+          CSV
+        </button>
+      </div>
+    </div>
+
+    <p class="message" *ngIf="message">{{ message }}</p>
+
+    <div class="loading-box" *ngIf="loading">
+      <span class="loader"></span>
+      <strong>Loading report...</strong>
+      <small>Please wait while system fetches fresh data.</small>
+    </div>
+
+    <div *ngIf="
+        !loading &&
+        selectedReport === 'monthly-attendance' &&
+        attendanceRows.length
+      " class="table-wrap">
+      <table class="report-table attendance-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+            <th>Hours</th>
+            <th *ngFor="let day of attendanceDays">{{ day }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of attendanceRows">
+            <td>
+              <strong>{{ row.firstName }} {{ row.lastName }}</strong>
+              <span>{{ row.empCode }}</span>
+            </td>
+            <td>{{ row.presentDays }}</td>
+            <td>{{ row.absentDays }}</td>
+            <td>{{ row.lateDays }}</td>
+            <td>{{ row.totalHours | number: "1.2-2" }}</td>
+            <td *ngFor="let day of row.days" [class]="getStatusClass(day.status)">
+              {{ day.status }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!loading && selectedReport !== 'monthly-attendance' && rows.length" class="table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th *ngFor="let column of columns">{{ column }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of rows">
+            <td *ngFor="let column of columns">{{ row[column] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-preview" *ngIf="
+        !loading &&
+        ((selectedReport === 'monthly-attendance' && !attendanceRows.length) ||
+          (selectedReport !== 'monthly-attendance' && !rows.length))
+      ">
+      <span class="material-icons">analytics</span>
+      <h3>No preview loaded</h3>
+      <p>
+        Select a report and click Preview. Export buttons work after report data
+        is loaded.
+      </p>
     </div>
   </mat-card>
 </div>

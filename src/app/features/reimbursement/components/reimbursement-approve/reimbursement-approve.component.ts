@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ReimbursementService, ReimbursementDto } from '../../services/reimbursement.service';
 import { EmployeeService } from '../../../employees/employee.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-reimbursement-approve',
@@ -13,9 +14,12 @@ import { EmployeeService } from '../../../employees/employee.service';
   styleUrls: ['./reimbursement-approve.component.scss']
 })
 export class ReimbursementApproveComponent implements OnInit {
+  private readonly authSession =  inject(AuthSessionService);
   reimbursements: ReimbursementDto[] = [];
   employees: any[] = [];
-  compId = 1;
+  get compId(): number {
+  return this.authSession.companyId;
+}
 
   constructor(
     private reimbursementService: ReimbursementService,
@@ -29,7 +33,9 @@ export class ReimbursementApproveComponent implements OnInit {
 
   loadData(): void {
     this.reimbursementService.getAll(this.compId).subscribe(reims => {
-      this.reimbursements = reims.filter(r => r.status === 'pending');
+     this.reimbursements = reims.filter(
+  item => item.status.toLowerCase() === 'pending'
+);
     });
 
     this.employeeService.getAll(this.compId).subscribe(employees => {

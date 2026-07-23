@@ -1,0 +1,216 @@
+<div class="container-fluid py-4">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Biometric</div>
+      <h1 class="page-title">Devices</h1>
+      <p class="page-subtitle">Register attendance devices and sync punches when needed.</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="mb-0">Devices</h4>
+    </div>
+
+    <div class="card-body">
+      <div class="alert alert-info" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Device Name</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.deviceName"
+            name="deviceName"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Serial Number</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.serialNumber"
+            name="serialNumber"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Model</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.deviceModel"
+            name="deviceModel"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Firmware</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.firmwareVersion"
+            name="firmwareVersion"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Machine No</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="form.machineNo"
+            name="machineNo"
+            min="1"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Connection Mode</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.connectionMode"
+            name="connectionMode"
+            placeholder="LAN, WiFi, ADMS, etc."
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">IP Address</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.ipAddress"
+            name="ipAddress"
+          />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Port</label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="form.port"
+            name="port"
+          />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Location</label>
+          <input
+            class="form-control"
+            [(ngModel)]="form.locationName"
+            name="locationName"
+          />
+        </div>
+      </div>
+
+      <div class="mt-3 d-flex gap-2">
+        <button
+          class="btn btn-primary"
+          type="button"
+          [disabled]="isSaving"
+          (click)="save()"
+          title="Save Device"
+        >
+          <span class="material-icons">{{ editingId === null ? 'add' : 'save' }}</span>
+          {{ editingId === null ? 'Add Device' : 'Save Device' }}
+        </button>
+
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="reset()"
+          title="Clear Form"
+        >
+          <span class="material-icons">restart_alt</span>
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Serial</th>
+            <th>Model</th>
+            <th>Machine</th>
+            <th>Connection</th>
+            <th>IP</th>
+            <th>Port</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let device of devices">
+            <td>{{ device.deviceName }}</td>
+            <td>{{ device.serialNumber || '-' }}</td>
+            <td>{{ device.deviceModel || '-' }}</td>
+            <td>{{ device.machineNo }}</td>
+            <td>{{ device.connectionMode || '-' }}</td>
+            <td>{{ device.ipAddress || '-' }}</td>
+            <td>{{ device.port || '-' }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.bg-success]="device.isActive"
+                [class.bg-secondary]="!device.isActive"
+              >
+                {{ device.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-outline-primary me-2"
+                type="button"
+                (click)="edit(device)"
+                title="Edit Device"
+              >
+                <span class="material-icons">edit</span>
+                Edit
+              </button>
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                type="button"
+                (click)="toggleStatus(device)"
+                [title]="device.isActive ? 'Disable Device' : 'Enable Device'"
+              >
+                <span class="material-icons">{{ device.isActive ? 'block' : 'check_circle' }}</span>
+                {{ device.isActive ? 'Disable' : 'Enable' }}
+              </button>
+              <button
+                class="btn btn-sm btn-outline-info ms-2"
+                type="button"
+                (click)="testConnection(device)"
+                title="Test Connection"
+              >
+                <span class="material-icons">lan</span>
+                Test
+              </button>
+              <button
+                class="btn btn-sm btn-outline-success ms-2"
+                type="button"
+                (click)="syncPunches(device)"
+                title="Sync Punches"
+              >
+                <span class="material-icons">sync</span>
+                Sync
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="devices.length === 0">
+            <td colspan="8" class="text-center text-muted">
+              No devices added yet.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

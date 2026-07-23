@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BranchService } from '../../services/branch.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-branch-create',
@@ -12,10 +13,11 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './branch-create.component.scss'
 })
 export class BranchCreateComponent {
+  private readonly authSession =  inject(AuthSessionService);
   branch: any = {
     branchName: '',
     location: '',
-    compID: 1
+    compID: this.authSession.companyId
   };
 
   constructor(

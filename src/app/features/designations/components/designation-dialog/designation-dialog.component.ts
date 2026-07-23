@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DesignationService } from '../../services/designation.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 interface DialogData {
   isEdit?: boolean;
@@ -27,6 +28,7 @@ interface DialogData {
   styleUrls: [`./designation-dialog.component.scss`]
 })
 export class DesignationDialogComponent {
+  private readonly authSession =  inject(AuthSessionService);
   desigName = '';
   tag = '';
   isEdit = false;
@@ -60,7 +62,7 @@ errorMessage = '';
   this.isSaving = true;
 
   const payload = {
-    compID: 1,
+    compID: this.authSession.companyId,
     desigName: this.desigName.trim(),
     tag: this.generateTag(this.desigName)
   };

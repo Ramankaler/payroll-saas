@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 // import { environment } from '../../../environments/environment';
 import { environment } from '../../../environments/environment';
@@ -13,6 +14,26 @@ export class EmployeeService {
 
   getAll(compId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${compId}`);
+  }
+
+  getPage(
+    compId: number,
+    page: number,
+    pageSize: number,
+    search: string
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<any>(
+      `${this.apiUrl}/${compId}/page`,
+      { params }
+    );
   }
 
   create(payload: any): Observable<any> {
@@ -43,11 +64,10 @@ export class EmployeeService {
     return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
-
-  toggleActive(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/toggle-active`, {});
-  }
+updateStatus(id: number, isActive: boolean): Observable<any> {
+  return this.http.put(
+    `${this.apiUrl}/${id}/status`,
+    { isActive }
+  );
+}
 }

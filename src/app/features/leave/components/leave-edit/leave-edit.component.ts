@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LeaveService, LeaveDto } from '../../services/leave.service';
 import { EmployeeService } from '../../../employees/employee.service';
 import { LeaveTypeService } from '../../services/leave-type.service';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-edit',
@@ -15,7 +16,7 @@ import { LeaveTypeService } from '../../services/leave-type.service';
   styleUrls: ['./leave-edit.component.scss'],
 })
 export class LeaveEditComponent implements OnInit {
-  DEFAULT_COMP_ID = 1;
+  private readonly authSession =   inject(AuthSessionService);
   leave: any = {};
   leaveTypes: any = {};
   employees: any[] = [];
@@ -25,7 +26,9 @@ export class LeaveEditComponent implements OnInit {
   startDate: any;
   endDate: any;
   createdAt:any;
-
+get DEFAULT_COMP_ID(): number {
+  return this.authSession.companyId;
+}
   // createdAt: any = new Date().toISOString().split('T')[0];
   constructor(
     private route: ActivatedRoute,
