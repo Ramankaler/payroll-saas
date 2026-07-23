@@ -25,7 +25,7 @@ leave:any={
   leaveReason:'',
   leaveStatus:'',
   totalDays : '',
-isHalfDay:'',
+isHalfDay:false,
 selectedHalf:''
 
 };

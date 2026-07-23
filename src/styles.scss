@@ -51,6 +51,18 @@
   --transition-normal: all 0.2s ease;
   --transition-slow: all 0.3s ease;
 }
+.comic-relief-regular {
+  font-family: "Comic Relief", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.comic-relief-bold {
+  font-family: "Comic Relief", system-ui;
+  font-weight: 700;
+  font-style: normal;
+}
+
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
@@ -269,4 +281,10 @@ label {
   padding: 8px 10px;
   border-radius: 6px;
   font-size: 13px;
+}
+
+
+.container-fluid {
+  padding: 10px;
+  background-color:rgb(255, 255, 255)
 }

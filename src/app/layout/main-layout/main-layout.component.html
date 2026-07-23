@@ -1,4 +1,4 @@
-<div class="app-shell">
+<!-- <div class="app-shell">
   <aside class="sidebar" [class.sidebar--collapsed]="isSidebarCollapsed">
     <div class="brand">
       <div class="brand__logo">P</div>
@@ -17,12 +17,14 @@
           routerLinkActive="nav-item--active"
           [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
         >
-          <span class="nav-item__icon" [attr.data-icon]="item.icon"></span>
+          <span class="material-icons nav-item__icon">
+  {{ item.icon }}
+</span>
           <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
         </a>
         <details *ngIf="item.children" class="nav-dropdown">
           <summary class="nav-item nav-item--parent">
-            <span class="nav-item__icon" [attr.data-icon]="item.icon"></span>
+            <span class="material-icons nav-item__icon" material-icons="item.icon"></span>
             <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
           </summary>
           <div class="nav-dropdown__children">
@@ -32,7 +34,7 @@
               [routerLink]="child.route"
               routerLinkActive="nav-item--active"
             >
-              <span class="nav-item__icon" [attr.data-icon]="child.icon"></span>
+              <span class="material-icons nav-item__icon" material-icons="child.icon"></span>
               <span class="nav-item__label" *ngIf="!isSidebarCollapsed">{{ child.label }}</span>
             </a>
           </div>
@@ -44,7 +46,8 @@
   <section class="workspace">
     <header class="topbar">
       <div class="topbar__left">
-        <button class="icon-btn" type="button" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <button class="icon-btn" type="button"  aria-label="Toggle sidebar">
+          (click)="toggleSidebar()"
           <span class="hamburger"></span>
         </button>
         <div class="search-box">
@@ -88,7 +91,158 @@
     </main>
   </section>
 
-  <!-- Floating AI Chat Widget -->
+  Floating AI Chat Widget
   <app-ai-chat *ngIf="showAiChat" class="ai-chat-widget"></app-ai-chat>
 </div>
+ -->
+<div class="layout">
 
+  <!-- SIDEBAR -->
+  <aside
+  class="sidebar"
+  [class.collapsed]="isSidebarCollapsed"
+  [class.mobile-open]="isMobileSidebarOpen"
+>
+
+    <div class="logo-section">
+      <div class="logo">P</div>
+
+      <div class="brand" *ngIf="!isSidebarCollapsed">
+        <h2>PayrollPro</h2>
+        <small>Enterprise HRMS</small>
+      </div>
+      <button
+  class="mobile-close-btn"
+  *ngIf="isMobileSidebarOpen"
+  (click)="isMobileSidebarOpen = false"
+>
+  <span class="material-icons">close</span>
+</button>
+    </div>
+
+    <ul class="menu">
+
+      <li *ngFor="let item of navItems">
+
+        <!-- SIMPLE LINK -->
+        <a
+          *ngIf="item.route"
+          [routerLink]="item.route"
+          (click)="closeMobileSidebar()"
+          routerLinkActive="active"
+          class="menu-link"
+        >
+          <span class="material-icons icon">
+            {{ item.icon }}
+          </span>
+
+          <span *ngIf="!isSidebarCollapsed">
+            {{ item.label }}
+          </span>
+        </a>
+
+        <!-- DROPDOWN -->
+       <div *ngIf="item.children">
+
+  <div
+    class="menu-link parent-link"
+    (click)="toggleMenu(item.label)"
+  >
+
+    <div class="menu-title">
+
+      <span class="material-icons icon">
+        {{ item.icon }}
+      </span>
+
+      <span *ngIf="!isSidebarCollapsed">
+        {{ item.label }}
+      </span>
+
+    </div>
+
+    <span
+      *ngIf="!isSidebarCollapsed"
+      class="material-icons arrow"
+    >
+      {{
+        expandedMenu === item.label
+        ? 'expand_less'
+        : 'expand_more'
+      }}
+    </span>
+
+  </div>
+
+  <div
+    class="submenu"
+    *ngIf="expandedMenu === item.label && !isSidebarCollapsed"
+  >
+
+    <a
+      *ngFor="let child of item.children"
+      [routerLink]="child.route"
+      (click)="closeMobileSidebar()"
+      routerLinkActive="active"
+      class="submenu-link"
+    >
+
+      <span class="material-icons small-icon">
+        {{ child.icon }}
+      </span>
+
+      {{ child.label }}
+
+    </a>
+
+  </div>
+
+</div>
+
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span class="material-icons">menu</span>
+      </button>
+
+      <div class="search-box">
+        <span class="material-icons">search</span>
+
+        <input
+          type="text"
+          placeholder="Search employees, payroll..."
+          [(ngModel)]="search"
+        />
+      </div>
+
+      <div class="profile">
+        <div class="avatar">
+          SA
+        </div>
+
+        <div class="profile-info">
+          <strong>Super Admin</strong>
+          <small>superadmin&#64;default.com</small>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

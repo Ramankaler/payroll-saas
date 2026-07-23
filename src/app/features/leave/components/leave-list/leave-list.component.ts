@@ -63,6 +63,11 @@ editLeave(id:any){
 }
 
 
+addLeave(){
+  this.router.navigate(['/leaves/create']);
+}
+
+
 deleteLeave(id:number){
 }
 }

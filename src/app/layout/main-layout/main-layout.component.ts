@@ -21,6 +21,21 @@ type NavItem = {
 export class MainLayoutComponent {
   isSidebarCollapsed = false;
   search = '';
+isMobileSidebarOpen = false;
+
+
+  expandedMenu: string = '';
+
+toggleMenu(menu: string) {
+
+  if (this.expandedMenu === menu) {
+    this.expandedMenu = '';
+  }
+  else {
+    this.expandedMenu = menu;
+  }
+
+}
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'grid' },
@@ -73,9 +88,16 @@ export class MainLayoutComponent {
 
   constructor(private readonly router: Router) {}
 
-  toggleSidebar(): void {
+ toggleSidebar(): void {
+
+  if (window.innerWidth <= 768) {
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+  }
+  else {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
+
+}
 
   toggleAiChat(): void {
     this.showAiChat = !this.showAiChat;
@@ -86,6 +108,11 @@ export class MainLayoutComponent {
       localStorage.removeItem('auth');
       this.router.navigate(['/login']);
     }
+  }
+  closeMobileSidebar(): void {
+      if (window.innerWidth <= 768) {
+    this.isMobileSidebarOpen = false;
+  }
   }
 }
 

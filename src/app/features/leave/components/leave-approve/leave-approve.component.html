@@ -39,14 +39,14 @@
                   <td >{{ leave.status }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group">
-                      <button *ngIf="status=='pending'" (click)="approveLeave(leave)" class="btn btn-success"
+                      <button  (click)="approveLeave(leave)" class="btn btn-success"
                         [disabled]="processingId === leave.leaveID">
 
                         <span *ngIf="processingId !== leave.leaveID">Approve</span>
                         <span *ngIf="processingId === leave.leaveID">Processing...</span>
                       </button>
 
-                      <button *ngIf="status=='pending'" (click)="rejectLeave(leave)" class="btn btn-danger"
+                      <button (click)="rejectLeave(leave)" class="btn btn-danger"
                         [disabled]="processingId === leave.leaveID">
 
                         <span *ngIf="processingId !== leave.leaveID">Reject</span>
