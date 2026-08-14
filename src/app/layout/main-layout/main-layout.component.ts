@@ -274,9 +274,13 @@ toggleMenu(menu: string) {
     this.router.navigate(['/dashboard']);
   }
 
-  prepareRoute(outlet: RouterOutlet): string {
-    return outlet?.activatedRouteData?.['animation'] ??
-      outlet?.activatedRoute?.snapshot.routeConfig?.path ??
+  prepareRoute(outlet: RouterOutlet | null): string {
+    if (!outlet || !outlet.isActivated) {
+      return this.router.url;
+    }
+
+    return outlet.activatedRouteData?.['animation'] ??
+      outlet.activatedRoute.snapshot.routeConfig?.path ??
       this.router.url;
   }
 
