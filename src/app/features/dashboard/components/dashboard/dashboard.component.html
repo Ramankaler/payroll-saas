@@ -23,8 +23,14 @@
   <p class="message" *ngIf="dashboardMessage">{{ dashboardMessage }}</p>
 
   <div class="dashboard-simple-grid" *ngIf="!isEmployee">
-    <mat-card>
-      <h3>Upcoming Birthdays</h3>
+    <mat-card class="dashboard-card">
+      <div class="card-title">
+        <mat-icon>cake</mat-icon>
+        <div>
+          <h3>Upcoming Birthdays</h3>
+          <p>Next 30 days</p>
+        </div>
+      </div>
 
       <div *ngIf="upcomingBirthdays.length === 0" class="empty-text">
         No birthdays in the next 30 days.
@@ -43,8 +49,31 @@
       </div>
     </mat-card>
 
-    <mat-card>
-      <h3>Payroll Notes</h3>
+    <mat-card class="dashboard-card">
+      <div class="card-title">
+        <mat-icon>warning_amber</mat-icon>
+        <div>
+          <h3>Attention Needed</h3>
+          <p>Setup items to fix before clean payroll</p>
+        </div>
+      </div>
+
+      <div class="attention-row" *ngFor="let item of attentionItems; trackBy: trackByFn">
+        <span class="material-icons">{{ item.icon }}</span>
+        <strong>{{ item.value }}</strong>
+        <p>{{ item.label }}</p>
+      </div>
+    </mat-card>
+
+    <mat-card class="dashboard-card">
+      <div class="card-title">
+        <mat-icon>payments</mat-icon>
+        <div>
+          <h3>Payroll Notes</h3>
+          <p>UAE payroll reminders</p>
+        </div>
+      </div>
+
       <p class="note-line">Annual leave is paid when approved.</p>
       <p class="note-line">Sick leave follows full / half / unpaid stages.</p>
       <p class="note-line">Gratuity report is available in Reports.</p>

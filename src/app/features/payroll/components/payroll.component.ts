@@ -32,6 +32,11 @@ interface SalarySlip {
 interface PayrollRegisterResponse {
   payrollID: number;
   status: string;
+  totalEmployees: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
+  totalPayout: number;
   rows: PayrollRegisterRow[];
 }
 
@@ -83,7 +88,14 @@ export class PayrollComponent implements OnInit {
   selectedYear = new Date().getFullYear();
   isRunning = false;
   message = '';
+  payrollID = 0;
+  payrollStatus = 'Not generated';
   salarySlips: SalarySlip[] = [];
+  page = 1;
+  pageSize = 100;
+  totalEmployees = 0;
+  totalPages = 0;
+  totalPayout = 0;
 
   displayedColumns = [
     'employeeName',
@@ -101,7 +113,17 @@ export class PayrollComponent implements OnInit {
     this.loadPayrollRegister();
   }
 
+  onPeriodChanged(): void {
+    this.page = 1;
+    this.loadPayrollRegister();
+  }
+
   runPayroll(): void {
+    if (this.isFinalized) {
+      this.message = 'Payroll is finalized. It cannot be recalculated.';
+      return;
+    }
+
     this.isRunning = true;
     this.message = 'Running payroll...';
 
@@ -114,6 +136,9 @@ export class PayrollComponent implements OnInit {
         this.message = result?.alreadyExists
           ? 'Payroll refreshed for this month.'
           : 'Payroll generated successfully.';
+        this.payrollID = result?.payrollID ?? 0;
+        this.payrollStatus = result?.status ?? 'Completed';
+        this.page = 1;
         this.loadPayrollRegister();
       },
       error: (err) => {
@@ -127,6 +152,8 @@ export class PayrollComponent implements OnInit {
     const params = {
       month: this.selectedMonth,
       year: this.selectedYear,
+      page: this.page,
+      pageSize: this.pageSize,
     };
 
     this.http.get<PayrollRegisterResponse>(
@@ -135,6 +162,13 @@ export class PayrollComponent implements OnInit {
     ).subscribe({
       next: (result) => {
         this.isRunning = false;
+        this.payrollID = result.payrollID ?? 0;
+        this.payrollStatus = result.status ?? 'Not generated';
+        this.totalEmployees = result.totalEmployees ?? 0;
+        this.totalPages = result.totalPages ?? 0;
+        this.page = result.page ?? this.page;
+        this.pageSize = result.pageSize ?? this.pageSize;
+        this.totalPayout = result.totalPayout ?? 0;
         this.salarySlips = (result.rows ?? []).map((row) => ({
           empCode: row.empCode,
           employeeName: `${row.firstName} ${row.lastName}`.trim(),
@@ -156,6 +190,50 @@ export class PayrollComponent implements OnInit {
         this.message = 'Could not load payroll register.';
       },
     });
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.loadPayrollRegister();
+  }
+
+  nextPage(): void {
+    if (this.totalPages > 0 && this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.loadPayrollRegister();
+  }
+
+  get isFinalized(): boolean {
+    return this.payrollStatus.toLowerCase() === 'finalized';
+  }
+
+  finalizePayroll(): void {
+    if (!this.payrollID || this.isFinalized) {
+      return;
+    }
+
+    this.isRunning = true;
+    this.message = 'Finalizing payroll...';
+
+    this.http.put<any>(API_ROUTES.payrollFinalize(this.payrollID), {})
+      .subscribe({
+        next: (result) => {
+          this.isRunning = false;
+          this.payrollStatus = result?.status ?? 'Finalized';
+          this.message = result?.message ?? 'Payroll finalized.';
+        },
+        error: (err) => {
+          this.isRunning = false;
+          this.message = err?.error?.message ?? 'Payroll finalize failed.';
+        },
+      });
   }
 
   viewSlip(slip: SalarySlip): void {

@@ -146,20 +146,23 @@ export class AssetReportsComponent implements OnInit {
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <script>setTimeout(function () { window.print(); }, 300);</script>
         </body>
       </html>`;
 
-    const popup = window.open('', '_blank');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const popup = window.open(url, '_blank');
 
     if (!popup) {
+      URL.revokeObjectURL(url);
       this.message = 'Popup blocked. Please allow popups for PDF print.';
       return;
     }
 
-    popup.document.open();
-    popup.document.write(html);
-    popup.document.close();
+    setTimeout(() => {
+      popup.print();
+      URL.revokeObjectURL(url);
+    }, 500);
   }
 
   private reportName(): string {

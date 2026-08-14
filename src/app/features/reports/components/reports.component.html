@@ -12,6 +12,7 @@
         <span>{{ reportGroups.length }} Categories</span>
         <span>{{ totalReports }} Reports</span>
         <span>{{ selectedReportName }}</span>
+        <span>{{ reportEngineNote }}</span>
       </div>
     </div>
 
@@ -42,6 +43,15 @@
             </option>
           </select>
         </label>
+
+        <label>
+          Rows
+          <select [(ngModel)]="rowLimit">
+            <option *ngFor="let option of rowLimitOptions" [ngValue]="option">
+              {{ option }}
+            </option>
+          </select>
+        </label>
       </div>
     </div>
   </section>
@@ -56,7 +66,7 @@
         </div>
       </div>
 
-      <button type="button" *ngFor="let group of reportGroups" class="category-row"
+      <button type="button" *ngFor="let group of reportGroups; trackBy: trackByGroupName" class="category-row"
         [class.active]="group.name === activeGroupName" (click)="selectGroup(group)">
         <span class="material-icons">{{ group.icon }}</span>
         <span class="category-name">{{ group.name }}</span>
@@ -112,7 +122,7 @@
       </div>
 
       <div class="report-list" *ngIf="filteredActiveReports.length; else noReports">
-        <button type="button" class="report-option" *ngFor="let report of filteredActiveReports"
+        <button type="button" class="report-option" *ngFor="let report of filteredActiveReports; trackBy: trackByReportKey"
           [class.selected]="isActiveReport(report.key)" (click)="selectReport(report.key)">
           <span class="material-icons report-option-icon">{{
             report.icon
@@ -147,7 +157,7 @@
       <div>
         <span class="preview-label">Preview</span>
         <h2>{{ selectedReportName }}</h2>
-        <p>Period: {{ selectedMonth }}/{{ selectedYear }}</p>
+        <p>Period: {{ selectedMonth }}/{{ selectedYear }} · Max rows: {{ rowLimit }}</p>
       </div>
 
       <div class="preview-actions">
@@ -194,12 +204,12 @@
             <th>Absent</th>
             <th>Late</th>
             <th>Hours</th>
-            <th *ngFor="let day of attendanceDays">{{ day }}</th>
+            <th *ngFor="let day of attendanceDays; trackBy: trackByDay">{{ day }}</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let row of attendanceRows">
+          <tr *ngFor="let row of attendanceRows; trackBy: trackByReportRow">
             <td>
               <strong>{{ row.firstName }} {{ row.lastName }}</strong>
               <span>{{ row.empCode }}</span>
@@ -208,7 +218,7 @@
             <td>{{ row.absentDays }}</td>
             <td>{{ row.lateDays }}</td>
             <td>{{ row.totalHours | number: "1.2-2" }}</td>
-            <td *ngFor="let day of row.days" [class]="getStatusClass(day.status)">
+            <td *ngFor="let day of row.days; trackBy: trackByAttendanceCell" [class]="getStatusClass(day.status)">
               {{ day.status }}
             </td>
           </tr>
@@ -220,13 +230,13 @@
       <table class="report-table">
         <thead>
           <tr>
-            <th *ngFor="let column of columns">{{ column }}</th>
+            <th *ngFor="let column of columns; trackBy: trackByColumn">{{ column }}</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let row of rows">
-            <td *ngFor="let column of columns">{{ row[column] }}</td>
+          <tr *ngFor="let row of rows; trackBy: trackByReportRow">
+            <td *ngFor="let column of columns; trackBy: trackByColumn">{{ row[column] }}</td>
           </tr>
         </tbody>
       </table>

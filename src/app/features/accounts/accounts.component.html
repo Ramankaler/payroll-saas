@@ -1,0 +1,355 @@
+<div class="accounts-page">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Finance</div>
+      <h1>Accounts</h1>
+      <p>Maintain UAE-ready chart, journals, VAT summary, and payroll posting.</p>
+    </div>
+
+    <button class="btn btn-outline-primary" type="button" (click)="loadAll()" title="Refresh Accounts">
+      <span class="material-icons">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button type="button" [class.active]="activeTab === 'settings'" (click)="setTab('settings')">
+      <span class="material-icons">settings</span>
+      Settings
+    </button>
+    <button type="button" [class.active]="activeTab === 'chart'" (click)="setTab('chart')">
+      <span class="material-icons">account_tree</span>
+      Chart
+    </button>
+    <button type="button" [class.active]="activeTab === 'journals'" (click)="setTab('journals')">
+      <span class="material-icons">menu_book</span>
+      Journals
+    </button>
+    <button type="button" [class.active]="activeTab === 'reports'" (click)="setTab('reports')">
+      <span class="material-icons">assessment</span>
+      Reports
+    </button>
+  </div>
+
+  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
+
+  <section class="card" *ngIf="activeTab === 'settings'">
+    <div class="card-header">
+      <div>
+        <h2>UAE Accounting Settings</h2>
+        <p>TRN is required only if company is VAT registered.</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label>
+        Legal Name
+        <input class="form-control" name="legalName" [(ngModel)]="settings.legalName">
+      </label>
+
+      <label>
+        TRN
+        <input class="form-control" name="trn" [(ngModel)]="settings.trn" placeholder="Tax Registration Number">
+      </label>
+
+      <label>
+        Fiscal Year Start Month
+        <select class="form-select" name="fiscalYearStartMonth" [(ngModel)]="settings.fiscalYearStartMonth">
+          <option *ngFor="let month of [1,2,3,4,5,6,7,8,9,10,11,12]" [ngValue]="month">
+            {{ month }}
+          </option>
+        </select>
+      </label>
+
+      <label class="check-line">
+        <input type="checkbox" name="vatRegistered" [(ngModel)]="settings.vatRegistered">
+        VAT Registered
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="button" (click)="saveSettings()" [disabled]="saving">
+        <span class="material-icons">save</span>
+        {{ saving ? 'Saving...' : 'Save Settings' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="activeTab === 'chart'">
+    <div class="card-header">
+      <div>
+        <h2>Chart of Accounts</h2>
+        <p>Use default chart first, then add company-specific accounts if needed.</p>
+      </div>
+
+      <button class="btn btn-outline-primary" type="button" (click)="seedChart()" title="Create Default UAE Chart">
+        <span class="material-icons">auto_fix_high</span>
+        Default Chart
+      </button>
+    </div>
+
+    <div class="form-grid">
+      <label>
+        Code *
+        <input class="form-control" name="accountCode" [(ngModel)]="accountForm.accountCode" placeholder="1000">
+      </label>
+
+      <label>
+        Name *
+        <input class="form-control" name="accountName" [(ngModel)]="accountForm.accountName" placeholder="Cash / Bank">
+      </label>
+
+      <label>
+        Type
+        <select class="form-select" name="accountType" [(ngModel)]="accountForm.accountType">
+          <option *ngFor="let type of accountTypes">{{ type }}</option>
+        </select>
+      </label>
+
+      <label>
+        Normal Balance
+        <select class="form-select" name="normalBalance" [(ngModel)]="accountForm.normalBalance">
+          <option *ngFor="let balance of normalBalances">{{ balance }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="button" (click)="saveAccount()" [disabled]="saving">
+        <span class="material-icons">save</span>
+        {{ accountEditId ? 'Update Account' : 'Save Account' }}
+      </button>
+
+      <button class="btn btn-outline-secondary" type="button" (click)="resetAccount()">
+        <span class="material-icons">restart_alt</span>
+        Clear
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Account</th>
+            <th>Type</th>
+            <th>Normal</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let account of accounts">
+            <td class="fw-semibold">{{ account.accountCode }}</td>
+            <td>{{ account.accountName }}</td>
+            <td>{{ account.accountType }}</td>
+            <td>{{ account.normalBalance }}</td>
+            <td>
+              <span class="status-pill" [class.success]="account.isActive" [class.danger]="!account.isActive">
+                {{ account.isActive ? 'Active' : 'Disabled' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button class="btn btn-sm btn-outline-primary" type="button" (click)="editAccount(account)" title="Edit Account">
+                  <span class="material-icons">edit</span>
+                </button>
+
+                <button class="btn btn-sm btn-outline-secondary" type="button" (click)="toggleAccount(account)" title="Enable or Disable">
+                  <span class="material-icons">{{ account.isActive ? 'block' : 'check_circle' }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="accounts.length === 0">
+            <td colspan="6" class="empty-row">No accounts found. Click Default Chart.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="activeTab === 'journals'">
+    <div class="card-header">
+      <div>
+        <h2>Manual Journal</h2>
+        <p>Posted journals are not edited. Reverse them if correction is needed.</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label>
+        Date
+        <input class="form-control" type="date" name="journalDate" [(ngModel)]="journalForm.journalDate">
+      </label>
+
+      <label>
+        Reference
+        <input class="form-control" name="referenceNo" [(ngModel)]="journalForm.referenceNo">
+      </label>
+
+      <label class="wide">
+        Narration *
+        <input class="form-control" name="narration" [(ngModel)]="journalForm.narration">
+      </label>
+    </div>
+
+    <div class="journal-lines">
+      <div class="journal-line head">
+        <span>Account</span>
+        <span>Debit</span>
+        <span>Credit</span>
+        <span>Notes</span>
+        <span></span>
+      </div>
+
+      <div class="journal-line" *ngFor="let line of journalForm.lines; let i = index">
+        <select class="form-select" name="account{{i}}" [(ngModel)]="line.accountID">
+          <option [ngValue]="null">Select account</option>
+          <option *ngFor="let account of accounts" [ngValue]="account.accountID">
+            {{ account.accountCode }} - {{ account.accountName }}
+          </option>
+        </select>
+
+        <input class="form-control" type="number" min="0" name="debit{{i}}" [(ngModel)]="line.debit">
+        <input class="form-control" type="number" min="0" name="credit{{i}}" [(ngModel)]="line.credit">
+        <input class="form-control" name="notes{{i}}" [(ngModel)]="line.notes">
+
+        <button class="btn btn-outline-danger btn-sm" type="button" (click)="removeLine(i)" title="Remove Line">
+          <span class="material-icons">delete</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="totals">
+      <strong>Debit: {{ debitTotal | number:'1.2-2' }}</strong>
+      <strong>Credit: {{ creditTotal | number:'1.2-2' }}</strong>
+      <span [class.ok]="debitTotal === creditTotal" [class.bad]="debitTotal !== creditTotal">
+        {{ debitTotal === creditTotal ? 'Balanced' : 'Not Balanced' }}
+      </span>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-outline-primary" type="button" (click)="addLine()">
+        <span class="material-icons">add</span>
+        Add Line
+      </button>
+
+      <button class="btn btn-primary" type="button" (click)="saveJournal()" [disabled]="saving">
+        <span class="material-icons">save</span>
+        Save Draft
+      </button>
+    </div>
+
+    <div class="payroll-post-box">
+      <label>
+        Payroll ID
+        <input class="form-control" type="number" min="1" name="payrollId" [(ngModel)]="payrollId">
+      </label>
+
+      <button class="btn btn-success" type="button" (click)="postPayroll()" title="Post Payroll to Accounts">
+        <span class="material-icons">payments</span>
+        Post Payroll
+      </button>
+    </div>
+
+    <div class="filter-line">
+      <input class="form-control" type="date" name="from" [(ngModel)]="filters.from">
+      <input class="form-control" type="date" name="to" [(ngModel)]="filters.to">
+      <select class="form-select" name="status" [(ngModel)]="filters.status">
+        <option value="">All Status</option>
+        <option>Draft</option>
+        <option>Posted</option>
+      </select>
+      <button class="btn btn-outline-primary" type="button" (click)="loadJournals()">
+        <span class="material-icons">filter_alt</span>
+        Load
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Date</th>
+            <th>Module</th>
+            <th>Narration</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let journal of journals">
+            <td class="fw-semibold">{{ journal.journalNo }}</td>
+            <td>{{ journal.journalDate | date:'dd-MMM-yyyy' }}</td>
+            <td>{{ journal.module }}</td>
+            <td>{{ journal.narration }}</td>
+            <td>
+              <span class="status-pill" [class.success]="journal.status === 'Posted'">
+                {{ journal.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button class="btn btn-sm btn-outline-success" type="button" (click)="postJournal(journal)" [disabled]="journal.status !== 'Draft'" title="Post Journal">
+                  <span class="material-icons">done_all</span>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" type="button" (click)="reverseJournal(journal)" [disabled]="journal.status !== 'Posted'" title="Reverse Journal">
+                  <span class="material-icons">undo</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="journals.length === 0">
+            <td colspan="6" class="empty-row">No journals found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="activeTab === 'reports'">
+    <div class="card-header">
+      <div>
+        <h2>Accounting Reports</h2>
+        <p>Use these for finance review, VAT checking, and monthly closing.</p>
+      </div>
+    </div>
+
+    <div class="filter-line">
+      <select class="form-select" name="report" [(ngModel)]="reportFilter.report">
+        <option *ngFor="let report of reportTypes" [ngValue]="report.key">
+          {{ report.name }}
+        </option>
+      </select>
+      <input class="form-control" type="date" name="reportFrom" [(ngModel)]="reportFilter.from">
+      <input class="form-control" type="date" name="reportTo" [(ngModel)]="reportFilter.to">
+      <button class="btn btn-primary" type="button" (click)="loadReport()">
+        <span class="material-icons">visibility</span>
+        Preview
+      </button>
+    </div>
+
+    <div class="loading-box" *ngIf="loading">Loading...</div>
+
+    <div class="table-responsive" *ngIf="!loading && reportRows.length">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th *ngFor="let column of reportColumns">{{ column }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of reportRows">
+            <td *ngFor="let column of reportColumns">{{ row[column] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-row" *ngIf="!loading && !reportRows.length">
+      Select report and click Preview.
+    </div>
+  </section>
+</div>

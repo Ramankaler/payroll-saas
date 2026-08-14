@@ -9,4 +9,6 @@ import { AppLoadingComponent } from './core/components/app-loading.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {}
+export class AppComponent {
+  title = 'angular-payroll-app';
+}

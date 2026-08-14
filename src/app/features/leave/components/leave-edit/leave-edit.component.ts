@@ -26,7 +26,7 @@ export class LeaveEditComponent implements OnInit {
   startDate: any;
   endDate: any;
   createdAt:any;
-get DEFAULT_COMP_ID(): number {
+get companyId(): number {
   return this.authSession.companyId;
 }
   // createdAt: any = new Date().toISOString().split('T')[0];
@@ -57,7 +57,7 @@ get DEFAULT_COMP_ID(): number {
   }
 
   loadEmployees() {
-    this.employeeService.getAll(this.DEFAULT_COMP_ID).subscribe({
+    this.employeeService.getAll(this.companyId).subscribe({
       next: (res: any) => {
         this.employees = res;
         console.log('Employees', res);
@@ -103,7 +103,7 @@ get DEFAULT_COMP_ID(): number {
   }
 
   loadLeaveTypes() {
-    this.leaveTypeService.getAll(this.DEFAULT_COMP_ID).subscribe({
+    this.leaveTypeService.getAll(this.companyId).subscribe({
       next: (res: any) => {
         this.leaveTypes = res;
         console.log('Leave Types', this.leaveTypes);

@@ -17,6 +17,7 @@ import { EmployeeService } from '../../employee.service';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 import { Shift, ShiftService } from '../../../shifts/services/shift.service';
 import { BranchService } from '../../../branches/services/branch.service';
+import { API_BASE_URL } from '../../../../core/config/api.config';
 
 
 @Component({
@@ -166,7 +167,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
 
           // Profile photo preview
           if (this.employee?.profilePhoto) {
-            this.previewUrl = 'http://localhost:5236/Uploads/ProfilePhotos/' + this.employee.profilePhoto;
+            this.previewUrl = this.profilePhotoUrl(this.employee.profilePhoto);
           }
         },
         error: (err: any) => {
@@ -389,4 +390,12 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     { value: 'on_leave',   label: 'On Leave' },
     { value: 'terminated', label: 'Terminated' },
   ];
+
+  private profilePhotoUrl(photo: string): string {
+    if (photo.startsWith('http')) {
+      return photo;
+    }
+
+    return `${API_BASE_URL}${photo.startsWith('/') ? '' : '/'}${photo}`;
+  }
 }

@@ -197,19 +197,23 @@ shifts: Shift[] = [];
       return;
     }
 
+    const now = new Date();
+    const year = String(now.getFullYear()).slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const prefix = `${year}${month}`;
+
     const numericCodes = this.employees
       .map(emp => String(emp.empCode || '').trim())
+      .filter(code => code.startsWith(prefix))
+      .map(code => code.slice(prefix.length))
       .filter(code => /^\d+$/.test(code));
 
     const maxCode = numericCodes.length
       ? Math.max(...numericCodes.map(code => Number(code)))
       : 0;
 
-    const longestLength = numericCodes.length
-      ? Math.max(...numericCodes.map(code => code.length), 4)
-      : 4;
-
-    this.employee.empCode = String(maxCode + 1).padStart(longestLength, '0');
+    this.employee.empCode =
+      `${prefix}${String(maxCode + 1).padStart(3, '0')}`;
   }
 
   managerLabel(emp: any): string {

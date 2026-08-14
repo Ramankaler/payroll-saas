@@ -26,7 +26,7 @@ constructor(private leaveService:LeaveService, private snackBar: MatSnackBar,
   private employeeService: EmployeeService, private router:Router) {
 
 }
-get DEFAULT_COMP_ID(): number {
+get companyId(): number {
   return this.authSession.companyId;
 }
 
@@ -38,14 +38,14 @@ this.loadData();
 
 
   loadData(){
-    this.leaveService.getAll(this.DEFAULT_COMP_ID).subscribe({
+    this.leaveService.getAll(this.companyId).subscribe({
       next:(res:any)=>{
         this.leaves=res;
         console.log("Leaves",this.leaves);
       }
     })
 
-    this.employeeService.getAll(this.DEFAULT_COMP_ID).subscribe({
+    this.employeeService.getAll(this.companyId).subscribe({
       next:(res:any)=>{
         this.employees=res;
         console.log("Employees",res);

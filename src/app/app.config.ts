@@ -15,9 +15,6 @@ import { LoadingInterceptor } from './core/interceptors/loading.interceptor';
 import { authFeatureKey, authReducer } from './features/auth/store/auth.reducer';
 import { AuthEffects } from './features/auth/store/auth.effects';
 
-import { provideAnimations } from '@angular/platform-browser/animations';
-
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),

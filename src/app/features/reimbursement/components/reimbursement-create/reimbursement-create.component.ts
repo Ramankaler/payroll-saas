@@ -25,10 +25,13 @@ export class ReimbursementCreateComponent implements OnInit {
   };
 
   employees: any[] = [];
+  fileMessage = '';
  get compId(): number {
   return this.authSession.companyId;
 }
   expenseTypes = ['Travel', 'Food', 'Medical', 'Office Expense', 'Other'];
+  allowedFileTypes = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+  maxFileSizeMb = 5;
 
   constructor(
     private reimbursementService: ReimbursementService,
@@ -49,7 +52,27 @@ export class ReimbursementCreateComponent implements OnInit {
 
   onFileChange(event: any): void {
     const file = event.target.files[0];
-    this.reimbursement.billFile = file || null;
+    this.fileMessage = '';
+    this.reimbursement.billFile = null;
+
+    if (!file) {
+      return;
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+
+    if (!this.allowedFileTypes.includes(extension)) {
+      this.fileMessage = 'Only PDF, JPG, PNG, and WEBP files are allowed.';
+      return;
+    }
+
+    if (file.size > this.maxFileSizeMb * 1024 * 1024) {
+      this.fileMessage = `File must be ${this.maxFileSizeMb} MB or smaller.`;
+      return;
+    }
+
+    this.reimbursement.billFile = file;
+    this.fileMessage = file.name;
   }
 
   save(): void {

@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class DesignationService {
-private apiUrl = 'http://localhost:5236/api/designation';
-// private apiUrl = environment.apiUrl + '/api/designation';
+private apiUrl = `${API_BASE_URL}/api/designation`;
 
   constructor(private http: HttpClient) {}
 
@@ -27,4 +26,3 @@ private apiUrl = 'http://localhost:5236/api/designation';
 
 
 }
-

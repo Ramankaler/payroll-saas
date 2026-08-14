@@ -1,0 +1,278 @@
+<div class="gatepass-page">
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">HR</div>
+      <h1>Gate Pass</h1>
+      <p>Create employee out-pass requests, approve them, and mark actual out/in time.</p>
+    </div>
+
+    <button class="btn btn-outline-primary" type="button" (click)="load()" title="Refresh Gate Passes">
+      <span class="material-icons">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <div class="gatepass-grid">
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>{{ editingId ? 'Edit Gate Pass' : 'New Gate Pass' }}</h2>
+          <p>Only pending gate passes can be edited.</p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <label>
+          Search Employee
+          <div class="search-line">
+            <input
+              class="form-control"
+              name="employeeSearch"
+              [(ngModel)]="employeeSearch"
+              (keyup.enter)="loadEmployees()"
+              placeholder="Code, bio ID, first name..."
+              autocomplete="off">
+
+            <button class="btn btn-outline-secondary" type="button" (click)="loadEmployees()" title="Search Employee">
+              <span class="material-icons">search</span>
+            </button>
+          </div>
+        </label>
+
+        <label>
+          Employee *
+          <select class="form-select" name="empID" [(ngModel)]="form.empID">
+            <option [ngValue]="null">Select employee</option>
+            <option *ngFor="let employee of employees" [ngValue]="employee.empID">
+              {{ employee.empCode }} - {{ employee.firstName }} {{ employee.lastName }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Out Time *
+          <input
+            class="form-control"
+            type="datetime-local"
+            name="outTime"
+            [(ngModel)]="form.outTime">
+        </label>
+
+        <label>
+          Expected In Time
+          <input
+            class="form-control"
+            type="datetime-local"
+            name="expectedInTime"
+            [(ngModel)]="form.expectedInTime">
+        </label>
+
+        <label>
+          Reason *
+          <textarea
+            class="form-control"
+            name="reason"
+            rows="3"
+            [(ngModel)]="form.reason"
+            placeholder="Example: Bank work, official visit, personal emergency"></textarea>
+        </label>
+
+        <label>
+          Remarks
+          <textarea
+            class="form-control"
+            name="remarks"
+            rows="2"
+            [(ngModel)]="form.remarks"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving" title="Save Gate Pass">
+            <span class="material-icons">save</span>
+            {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Save') }}
+          </button>
+
+          <button class="btn btn-outline-secondary" type="button" (click)="reset()" title="Clear Form">
+            <span class="material-icons">restart_alt</span>
+            Clear
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Filters</h2>
+          <p>Use filters before loading large data.</p>
+        </div>
+      </div>
+
+      <div class="card-body filters">
+        <label>
+          Employee
+          <select class="form-select" name="filterEmpID" [(ngModel)]="filters.empID">
+            <option [ngValue]="null">All employees</option>
+            <option *ngFor="let employee of employees" [ngValue]="employee.empID">
+              {{ employee.empCode }} - {{ employee.firstName }} {{ employee.lastName }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select class="form-select" name="status" [(ngModel)]="filters.status">
+            <option *ngFor="let status of statusList" [ngValue]="status">
+              {{ status || 'All Status' }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          From
+          <input class="form-control" type="date" name="from" [(ngModel)]="filters.from">
+        </label>
+
+        <label>
+          To
+          <input class="form-control" type="date" name="to" [(ngModel)]="filters.to">
+        </label>
+
+        <label>
+          Max Rows
+          <select class="form-select" name="limit" [(ngModel)]="filters.limit">
+            <option [ngValue]="1000">1000</option>
+            <option [ngValue]="5000">5000</option>
+            <option [ngValue]="10000">10000</option>
+            <option [ngValue]="20000">20000</option>
+          </select>
+        </label>
+
+        <button class="btn btn-primary w-100" type="button" (click)="load()" title="Apply Filters">
+          <span class="material-icons">filter_alt</span>
+          Apply Filters
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="alert alert-info" *ngIf="message">{{ message }}</div>
+
+  <section class="card">
+    <div class="card-header table-heading">
+      <div>
+        <h2>Gate Pass List</h2>
+        <p>{{ gatePasses.length }} records loaded</p>
+      </div>
+    </div>
+
+    <div class="loading-box" *ngIf="loading">
+      <span class="loader"></span>
+      Loading gate passes...
+    </div>
+
+    <div class="table-responsive" *ngIf="!loading">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Planned Time</th>
+            <th>Actual Time</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let pass of gatePasses">
+            <td>
+              <strong>{{ pass.firstName }} {{ pass.lastName }}</strong>
+              <small>{{ pass.empCode }}</small>
+            </td>
+            <td>
+              <div>Out: {{ pass.outTime | date:'dd-MMM-yyyy HH:mm' }}</div>
+              <small>Expected In: {{ pass.expectedInTime ? (pass.expectedInTime | date:'dd-MMM-yyyy HH:mm') : '-' }}</small>
+            </td>
+            <td>
+              <div>Out: {{ pass.actualOutTime ? (pass.actualOutTime | date:'dd-MMM-yyyy HH:mm') : '-' }}</div>
+              <small>In: {{ pass.actualInTime ? (pass.actualInTime | date:'dd-MMM-yyyy HH:mm') : '-' }}</small>
+            </td>
+            <td>
+              <span>{{ pass.reason }}</span>
+              <small *ngIf="pass.remarks">{{ pass.remarks }}</small>
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="statusClass(pass.status)">
+                {{ pass.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons justify-content-end">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  type="button"
+                  (click)="edit(pass)"
+                  [disabled]="!isPending(pass)"
+                  title="Edit Gate Pass">
+                  <span class="material-icons">edit</span>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-success"
+                  type="button"
+                  (click)="approve(pass)"
+                  [disabled]="!isPending(pass)"
+                  title="Approve Gate Pass">
+                  <span class="material-icons">check_circle</span>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  type="button"
+                  (click)="reject(pass)"
+                  [disabled]="!isPending(pass)"
+                  title="Reject Gate Pass">
+                  <span class="material-icons">cancel</span>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  type="button"
+                  (click)="cancel(pass)"
+                  [disabled]="!isPending(pass)"
+                  title="Cancel Gate Pass">
+                  <span class="material-icons">block</span>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-dark"
+                  type="button"
+                  (click)="markOut(pass)"
+                  [disabled]="!canMarkOut(pass)"
+                  title="Mark Actual Out">
+                  <span class="material-icons">logout</span>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-outline-dark"
+                  type="button"
+                  (click)="markIn(pass)"
+                  [disabled]="!canMarkIn(pass)"
+                  title="Mark Actual In">
+                  <span class="material-icons">login</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="gatePasses.length === 0">
+            <td colspan="6" class="empty-row">
+              No gate passes found for selected filters.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

@@ -9,8 +9,16 @@ import { LoadingService } from '../services/loading.service';
   template: `
     <div class="app-loading" *ngIf="loading.loading$ | async">
       <div class="loader-card">
-        <div class="loader"></div>
-        <span>Loading data…</span>
+        <div class="loader-row">
+          <div class="loader"></div>
+          <span>Loading data…</span>
+        </div>
+
+        <div class="skeleton-lines" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
   `,
@@ -31,18 +39,24 @@ import { LoadingService } from '../services/loading.service';
     }
 
     .loader-card {
-      display: inline-flex;
-      align-items: center;
+      width: min(420px, calc(100vw - 32px));
+      display: grid;
       gap: 10px;
-      min-height: 42px;
-      padding: 0 14px;
+      min-height: 92px;
+      padding: 14px;
       border: 1px solid #dbeafe;
-      border-radius: 999px;
+      border-radius: 18px;
       background: #ffffff;
       color: #1e3a8a;
       box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
       font-size: 13px;
       font-weight: 700;
+    }
+
+    .loader-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .loader {
@@ -54,8 +68,44 @@ import { LoadingService } from '../services/loading.service';
       animation: spin 0.7s linear infinite;
     }
 
+    .skeleton-lines {
+      display: grid;
+      gap: 7px;
+    }
+
+    .skeleton-lines span {
+      display: block;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        #eff6ff 0%,
+        #dbeafe 50%,
+        #eff6ff 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.1s ease-in-out infinite;
+    }
+
+    .skeleton-lines span:nth-child(1) {
+      width: 86%;
+    }
+
+    .skeleton-lines span:nth-child(2) {
+      width: 64%;
+    }
+
+    .skeleton-lines span:nth-child(3) {
+      width: 76%;
+    }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
     }
   `],
 })

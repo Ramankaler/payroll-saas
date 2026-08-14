@@ -13,17 +13,38 @@
       <p class="section-note">Choose month and year, then generate slips for all active employees.</p>
     </div>
 
+    <div class="status-strip" [class.finalized]="isFinalized">
+      <span>Current Status</span>
+      <strong>{{ payrollStatus }}</strong>
+    </div>
+
     <div class="controls">
-      <select [(ngModel)]="selectedMonth" class="select-input" (change)="loadPayrollRegister()">
+      <select [(ngModel)]="selectedMonth" class="select-input" (change)="onPeriodChanged()">
         <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
       </select>
-      <select [(ngModel)]="selectedYear" class="select-input" (change)="loadPayrollRegister()">
+      <select [(ngModel)]="selectedYear" class="select-input" (change)="onPeriodChanged()">
         <option *ngFor="let year of years" [ngValue]="year">{{ year }}</option>
       </select>
 
-      <button mat-raised-button color="primary" (click)="runPayroll()" title="Run Payroll For All Employees">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="runPayroll()"
+        [disabled]="isFinalized"
+        title="Run Payroll For All Employees">
         <mat-icon>play_arrow</mat-icon>
         Run Payroll For All Employees
+      </button>
+
+      <button
+        mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="finalizePayroll()"
+        [disabled]="!payrollID || isFinalized || salarySlips.length === 0"
+        title="Finalize and lock payroll">
+        <mat-icon>lock</mat-icon>
+        Finalize Payroll
       </button>
     </div>
 
@@ -34,8 +55,39 @@
 
   <mat-card class="table-card">
     <div class="table-header">
-      <h3>Generated Slips</h3>
-      <span>{{ salarySlips.length }} records</span>
+      <div>
+        <h3>Generated Slips</h3>
+        <span>
+          Showing {{ salarySlips.length }} of {{ totalEmployees }} records
+          <ng-container *ngIf="totalPayout">
+            | Total payout {{ totalPayout | number:'1.2-2' }}
+          </ng-container>
+        </span>
+      </div>
+
+      <div class="pager">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="previousPage()"
+          [disabled]="page <= 1 || isRunning"
+          title="Previous page">
+          <mat-icon>chevron_left</mat-icon>
+          Previous
+        </button>
+
+        <span>Page {{ page }} / {{ totalPages || 1 }}</span>
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="nextPage()"
+          [disabled]="totalPages === 0 || page >= totalPages || isRunning"
+          title="Next page">
+          Next
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
 
     <table mat-table [dataSource]="salarySlips" class="payroll-table">

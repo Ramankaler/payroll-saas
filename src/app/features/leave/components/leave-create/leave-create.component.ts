@@ -30,7 +30,7 @@ isHalfDay:false,
 selectedHalf:''
 
 };
-get DEFAULT_COMP_ID(): number {
+get companyId(): number {
   return this.authSession.companyId;
 }
 leaves:any[]=[];
@@ -83,7 +83,7 @@ const foundEmp = this.employees.find((emp:any) =>
 
 // Employee type service
 loadEmployees(){
-   this.employeeService.getAll(this.DEFAULT_COMP_ID).subscribe({
+   this.employeeService.getAll(this.companyId).subscribe({
       next:(data)=>{
         this.employees = data;
         console.log("employee list :",this.employees)
@@ -94,7 +94,7 @@ loadEmployees(){
       }
     });
 
-  this.leaveService.getAll(this.DEFAULT_COMP_ID).subscribe({
+  this.leaveService.getAll(this.companyId).subscribe({
     next: (res) => {
       this.leaves = res;
       console.log("Leaves", this.leaves)
@@ -107,7 +107,7 @@ loadEmployees(){
 
 // Leave type service
 loadLeaveTypes(){
-  this.leaveTypeService.getAll(this.DEFAULT_COMP_ID).subscribe({
+  this.leaveTypeService.getAll(this.companyId).subscribe({
     next:(data)=>{
       this.leaveTypes=data;
       console.log('Leave types', this.leaveTypes);

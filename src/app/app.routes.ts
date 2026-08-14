@@ -28,6 +28,7 @@ import { BranchCreateComponent } from './features/branches/components/branch-cre
 import { BranchListComponent } from './features/branches/components/branch-list/branch-list.component';
 import { ShiftListComponent } from './features/shifts/components/shift-list/shift-list.component';
 import { DeviceListComponent } from './features/devices/components/device-list/device-list.component';
+import { GatePassComponent } from './features/gatepass/gatepass.component';
 import { ChangePasswordComponent } from './features/auth/components/change-password/change-password.component';
 import { accessGuard } from './core/guards/access.guard';
 import { MyAttendanceComponent } from './features/self-service/my-attendance.component';
@@ -40,6 +41,7 @@ import { AssetDetailsComponent } from './features/assets/components/asset-detail
 import { AssetAllocationComponent } from './features/assets/components/asset-allocation/asset-allocation.component';
 import { AssetReportsComponent } from './features/assets/components/asset-reports/asset-reports.component';
 import { ReportsComponent } from './features/reports/components/reports.component';
+import { AccountsComponent } from './features/accounts/accounts.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -73,6 +75,7 @@ export const routes: Routes = [
       { path: 'attendance', component: AttendanceComponent },
       { path: 'shifts', component: ShiftListComponent },
       { path: 'devices', component: DeviceListComponent },
+      { path: 'gatepass', component: GatePassComponent },
       { path: 'leave', component: LeaveComponent },
       { path: 'leaves', component: LeaveListComponent },
       { path: 'leaves/create', component: LeaveCreateComponent },
@@ -87,6 +90,7 @@ export const routes: Routes = [
       { path: 'assets', component: AssetDetailsComponent },
       { path: 'assets/allocations', component: AssetAllocationComponent },
       { path: 'assets/reports', component: AssetReportsComponent },
+      { path: 'accounts', component: AccountsComponent },
       { path: 'reports', component: ReportsComponent },
       { path: 'admin/settings', component: AdminSettingsComponent },
 // company module routes

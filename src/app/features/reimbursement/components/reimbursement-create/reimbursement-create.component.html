@@ -49,6 +49,9 @@
               <label class="form-label">Bill/Receipt File <span class="text-danger">*</span></label>
               <input type="file" (change)="onFileChange($event)" accept=".jpg,.jpeg,.png,.webp,.pdf" class="form-control">
               <div class="form-text">Upload JPG, PNG, WEBP, or PDF. Maximum 5 MB.</div>
+              <div class="form-text" [class.text-danger]="!reimbursement.billFile && fileMessage">
+                {{ fileMessage }}
+              </div>
             </div>
 
             <div class="d-flex gap-2">

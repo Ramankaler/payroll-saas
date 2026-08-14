@@ -69,6 +69,7 @@ function getNeededPermission(url: string): string | null {
   if (path.startsWith('/designations')) return 'designation.read';
 
   if (path.startsWith('/attendance')) return 'attendance.view';
+  if (path.startsWith('/gatepass')) return 'gatepass.view';
   if (path.startsWith('/shifts')) return 'shift.read';
   if (path.startsWith('/devices')) return 'attendance.view';
   if (path.startsWith('/team-approvals')) return 'team.view';
@@ -85,6 +86,7 @@ function getNeededPermission(url: string): string | null {
   if (path.startsWith('/reimbursement')) return 'reimbursement.view';
 
   if (path.startsWith('/payroll')) return 'payroll.view';
+  if (path.startsWith('/accounts')) return 'account.view';
   if (path.startsWith('/assets/allocations')) return 'asset.allocate';
   if (path.startsWith('/assets/reports')) return 'asset.report';
   if (path.startsWith('/assets')) return 'asset.read';

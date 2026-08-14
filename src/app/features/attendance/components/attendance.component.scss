@@ -1,12 +1,341 @@
-.attendance-container { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; flex-direction: column; gap: 2rem; }
-.import-card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.table-card { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.file-input-wrapper { display: flex; gap: 1rem; align-items: center; margin: 1rem 0; }
-.status-badge { padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
-.status-badge.present { background: #e8f5e9; color: #2e7d32; }
-.status-badge.late { background: #fff3e0; color: #ef6c00; }
-.status-badge.absent { background: #ffebee; color: #c62828; }
-.attendance-table { width: 100%; }
-.result { margin-top: 1rem; padding: 0.75rem; border-radius: 4px; }
-.result.success { background: #e8f5e9; color: #2e7d32; }
-.result.error { background: #ffebee; color: #c62828; }
+.attendance-container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.attendance-hero,
+.import-card,
+.calendar-card,
+.table-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.07);
+}
+
+.attendance-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 520px;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 18rem),
+    #ffffff;
+}
+
+.attendance-hero h1,
+.card-heading h2 {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+.attendance-hero h1 {
+  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+}
+
+.attendance-hero p,
+.card-heading p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.filter-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  background: #eff6ff;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+select,
+.form-control {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 13px;
+  padding: 0 0.75rem;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+
+select:focus,
+.form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.13);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.stat-card {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.055);
+}
+
+.stat-card span {
+  display: block;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #0f172a;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.import-card,
+.calendar-card,
+.table-card {
+  padding: 1rem !important;
+}
+
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.employee-filter {
+  width: min(360px, 100%);
+}
+
+.import-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.alert {
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 13px;
+}
+
+.alert.success {
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.alert.danger {
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.loading-box {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  color: #64748b;
+}
+
+.loader {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #dbeafe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.65rem;
+}
+
+.calendar-day {
+  min-height: 118px;
+  display: grid;
+  align-content: space-between;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.calendar-day.day-empty {
+  background: #f8fafc;
+}
+
+.calendar-day.day-has-punch {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.calendar-day.day-complete {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.calendar-day.day-missing {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.day-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.day-top strong {
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.day-top span,
+.punch-count,
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 24px;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.day-times {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.day-times small {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #475569;
+  font-weight: 750;
+}
+
+.day-times .material-icons {
+  color: #2563eb;
+  font-size: 17px;
+}
+
+.table-wrapper {
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.attendance-table {
+  width: 100%;
+}
+
+.attendance-table td strong,
+.attendance-table td span {
+  display: block;
+}
+
+.attendance-table td span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.type-pill {
+  color: #1d4ed8 !important;
+  background: #eff6ff;
+}
+
+.empty-state {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-state .material-icons {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 0.75rem;
+  border-radius: 18px;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 30px;
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.empty-state p {
+  margin: 0.25rem 0 0;
+}
+
+@media (max-width: 1180px) {
+  .attendance-hero,
+  .filter-card {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .attendance-container {
+    padding: 0.85rem;
+  }
+
+  .stats-grid,
+  .calendar-grid,
+  .import-row,
+  .card-heading {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

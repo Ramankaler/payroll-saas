@@ -217,9 +217,23 @@
     <!-- TOPBAR -->
     <header class="topbar">
 
-      <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle menu" aria-label="Toggle menu">
-        <span class="material-icons">menu</span>
-      </button>
+      <div class="topbar-left">
+        <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle menu" aria-label="Toggle menu">
+          <span class="material-icons">menu</span>
+        </button>
+
+        <button
+          *ngIf="showBackButton"
+          class="back-btn"
+          type="button"
+          (click)="goBack()"
+          title="Go back"
+          aria-label="Go back"
+        >
+          <span class="material-icons">arrow_back</span>
+          <span>Back</span>
+        </button>
+      </div>
 
       <div class="search-box">
         <span class="material-icons">search</span>
@@ -250,7 +264,9 @@
 
     <!-- PAGE CONTENT -->
     <main class="page-content">
-      <router-outlet></router-outlet>
+      <div class="route-stage" [@routeFade]="prepareRoute(pageOutlet)">
+        <router-outlet #pageOutlet="outlet"></router-outlet>
+      </div>
     </main>
 
   </div>

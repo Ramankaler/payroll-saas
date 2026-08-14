@@ -2,7 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AiChatComponent } from '../../features/ai/components/ai-chat.component';
+import { Location } from '@angular/common';
+import {
+  animate,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 type NavItem = {
   label: string;
@@ -15,9 +21,26 @@ type NavItem = {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, AiChatComponent],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './main-layout.component.html',
-  styleUrl: './main-layout.component.scss'
+  styleUrl: './main-layout.component.scss',
+  animations: [
+    trigger('routeFade', [
+      transition('* <=> *', [
+        style({
+          opacity: 0,
+          transform: 'translateY(10px)',
+        }),
+        animate(
+          '180ms ease-out',
+          style({
+            opacity: 1,
+            transform: 'translateY(0)',
+          })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class MainLayoutComponent {
   isSidebarCollapsed = false;
@@ -51,7 +74,10 @@ toggleMenu(menu: string) {
 
   showAiChat = false;
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly location: Location
+  ) {}
 
   private readAuthentication(): {
     username?: string;
@@ -180,6 +206,7 @@ toggleMenu(menu: string) {
           { label: 'Shifts', route: '/shifts', icon: 'schedule', permission: 'shift.read' },
           { label: 'Devices', route: '/devices', icon: 'devices', permission: 'attendance.view' },
           { label: 'Attendance', route: '/attendance', icon: 'access_time', permission: 'attendance.view' },
+          { label: 'Gate Pass', route: '/gatepass', icon: 'meeting_room', permission: 'gatepass.view' },
         ],
       },
       {
@@ -199,6 +226,7 @@ toggleMenu(menu: string) {
           { label: 'Asset Reports', route: '/assets/reports', icon: 'summarize', permission: 'asset.report' },
         ],
       },
+      { label: 'Accounts', route: '/accounts', icon: 'account_balance', permission: 'account.view' },
       { label: 'Reports', route: '/reports', icon: 'assessment', permission: 'reports.view' },
       { label: 'Users & Permissions', route: '/users', icon: 'manage_accounts', permission: 'role.manage' },
       { label: 'Admin Settings', route: '/admin/settings', icon: 'settings', permission: 'company.update' },
@@ -226,6 +254,30 @@ toggleMenu(menu: string) {
 
   toggleAiChat(): void {
     this.showAiChat = !this.showAiChat;
+  }
+
+  get showBackButton(): boolean {
+    const currentUrl = this.router.url.split('?')[0];
+
+    return currentUrl !== '/' &&
+      currentUrl !== '/dashboard' &&
+      currentUrl !== '/login' &&
+      currentUrl !== '/change-password';
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    this.router.navigate(['/dashboard']);
+  }
+
+  prepareRoute(outlet: RouterOutlet): string {
+    return outlet?.activatedRouteData?.['animation'] ??
+      outlet?.activatedRoute?.snapshot.routeConfig?.path ??
+      this.router.url;
   }
 
   onProfileMenu(action: 'profile' | 'logout'): void {

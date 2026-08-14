@@ -2,13 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import { environment } from '../../../environments/environment';
-import { environment } from '../../../environments/environment';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
-  private apiUrl = 'http://localhost:5236/api/employee';
-  // private apiUrl = environment.apiUrl + '/api/employee';
+  private apiUrl = `${API_BASE_URL}/api/employee`;
 
   constructor(private http: HttpClient) {}
 
@@ -45,11 +43,11 @@ export class EmployeeService {
   }
 
   getDepartments(compId: number): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:5236/api/department/${compId}`);
+    return this.http.get<any[]>(`${API_BASE_URL}/api/department/${compId}`);
   }
 
   getDesignations(compId: number): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:5236/api/designation/${compId}`);
+    return this.http.get<any[]>(`${API_BASE_URL}/api/designation/${compId}`);
   }
 
   getDocuments(empId: number): Observable<any[]> {

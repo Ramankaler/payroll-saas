@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 export interface ReimbursementDto {
   reimbID: number;
@@ -16,7 +17,7 @@ export interface ReimbursementDto {
 
 @Injectable({ providedIn: 'root' })
 export class ReimbursementService {
-  private apiUrl = 'http://localhost:5236/api/reimbursement';
+  private apiUrl = `${API_BASE_URL}/api/reimbursement`;
 
   constructor(private http: HttpClient) {}
 

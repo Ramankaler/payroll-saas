@@ -36,6 +36,7 @@ export class DashboardComponent implements OnInit {
 
   kpis: Array<{ value: string; label: string; trend: string; type: string }> = [];
   upcomingBirthdays: any[] = [];
+  attentionItems: Array<{ label: string; value: number; icon: string }> = [];
 
   ngOnInit(): void {
     const authentication = JSON.parse(
@@ -73,7 +74,25 @@ export class DashboardComponent implements OnInit {
           { value: String(data.activeEmployees ?? 0), label: 'Active Employees', trend: '', type: 'up' },
           { value: String(data.onProbation ?? 0), label: 'On Probation', trend: '', type: 'up' },
           { value: String(data.pendingLeaves ?? 0), label: 'Pending Leaves', trend: '', type: 'up' },
+          { value: String(data.pendingReimbursements ?? 0), label: 'Pending Reimbursements', trend: '', type: 'up' },
           { value: String(data.currentMonthPayroll ?? 0), label: 'Current Month Payroll', trend: '', type: 'up' },
+        ];
+        this.attentionItems = [
+          {
+            label: 'Employees missing biometric ID',
+            value: data.missingBioEmployees ?? 0,
+            icon: 'fingerprint',
+          },
+          {
+            label: 'Employees without manager',
+            value: data.employeesWithoutManager ?? 0,
+            icon: 'supervisor_account',
+          },
+          {
+            label: 'Employees without shift',
+            value: data.employeesWithoutShift ?? 0,
+            icon: 'schedule',
+          },
         ];
       },
       error: () => {

@@ -137,6 +137,12 @@ export class ReportsComponent {
           note: 'UAE gratuity estimate based on basic salary and service period.',
           icon: 'account_balance_wallet',
         },
+        {
+          key: 'wps-readiness',
+          name: 'WPS Readiness',
+          note: 'Shows employees missing salary, bank, or payment setup before WPS/SIF export.',
+          icon: 'fact_check',
+        },
       ],
     },
     {
@@ -148,6 +154,18 @@ export class ReportsComponent {
           name: 'Monthly Attendance',
           note: 'Employee-wise monthly calendar with present, absent, late, and hours.',
           icon: 'calendar_month',
+        },
+        {
+          key: 'unmapped-punches',
+          name: 'Unmapped Punches',
+          note: 'Device punches whose biometric ID is not mapped to any employee.',
+          icon: 'fingerprint',
+        },
+        {
+          key: 'gatepass-register',
+          name: 'Gate Pass Register',
+          note: 'Employee out-pass requests with planned, actual, and approval status.',
+          icon: 'meeting_room',
         },
       ],
     },
@@ -187,6 +205,36 @@ export class ReportsComponent {
         },
       ],
     },
+    {
+      name: 'Accounts Reports',
+      icon: 'account_balance',
+      reports: [
+        {
+          key: 'trial-balance',
+          name: 'Trial Balance',
+          note: 'Debit, credit, and balance review for posted journals.',
+          icon: 'balance',
+        },
+        {
+          key: 'profit-loss',
+          name: 'Profit & Loss',
+          note: 'Income and expense summary for selected period.',
+          icon: 'monitoring',
+        },
+        {
+          key: 'balance-sheet',
+          name: 'Balance Sheet',
+          note: 'Assets, liabilities, and equity as of selected date.',
+          icon: 'account_balance',
+        },
+        {
+          key: 'vat-summary',
+          name: 'VAT Summary',
+          note: 'Input VAT, output VAT, and net VAT payable.',
+          icon: 'receipt_long',
+        },
+      ],
+    },
   ];
 
   months = [
@@ -210,12 +258,15 @@ export class ReportsComponent {
   reportSearch = '';
   selectedMonth = new Date().getMonth() + 1;
   selectedYear = new Date().getFullYear();
+  rowLimit = 5000;
+  rowLimitOptions = [1000, 5000, 10000, 20000];
   loading = false;
   message = '';
   attendanceDays: number[] = [];
   attendanceRows: AttendanceRow[] = [];
   rows: any[] = [];
   columns: string[] = [];
+  readonly reportEngineNote = 'Live API';
 
   get reports(): ReportItem[] {
     return this.reportGroups.flatMap(group => group.reports);
@@ -268,6 +319,40 @@ export class ReportsComponent {
 
   isActiveReport(reportKey: string): boolean {
     return this.selectedReport === reportKey;
+  }
+
+  trackByGroupName(_index: number, group: ReportGroup): string {
+    return group.name;
+  }
+
+  trackByReportKey(_index: number, report: ReportItem): string {
+    return report.key;
+  }
+
+  trackByColumn(_index: number, column: string): string {
+    return column;
+  }
+
+  trackByDay(_index: number, day: number): number {
+    return day;
+  }
+
+  trackByAttendanceCell(_index: number, day: { day: number }): number {
+    return day.day;
+  }
+
+  trackByReportRow(index: number, row: any): string {
+    return String(
+      row.empID ??
+        row.empCode ??
+        row.leaveID ??
+        row.rawPunchID ??
+        row.reimbID ??
+        row.gatePassID ??
+        row.assetCode ??
+        row.accountCode ??
+        index
+    );
   }
 
   load(): void {
@@ -426,22 +511,23 @@ export class ReportsComponent {
             </thead>
             <tbody>${tableRows}</tbody>
           </table>
-          <script>
-            setTimeout(function () { window.print(); }, 300);
-          </script>
         </body>
       </html>`;
 
-    const popup = window.open('', '_blank');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const popup = window.open(url, '_blank');
 
     if (!popup) {
+      URL.revokeObjectURL(url);
       this.message = 'Popup blocked. Please allow popups for PDF print.';
       return;
     }
 
-    popup.document.open();
-    popup.document.write(html);
-    popup.document.close();
+    setTimeout(() => {
+      popup.print();
+      URL.revokeObjectURL(url);
+    }, 500);
   }
 
   getStatusClass(status: string): string {
@@ -460,6 +546,9 @@ export class ReportsComponent {
     const params = {
       month: this.selectedMonth,
       year: this.selectedYear,
+      limit: this.rowLimit,
+      from: this.reportFromDate(),
+      to: this.reportToDate(),
     };
 
     this.http.get<any>(this.getReportUrl(reportKey), { params: params as any }).subscribe({
@@ -501,8 +590,14 @@ export class ReportsComponent {
     switch (reportKey) {
       case 'payroll-register':
         return API_ROUTES.reportsPayrollRegister;
+      case 'unmapped-punches':
+        return API_ROUTES.reportsUnmappedPunches;
+      case 'gatepass-register':
+        return API_ROUTES.reportsGatePass;
       case 'payroll-statistics':
         return API_ROUTES.reportsPayrollStatistics;
+      case 'wps-readiness':
+        return API_ROUTES.reportsWpsReadiness;
       case 'employee-master':
         return API_ROUTES.reportsEmployeeMaster;
       case 'employee-statistics':
@@ -527,9 +622,31 @@ export class ReportsComponent {
         return API_ROUTES.reportsAssetAllocation;
       case 'asset-summary':
         return API_ROUTES.reportsAssetSummary;
+      case 'trial-balance':
+        return API_ROUTES.reportsTrialBalance;
+      case 'profit-loss':
+        return API_ROUTES.reportsProfitLoss;
+      case 'balance-sheet':
+        return API_ROUTES.reportsBalanceSheet;
+      case 'vat-summary':
+        return API_ROUTES.reportsVatSummary;
       default:
         return API_ROUTES.reportsMonthlyAttendance;
     }
+  }
+
+  private reportFromDate(): string {
+    return `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-01`;
+  }
+
+  private reportToDate(): string {
+    const lastDay = new Date(
+      this.selectedYear,
+      this.selectedMonth,
+      0
+    ).getDate();
+
+    return `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
   private buildExportData(): { columns: string[]; rows: any[] } {
@@ -589,15 +706,35 @@ export class ReportsComponent {
   }
 
   private csvValue(value: any): string {
-    return `"${String(value ?? '').replace(/"/g, '""')}"`;
+    return `"${this.exportText(value).replace(/"/g, '""')}"`;
   }
 
   private htmlValue(value: any): string {
-    return String(value ?? '')
+    return this.exportText(value)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  private exportText(value: any): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+
+    const text = String(value);
+    const trimmedText = text.trimStart();
+    const firstLetter = trimmedText.charAt(0);
+
+    if (['=', '+', '-', '@'].includes(firstLetter)) {
+      return `'${text}`;
+    }
+
+    return text;
   }
 }

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../../../core/config/api.config';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
 
 export interface LeaveTypeDto {
@@ -16,7 +17,7 @@ export interface LeaveTypeDto {
 })
 export class LeaveTypeService {
   private readonly apiUrl =
-    'http://localhost:5236/api/leave';
+    `${API_BASE_URL}/api/leave`;
 
   constructor(
     private readonly http: HttpClient,
