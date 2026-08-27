@@ -9,9 +9,10 @@ export class GatePassService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(compId: number, filters: any): Observable<any[]> {
+  getAll(compId: number, filters: any): Observable<any> {
     let params = new HttpParams()
-      .set('limit', filters.limit || 5000);
+      .set('page', filters.page || 1)
+      .set('pageSize', filters.pageSize || 25);
 
     if (filters.empID) {
       params = params.set('empId', filters.empID);
@@ -29,7 +30,11 @@ export class GatePassService {
       params = params.set('to', filters.to);
     }
 
-    return this.http.get<any[]>(`${this.apiUrl}/${compId}`, { params });
+    if (filters.search) {
+      params = params.set('search', filters.search);
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/${compId}`, { params });
   }
 
   create(data: any): Observable<any> {

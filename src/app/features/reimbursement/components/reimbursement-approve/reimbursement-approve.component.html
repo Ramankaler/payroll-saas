@@ -11,9 +11,21 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h5>Manager Approval Queue</h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5>Manager Approval Queue</h5>
+              <p class="section-note mb-0">{{ totalRecords }} pending claims</p>
+            </div>
+
+            <select class="form-select w-auto" [(ngModel)]="pageSize" (change)="changePageSize()">
+              <option [ngValue]="25">25</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
+            </select>
+          </div>
         </div>
-          <div class="table-responsive">
+          <div class="loading-container" *ngIf="loading">Loading pending reimbursements...</div>
+          <div class="table-responsive" *ngIf="!loading">
             <table class="table table-hover mb-0">
               <thead class="table-light">
                 <tr>
@@ -26,9 +38,9 @@
               </thead>
               <tbody>
                 <tr *ngFor="let reim of reimbursements">
-                  <td class="fw-semibold">{{ getEmployeeName(reim.empID) }}</td>
+                  <td class="fw-semibold">{{ getEmployeeName(reim) }}</td>
                   <td>{{ reim.amount | number:'1.2-2' }}</td>
-                  <td>{{ reim.expenseType }}</td>
+                  <td>{{ getExpenseType(reim) }}</td>
                   <td>{{ reim.description || '-' }}</td>
                   <td>
                     <div class="action-buttons">
@@ -50,6 +62,19 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="!loading">
+            <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
+
+            <div class="btn-group">
+              <button class="btn btn-outline-secondary" type="button" (click)="previousPage()" [disabled]="page <= 1">
+                Previous
+              </button>
+
+              <button class="btn btn-outline-secondary" type="button" (click)="nextPage()" [disabled]="page >= totalPages">
+                Next
+              </button>
+            </div>
           </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api.config';
 
@@ -11,6 +12,41 @@ export class AssetService {
 
   getAll(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
+  }
+
+  getPage(page: number, pageSize: number, search: string): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/page`, { params });
+  }
+
+  searchAvailable(search: string, limit = 20): Observable<any[]> {
+    let params = new HttpParams().set('limit', limit);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/available`, { params });
+  }
+
+  searchEmployees(search: string, limit = 20): Observable<any[]> {
+    let params = new HttpParams().set('limit', limit);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get<any[]>(
+      `${API_BASE_URL}/api/employee/lookup`,
+      { params }
+    );
   }
 
   getById(id: number): Observable<any> {
@@ -29,8 +65,25 @@ export class AssetService {
     return this.http.put<any>(`${this.apiUrl}/${id}/status`, { isActive });
   }
 
-  getAllocations(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/allocations`);
+  getAllocations(
+    page: number,
+    pageSize: number,
+    search: string,
+    status: string
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/allocations`, { params });
   }
 
   allocate(data: any): Observable<any> {

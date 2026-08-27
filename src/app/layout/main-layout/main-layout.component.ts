@@ -98,6 +98,9 @@ toggleMenu(menu: string) {
       { label: 'My Leaves', route: '/my-leaves', icon: 'event' },
       { label: 'My Reimbursements', route: '/my-reimbursements', icon: 'receipt' },
       { label: 'My Salary Slips', route: '/my-payslips', icon: 'payments' },
+      { label: 'My Gate Passes', route: '/my-gatepasses', icon: 'meeting_room' },
+      { label: 'My Advances', route: '/my-advances', icon: 'savings' },
+      { label: 'My Resignation', route: '/my-resignation', icon: 'logout' },
     ];
 
     if (this.isManager) {
@@ -202,6 +205,7 @@ toggleMenu(menu: string) {
           { label: 'Designations', route: '/designations', icon: 'badge', permission: 'designation.read' },
           { label: 'Leave Requests', route: '/leaves', icon: 'event_busy', permission: 'leave.view' },
           { label: 'Leave Types', route: '/leave-types', icon: 'list_alt', permission: 'leave.type.manage' },
+          { label: 'Resignations', route: '/resignations', icon: 'person_remove', permission: 'resignation.view' },
           { label: 'Final Approvals', route: '/team-approvals', icon: 'check_circle', permission: 'team.view' },
           { label: 'Shifts', route: '/shifts', icon: 'schedule', permission: 'shift.read' },
           { label: 'Devices', route: '/devices', icon: 'devices', permission: 'attendance.view' },
@@ -214,6 +218,7 @@ toggleMenu(menu: string) {
         icon: 'account_balance_wallet',
         children: [
           { label: 'Payroll Runs', route: '/payroll', icon: 'payment', permission: 'payroll.view' },
+          { label: 'Salary Advances', route: '/advances', icon: 'savings', permission: 'advance.view' },
           { label: 'Reimbursements', route: '/reimbursement', icon: 'receipt', permission: 'reimbursement.view' },
         ],
       },
@@ -275,13 +280,21 @@ toggleMenu(menu: string) {
   }
 
   prepareRoute(outlet: RouterOutlet | null): string {
-    if (!outlet || !outlet.isActivated) {
+    if (!outlet) {
       return this.router.url;
     }
 
-    return outlet.activatedRouteData?.['animation'] ??
-      outlet.activatedRoute.snapshot.routeConfig?.path ??
-      this.router.url;
+    try {
+      if (!outlet.isActivated) {
+        return this.router.url;
+      }
+
+      return outlet.activatedRouteData?.['animation'] ??
+        outlet.activatedRoute.snapshot.routeConfig?.path ??
+        this.router.url;
+    } catch {
+      return this.router.url;
+    }
   }
 
   onProfileMenu(action: 'profile' | 'logout'): void {

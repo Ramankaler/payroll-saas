@@ -1,22 +1,25 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { LeaveService, LeaveDto } from '../../services/leave.service';
-import { EmployeeService } from '../../../employees/employee.service';
+import { LeaveService } from '../../services/leave.service';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-leave-approve',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatSnackBarModule],
   templateUrl: './leave-approve.component.html',
   styleUrls: ['./leave-approve.component.scss']
 })
 export class LeaveApproveComponent implements OnInit {
 private readonly authSession =  inject(AuthSessionService);
-  leaves: LeaveDto[] = [];
-  employees: any[] = [];
+  leaves: any[] = [];
+  page = 1;
+  pageSize = 25;
+  totalRecords = 0;
+  loading = false;
   get compId(): number {
   return this.authSession.companyId;
 }
@@ -25,7 +28,6 @@ private readonly authSession =  inject(AuthSessionService);
 
   constructor(
     private leaveService: LeaveService,
-    private employeeService: EmployeeService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -34,19 +36,57 @@ private readonly authSession =  inject(AuthSessionService);
   }
 
   loadData(): void {
-    this.leaveService.getAll(this.compId).subscribe(leaves => {
-      this.leaves = leaves;
-      // filter(l => l.status === 'pending');
-    });
+    this.loading = true;
 
-    this.employeeService.getAll(this.compId).subscribe(employees => {
-      this.employees = employees;
-    });
+    this.leaveService
+      .getPage(this.compId, this.page, this.pageSize, '', 'Pending')
+      .subscribe({
+        next: result => {
+          this.leaves = result?.data || [];
+          this.totalRecords = result?.totalRecords || 0;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.snackBar.open('Leaves could not be loaded.', 'Close', {
+            duration: 4000
+          });
+        }
+      });
   }
 
-  getEmployeeName(empId: number): string {
-    const emp = this.employees.find(e => e.empID === empId);
-    return emp ? `${emp.firstName} ${emp.lastName}` : 'Unknown';
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.loadData();
+  }
+
+  nextPage(): void {
+    if (this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.loadData();
+  }
+
+  changePageSize(): void {
+    this.page = 1;
+    this.loadData();
+  }
+
+  getEmployeeName(leave: any): string {
+    const name = `${leave.firstName || ''} ${leave.lastName || ''}`.trim();
+    const code = leave.empCode ? `${leave.empCode} - ` : '';
+
+    return `${code}${name || 'Unknown'}`;
   }
 
 
@@ -56,7 +96,7 @@ if(leave==null){
   this.snackBar.open('Invalid leave ID', 'Close', { duration: 3000 });
   return;
 }
-if(leave.status !== 'pending'){
+if(String(leave.status || '').toLowerCase() !== 'pending'){
   this.snackBar.open('Only pending leaves can be approved', 'Close', { duration: 3000 });
   return;
 }

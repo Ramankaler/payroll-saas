@@ -5,8 +5,7 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { LeaveService, LeaveDto } from '../../services/leave.service';
-import { EmployeeService } from '../../../employees/employee.service';
+import { LeaveService } from '../../services/leave.service';
 import { LeaveTypeService } from '../../services/leave-type.service';
 import { Router } from '@angular/router';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
@@ -21,13 +20,22 @@ import { AuthSessionService } from '../../../../core/services/auth-session.servi
 export class LeaveListComponent implements OnInit {
  private readonly authSession =  inject(AuthSessionService);
 leaves:any[]=[];
-employees:any[]=[];
+searchTerm = '';
+status = 'All';
+page = 1;
+pageSize = 25;
+totalRecords = 0;
+loading = false;
 constructor(private leaveService:LeaveService, private snackBar: MatSnackBar,
-  private employeeService: EmployeeService, private router:Router) {
+  private router:Router) {
 
 }
 get companyId(): number {
   return this.authSession.companyId;
+}
+
+get totalPages(): number {
+  return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
 }
 
   ngOnInit(): void {
@@ -38,23 +46,62 @@ this.loadData();
 
 
   loadData(){
-    this.leaveService.getAll(this.companyId).subscribe({
-      next:(res:any)=>{
-        this.leaves=res;
-        console.log("Leaves",this.leaves);
-      }
-    })
+    this.loading = true;
 
-    this.employeeService.getAll(this.companyId).subscribe({
+    this.leaveService
+      .getPage(this.companyId, this.page, this.pageSize, this.searchTerm, this.status)
+      .subscribe({
       next:(res:any)=>{
-        this.employees=res;
-        console.log("Employees",res);
-      }
+        this.leaves=res?.data || [];
+        this.totalRecords = res?.totalRecords || 0;
+        this.loading = false;
+      },
+      error:()=>{
+        this.loading = false;
+        this.snackBar.open('Leaves could not be loaded.', 'Close', {
+          duration: 4000
+        });
+      },
     })
   }
-getEmployeeName(empId:number):string{
-  const emp=this.employees.find(emp=>emp.empID===empId);
-  return emp?emp.firstName+" "+emp.lastName:"Unknown";
+
+searchLeaves(): void {
+  this.page = 1;
+  this.loadData();
+}
+
+changePageSize(): void {
+  this.page = 1;
+  this.loadData();
+}
+
+previousPage(): void {
+  if (this.page <= 1) {
+    return;
+  }
+
+  this.page--;
+  this.loadData();
+}
+
+nextPage(): void {
+  if (this.page >= this.totalPages) {
+    return;
+  }
+
+  this.page++;
+  this.loadData();
+}
+
+statusClass(status: string): string {
+  return String(status || '').toLowerCase();
+}
+
+getEmployeeName(leave:any):string{
+  const name = `${leave.firstName || ''} ${leave.lastName || ''}`.trim();
+  const code = leave.empCode ? `${leave.empCode} - ` : '';
+
+  return `${code}${name || 'Unknown'}`;
 
 }
 editLeave(id:any){

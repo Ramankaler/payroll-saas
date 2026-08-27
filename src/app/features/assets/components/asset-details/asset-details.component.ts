@@ -23,6 +23,9 @@ export class AssetDetailsComponent implements OnInit {
   loading = false;
   saving = false;
   editingId: number | null = null;
+  page = 1;
+  pageSize = 25;
+  totalRecords = 0;
 
   form: any = this.emptyForm();
 
@@ -33,36 +36,18 @@ export class AssetDetailsComponent implements OnInit {
     });
   }
 
-  get filteredAssets(): any[] {
-    const search = this.searchText.trim().toLowerCase();
-
-    if (!search) {
-      return this.assets;
-    }
-
-    return this.assets.filter(asset =>
-      [
-        asset.assetCode,
-        asset.assetName,
-        asset.category,
-        asset.brand,
-        asset.modelNo,
-        asset.serialNo,
-        asset.status,
-        asset.currentEmployee,
-      ].some(value =>
-        String(value ?? '').toLowerCase().includes(search)
-      )
-    );
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
   }
 
   load(): void {
     this.loading = true;
     this.message = '';
 
-    this.assetService.getAll().subscribe({
-      next: assets => {
-        this.assets = assets || [];
+    this.assetService.getPage(this.page, this.pageSize, this.searchText).subscribe({
+      next: result => {
+        this.assets = result?.data || [];
+        this.totalRecords = result?.totalRecords || 0;
         this.loading = false;
       },
       error: err => {
@@ -70,6 +55,34 @@ export class AssetDetailsComponent implements OnInit {
         this.message = err?.error?.message ?? 'Assets could not be loaded.';
       }
     });
+  }
+
+  searchAssets(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  nextPage(): void {
+    if (this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.load();
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.load();
+  }
+
+  changePageSize(): void {
+    this.page = 1;
+    this.load();
   }
 
   save(): void {

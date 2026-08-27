@@ -34,6 +34,20 @@ export class EmployeeService {
     );
   }
 
+  lookup(search: string, limit = 20, excludeEmpID?: number): Observable<any[]> {
+    let params = new HttpParams().set('limit', limit);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    if (excludeEmpID) {
+      params = params.set('excludeEmpID', excludeEmpID);
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/lookup`, { params });
+  }
+
   create(payload: any): Observable<any> {
     return this.http.post(this.apiUrl, payload);
   }

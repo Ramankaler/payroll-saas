@@ -24,28 +24,34 @@
           <label>Asset</label>
           <input
             class="form-control"
-            [(ngModel)]="assetSearch"
+            [ngModel]="assetSearch"
+            (ngModelChange)="assetSearch = $event; onAssetSearchChanged()"
+            name="assetSearch"
             list="assetOptions"
             (change)="selectAsset()"
             placeholder="Search asset">
           <datalist id="assetOptions">
-            <option *ngFor="let asset of availableAssets" [value]="assetLabel(asset)"></option>
+            <option *ngFor="let asset of assetOptions" [value]="assetLabel(asset)"></option>
           </datalist>
-          <small class="text-muted">Selected Asset ID: {{ form.assetID || 'None' }}</small>
+          <small class="text-muted" *ngIf="!loadingAssets">Selected Asset ID: {{ form.assetID || 'None' }}</small>
+          <small class="text-muted" *ngIf="loadingAssets">Searching assets...</small>
         </div>
 
         <div class="col-md-4">
           <label>Employee</label>
           <input
             class="form-control"
-            [(ngModel)]="employeeSearch"
+            [ngModel]="employeeSearch"
+            (ngModelChange)="employeeSearch = $event; onEmployeeSearchChanged()"
+            name="employeeSearch"
             list="employeeAssetOptions"
             (change)="selectEmployee()"
             placeholder="Search employee">
           <datalist id="employeeAssetOptions">
-            <option *ngFor="let employee of employees" [value]="employeeLabel(employee)"></option>
+            <option *ngFor="let employee of employeeOptions" [value]="employeeLabel(employee)"></option>
           </datalist>
-          <small class="text-muted">Selected Employee ID: {{ form.empID || 'None' }}</small>
+          <small class="text-muted" *ngIf="!loadingEmployees">Selected Employee ID: {{ form.empID || 'None' }}</small>
+          <small class="text-muted" *ngIf="loadingEmployees">Searching employees...</small>
         </div>
 
         <div class="col-md-4">
@@ -76,10 +82,52 @@
   </div>
 
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header">
       <div>
         <h5>Allocation History</h5>
-        <p class="section-note">{{ allocations.length }} records</p>
+        <p class="section-note">{{ totalRecords }} records found</p>
+      </div>
+
+      <div class="row g-2 mt-2">
+        <div class="col-md-5">
+          <input
+            class="form-control"
+            [(ngModel)]="allocationSearch"
+            name="allocationSearch"
+            placeholder="Search asset or employee..."
+            (keyup.enter)="searchAllocations()">
+        </div>
+
+        <div class="col-md-3">
+          <select
+            class="form-select"
+            [(ngModel)]="allocationStatus"
+            name="allocationStatus"
+            (change)="searchAllocations()">
+            <option>Issued</option>
+            <option>Returned</option>
+            <option>All</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <select
+            class="form-select"
+            [(ngModel)]="pageSize"
+            name="pageSize"
+            (change)="changePageSize()">
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+            <option [ngValue]="100">100</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-outline-primary" type="button" (click)="searchAllocations()">
+            <span class="material-icons">search</span>
+            Search
+          </button>
+        </div>
       </div>
     </div>
 
@@ -137,6 +185,28 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="!loading">
+      <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
+
+      <div class="btn-group">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="previousPage()"
+          [disabled]="page <= 1">
+          Previous
+        </button>
+
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="nextPage()"
+          [disabled]="page >= totalPages">
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </div>

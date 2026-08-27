@@ -57,39 +57,28 @@ get companyId(): number {
   }
 
   loadEmployees() {
-    this.employeeService.getAll(this.companyId).subscribe({
-      next: (res: any) => {
-        this.employees = res;
-        console.log('Employees', res);
-        this.loadLeave(this.leaveID);
-      },
-    });
+    this.loadLeave(this.leaveID);
   }
 
   loadLeave(id: number) {
     this.leaveService.getById(id).subscribe({
       next: (res: any) => {
-        // this.leave = res;
+        this.leave.leaveID = res.leaveID;
+        this.leave.leaveTypeID = res.leaveTypeID;
+        this.leave.reason = res.reason || '';
         this.leave.startDate = res.startDate.split('T')[0];
-
         this.leave.endDate = res.endDate.split('T')[0];
         this.leave.createdAt = new Date(res.createdAt).toLocaleDateString('en-GB');
 
-        console.log('Leave', res);
-        console.log('start date', res.startDate);
-        console.log('End date', res.endDate);
-
-        const employee = this.employees.find(
-          (x) => x.empID === res.empID,
-        );
-
-        console.log('FOUND EMPLOYEE', employee);
-
-        if (employee) {
-          this.leave.EMPLOYEENAME = `${employee.firstName} ${employee.lastName}`;
-        }
-
-        console.log('Employee Name', this.leave.EMPLOYEENAME);
+        this.employeeService.getById(res.empID).subscribe({
+          next: (employee: any) => {
+            this.leave.EMPLOYEENAME =
+              `${employee.empCode} - ${employee.firstName} ${employee.lastName}`.trim();
+          },
+          error: () => {
+            this.leave.EMPLOYEENAME = 'Unknown';
+          }
+        });
       },
 
       error: (err) => {

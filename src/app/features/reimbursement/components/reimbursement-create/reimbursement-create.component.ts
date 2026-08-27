@@ -25,6 +25,9 @@ export class ReimbursementCreateComponent implements OnInit {
   };
 
   employees: any[] = [];
+  employeeSearch = '';
+  loadingEmployees = false;
+  private employeeSearchTimer: any = null;
   fileMessage = '';
  get compId(): number {
   return this.authSession.companyId;
@@ -45,9 +48,47 @@ export class ReimbursementCreateComponent implements OnInit {
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll(this.compId).subscribe(employees => {
-      this.employees = employees;
+    this.loadingEmployees = true;
+
+    this.employeeService.lookup(this.employeeSearch, 20).subscribe({
+      next: employees => {
+        this.employees = employees || [];
+        this.loadingEmployees = false;
+        this.selectEmployee();
+      },
+      error: () => {
+        this.employees = [];
+        this.loadingEmployees = false;
+      }
     });
+  }
+
+  employeeLabel(emp: any): string {
+    const name = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+    return `${emp.empCode} - ${name}`;
+  }
+
+  onEmployeeSearchChanged(): void {
+    this.reimbursement.empID = 0;
+
+    if (this.employeeSearchTimer) {
+      clearTimeout(this.employeeSearchTimer);
+    }
+
+    this.employeeSearchTimer = setTimeout(() => {
+      this.loadEmployees();
+    }, 300);
+  }
+
+  selectEmployee(): void {
+    const value = this.employeeSearch.trim().toLowerCase();
+
+    const selected = this.employees.find(emp =>
+      this.employeeLabel(emp).toLowerCase() === value ||
+      String(emp.empCode || '').toLowerCase() === value
+    );
+
+    this.reimbursement.empID = selected ? selected.empID : 0;
   }
 
   onFileChange(event: any): void {
@@ -76,6 +117,13 @@ export class ReimbursementCreateComponent implements OnInit {
   }
 
   save(): void {
+    this.selectEmployee();
+
+    if (!this.reimbursement.empID) {
+      this.snackBar.open('Please select a valid employee', 'Close');
+      return;
+    }
+
     if (!this.reimbursement.billFile) {
       this.snackBar.open('Please select bill file', 'Close');
       return;

@@ -19,7 +19,13 @@
     <div class="col-sm-6">
       <label for="" class="form-label fw-bold">Employee Code</label>
       <input type="text"   class="form-control" [(ngModel)]="leave.employeeCode" [ngModelOptions]="{standalone: true}"
-      (input)="onCodeChange($any($event.target).value)" autocomplete="off">
+      list="leaveEmployeeOptions" (input)="onCodeChange($any($event.target).value)" autocomplete="off">
+      <datalist id="leaveEmployeeOptions">
+        <option *ngFor="let emp of employees" [value]="employeeLabel(emp)"></option>
+      </datalist>
+      <div *ngIf="loadingEmployees" class="text-muted small mt-1">
+        Searching employees...
+      </div>
       <div *ngIf="leave.employeeCode && !selectedEmployeeID" class="text-danger small mt-1">
       No employee found with this code.
     </div>

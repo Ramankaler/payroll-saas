@@ -30,7 +30,7 @@
         mat-raised-button
         color="primary"
         (click)="runPayroll()"
-        [disabled]="isFinalized"
+        [disabled]="isFinalized || isUnlocked"
         title="Run Payroll For All Employees">
         <mat-icon>play_arrow</mat-icon>
         Run Payroll For All Employees
@@ -45,6 +45,17 @@
         title="Finalize and lock payroll">
         <mat-icon>lock</mat-icon>
         Finalize Payroll
+      </button>
+
+      <button
+        mat-stroked-button
+        color="warn"
+        type="button"
+        (click)="unlockPayroll()"
+        [disabled]="!payrollID || !isFinalized"
+        title="Unlock finalized payroll">
+        <mat-icon>lock_open</mat-icon>
+        Unlock
       </button>
     </div>
 
@@ -119,6 +130,14 @@
         <th mat-header-cell *matHeaderCellDef>Allowances</th>
         <td mat-cell *matCellDef="let slip">{{ slip.allowances | number:'1.2-2' }}</td>
       </ng-container>
+      <ng-container matColumnDef="advanceDeduction">
+        <th mat-header-cell *matHeaderCellDef>Advance</th>
+        <td mat-cell *matCellDef="let slip">{{ slip.advanceDeduction | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="manualDeduction">
+        <th mat-header-cell *matHeaderCellDef>Manual</th>
+        <td mat-cell *matCellDef="let slip">{{ slip.manualDeduction | number:'1.2-2' }}</td>
+      </ng-container>
       <ng-container matColumnDef="deductions">
         <th mat-header-cell *matHeaderCellDef>Deductions</th>
         <td mat-cell *matCellDef="let slip">{{ slip.deductions | number:'1.2-2' }}</td>
@@ -141,6 +160,14 @@
           </button>
           <button mat-icon-button (click)="downloadSlip(slip)" title="Download Payslip" aria-label="Download Payslip">
             <mat-icon>download</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="adjustSlip(slip)"
+            [disabled]="isFinalized"
+            title="Adjust Manual Deduction"
+            aria-label="Adjust Manual Deduction">
+            <mat-icon>edit</mat-icon>
           </button>
           <button mat-icon-button (click)="sendPayslip()" title="Send Payslip" aria-label="Send Payslip">
             <mat-icon>send</mat-icon>

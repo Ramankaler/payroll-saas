@@ -1,29 +1,31 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ReimbursementService, ReimbursementDto } from '../../services/reimbursement.service';
-import { EmployeeService } from '../../../employees/employee.service';
+import { ReimbursementService } from '../../services/reimbursement.service';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
 @Component({
   selector: 'app-reimbursement-approve',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatSnackBarModule],
   templateUrl: './reimbursement-approve.component.html',
   styleUrls: ['./reimbursement-approve.component.scss']
 })
 export class ReimbursementApproveComponent implements OnInit {
   private readonly authSession =  inject(AuthSessionService);
-  reimbursements: ReimbursementDto[] = [];
-  employees: any[] = [];
+  reimbursements: any[] = [];
+  page = 1;
+  pageSize = 25;
+  totalRecords = 0;
+  loading = false;
   get compId(): number {
   return this.authSession.companyId;
 }
 
   constructor(
     private reimbursementService: ReimbursementService,
-    private employeeService: EmployeeService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -32,20 +34,61 @@ export class ReimbursementApproveComponent implements OnInit {
   }
 
   loadData(): void {
-    this.reimbursementService.getAll(this.compId).subscribe(reims => {
-     this.reimbursements = reims.filter(
-  item => item.status.toLowerCase() === 'pending'
-);
-    });
+    this.loading = true;
 
-    this.employeeService.getAll(this.compId).subscribe(employees => {
-      this.employees = employees;
-    });
+    this.reimbursementService
+      .getPage(this.compId, this.page, this.pageSize, '', 'Pending')
+      .subscribe({
+        next: result => {
+          this.reimbursements = result?.data || [];
+          this.totalRecords = result?.totalRecords || 0;
+          this.loading = false;
+        },
+        error: err => {
+          this.loading = false;
+          const message =
+            err?.error?.message ?? 'Reimbursements could not be loaded.';
+          this.snackBar.open(message, 'Close', { duration: 4000 });
+        }
+      });
   }
 
-  getEmployeeName(empId: number): string {
-    const emp = this.employees.find(e => e.empID === empId);
-    return emp ? `${emp.firstName} ${emp.lastName}` : 'Unknown';
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.loadData();
+  }
+
+  nextPage(): void {
+    if (this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.loadData();
+  }
+
+  changePageSize(): void {
+    this.page = 1;
+    this.loadData();
+  }
+
+  getEmployeeName(reim: any): string {
+    const name = `${reim.firstName || ''} ${reim.lastName || ''}`.trim();
+    const code = reim.empCode ? `${reim.empCode} - ` : '';
+
+    return `${code}${name || 'Unknown'}`;
+  }
+
+  getExpenseType(reim: any): string {
+    return reim.expenseType || reim.category || '-';
   }
 
   approve(id: number): void {

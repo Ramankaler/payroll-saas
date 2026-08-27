@@ -179,11 +179,13 @@
               matInput
               [value]="managerSearch"
               [attr.list]="'managerEditOptions'"
-              (input)="managerSearch = $any($event.target).value"
+              (input)="onManagerSearchChanged($any($event.target).value)"
               (change)="selectManager()"
               placeholder="Search manager by code or name" />
             <mat-icon matSuffix>supervisor_account</mat-icon>
-            <mat-hint>Selected Manager ID: {{ form.get('managerID')?.value || 'None' }}</mat-hint>
+            <mat-hint>
+              {{ loadingManagers ? 'Searching managers...' : 'Selected Manager ID: ' + (form.get('managerID')?.value || 'None') }}
+            </mat-hint>
           </mat-form-field>
 
           <datalist id="managerEditOptions">

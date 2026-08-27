@@ -16,18 +16,42 @@
     <div class="card-header d-flex justify-content-between align-items-center">
       <div>
         <h5>Claims List</h5>
-        <p class="section-note">{{ filteredReimbursements.length }} claims shown</p>
+        <p class="section-note">{{ totalRecords }} claims found</p>
       </div>
 
-      <input
-        [(ngModel)]="searchTerm"
-        (input)="applyFilter()"
-        class="form-control search-box"
-        placeholder="Search employee, type, status..."
-        autocomplete="off">
+      <div class="d-flex gap-2">
+        <input
+          [(ngModel)]="searchTerm"
+          name="searchTerm"
+          class="form-control search-box"
+          placeholder="Search employee or type..."
+          autocomplete="off"
+          (keyup.enter)="searchClaims()">
+
+        <select class="form-select" [(ngModel)]="status" name="status" (change)="searchClaims()">
+          <option>All</option>
+          <option>Pending</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+          <option>Cancelled</option>
+        </select>
+
+        <select class="form-select" [(ngModel)]="pageSize" name="pageSize" (change)="changePageSize()">
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+          <option [ngValue]="100">100</option>
+        </select>
+
+        <button class="btn btn-outline-primary" type="button" (click)="searchClaims()">
+          <span class="material-icons">search</span>
+          Search
+        </button>
+      </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="loading-container" *ngIf="loading">Loading claims...</div>
+
+    <div class="table-responsive" *ngIf="!loading">
       <table class="table table-hover align-middle">
         <thead>
           <tr>
@@ -42,17 +66,17 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let reim of filteredReimbursements">
-            <td class="fw-semibold">{{ getEmployeeName(reim.empID) }}</td>
+          <tr *ngFor="let reim of reimbursements">
+            <td class="fw-semibold">{{ getEmployeeName(reim) }}</td>
             <td>{{ reim.amount | number:'1.2-2' }}</td>
-            <td>{{ reim.expenseType }}</td>
+            <td>{{ getExpenseType(reim) }}</td>
             <td>{{ reim.description || '-' }}</td>
             <td>
               <span
                 class="status-pill"
-                [class.success]="reim.status === 'approved'"
-                [class.warning]="reim.status === 'pending'"
-                [class.danger]="reim.status === 'rejected' || reim.status === 'cancelled'">
+                [class.success]="statusClass(reim.status) === 'approved'"
+                [class.warning]="statusClass(reim.status) === 'pending'"
+                [class.danger]="statusClass(reim.status) === 'rejected' || statusClass(reim.status) === 'cancelled'">
                 {{ reim.status }}
               </span>
             </td>
@@ -79,13 +103,27 @@
             </td>
           </tr>
 
-          <tr *ngIf="filteredReimbursements.length === 0">
+          <tr *ngIf="reimbursements.length === 0">
             <td colspan="7" class="empty-row">
               No reimbursements found.
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="!loading">
+      <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
+
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary" type="button" (click)="previousPage()" [disabled]="page <= 1">
+          Previous
+        </button>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="nextPage()" [disabled]="page >= totalPages">
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </div>

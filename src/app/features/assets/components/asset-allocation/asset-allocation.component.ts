@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthSessionService } from '../../../../core/services/auth-session.service';
-import { EmployeeService } from '../../../employees/employee.service';
 import { AssetService } from '../../services/asset.service';
 
 @Component({
@@ -13,18 +11,26 @@ import { AssetService } from '../../services/asset.service';
 })
 export class AssetAllocationComponent implements OnInit {
   private readonly assetService = inject(AssetService);
-  private readonly employeeService = inject(EmployeeService);
-  private readonly authSession = inject(AuthSessionService);
 
-  assets: any[] = [];
-  employees: any[] = [];
+  assetOptions: any[] = [];
+  employeeOptions: any[] = [];
   allocations: any[] = [];
   message = '';
   saving = false;
   loading = false;
+  loadingAssets = false;
+  loadingEmployees = false;
 
   assetSearch = '';
   employeeSearch = '';
+  allocationSearch = '';
+  allocationStatus = 'Issued';
+  page = 1;
+  pageSize = 25;
+  totalRecords = 0;
+
+  private assetSearchTimer: any = null;
+  private employeeSearchTimer: any = null;
 
   form: any = {
     assetID: null,
@@ -35,41 +41,123 @@ export class AssetAllocationComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.loadAssetOptions();
+    this.loadEmployeeOptions();
   }
 
-  get availableAssets(): any[] {
-    return this.assets.filter(asset =>
-      asset.isActive &&
-      asset.status !== 'Allocated'
-    );
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
   }
 
   load(): void {
     this.loading = true;
     this.message = '';
 
-    this.assetService.getAll().subscribe({
+    this.assetService
+      .getAllocations(
+        this.page,
+        this.pageSize,
+        this.allocationSearch,
+        this.allocationStatus
+      )
+      .subscribe({
+        next: result => {
+          this.allocations = result?.data || [];
+          this.totalRecords = result?.totalRecords || 0;
+          this.loading = false;
+        },
+        error: err => {
+          this.loading = false;
+          this.message = err?.error?.message ?? 'Allocations could not be loaded.';
+        }
+      });
+  }
+
+  loadAssetOptions(): void {
+    this.loadingAssets = true;
+
+    this.assetService.searchAvailable(this.assetSearch).subscribe({
       next: assets => {
-        this.assets = assets || [];
-        this.loading = false;
+        this.assetOptions = assets || [];
+        this.loadingAssets = false;
       },
-      error: err => {
-        this.loading = false;
-        this.message = err?.error?.message ?? 'Assets could not be loaded.';
+      error: () => {
+        this.assetOptions = [];
+        this.loadingAssets = false;
       }
-    });
-
-    this.employeeService.getAll(this.authSession.companyId).subscribe({
-      next: employees => this.employees = employees || [],
-    });
-
-    this.assetService.getAllocations().subscribe({
-      next: allocations => this.allocations = allocations || [],
     });
   }
 
+  loadEmployeeOptions(): void {
+    this.loadingEmployees = true;
+
+    this.assetService.searchEmployees(this.employeeSearch).subscribe({
+      next: employees => {
+        this.employeeOptions = employees || [];
+        this.loadingEmployees = false;
+      },
+      error: () => {
+        this.employeeOptions = [];
+        this.loadingEmployees = false;
+      }
+    });
+  }
+
+  onAssetSearchChanged(): void {
+    this.form.assetID = null;
+
+    if (this.assetSearchTimer) {
+      clearTimeout(this.assetSearchTimer);
+    }
+
+    this.assetSearchTimer = setTimeout(() => {
+      this.loadAssetOptions();
+    }, 300);
+  }
+
+  onEmployeeSearchChanged(): void {
+    this.form.empID = null;
+
+    if (this.employeeSearchTimer) {
+      clearTimeout(this.employeeSearchTimer);
+    }
+
+    this.employeeSearchTimer = setTimeout(() => {
+      this.loadEmployeeOptions();
+    }, 300);
+  }
+
+  searchAllocations(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  nextPage(): void {
+    if (this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.load();
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.load();
+  }
+
+  changePageSize(): void {
+    this.page = 1;
+    this.load();
+  }
+
   assetLabel(asset: any): string {
-    return `${asset.assetCode} - ${asset.assetName}`;
+    const serial = asset.serialNo ? ` (${asset.serialNo})` : '';
+    return `${asset.assetCode} - ${asset.assetName}${serial}`;
   }
 
   employeeLabel(employee: any): string {
@@ -78,7 +166,7 @@ export class AssetAllocationComponent implements OnInit {
   }
 
   selectAsset(): void {
-    const selected = this.availableAssets.find(asset =>
+    const selected = this.assetOptions.find(asset =>
       this.assetLabel(asset).toLowerCase() === this.assetSearch.trim().toLowerCase()
     );
 
@@ -86,7 +174,7 @@ export class AssetAllocationComponent implements OnInit {
   }
 
   selectEmployee(): void {
-    const selected = this.employees.find(employee =>
+    const selected = this.employeeOptions.find(employee =>
       this.employeeLabel(employee).toLowerCase() === this.employeeSearch.trim().toLowerCase()
     );
 
@@ -94,8 +182,11 @@ export class AssetAllocationComponent implements OnInit {
   }
 
   allocate(): void {
+    this.selectAsset();
+    this.selectEmployee();
+
     if (!this.form.assetID || !this.form.empID) {
-      this.message = 'Please select asset and employee.';
+      this.message = 'Please select asset and employee from the search list.';
       return;
     }
 
@@ -113,6 +204,7 @@ export class AssetAllocationComponent implements OnInit {
         this.message = 'Asset allocated.';
         this.reset();
         this.load();
+        this.loadAssetOptions();
       },
       error: err => {
         this.saving = false;
@@ -131,6 +223,7 @@ export class AssetAllocationComponent implements OnInit {
       next: () => {
         this.message = 'Asset returned.';
         this.load();
+        this.loadAssetOptions();
       },
       error: err => this.message = err?.error?.message ?? 'Return failed.',
     });
@@ -145,6 +238,9 @@ export class AssetAllocationComponent implements OnInit {
       issuedOn: this.today(),
       note: '',
     };
+
+    this.loadAssetOptions();
+    this.loadEmployeeOptions();
   }
 
   private today(): string {

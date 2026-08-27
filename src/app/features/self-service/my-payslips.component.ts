@@ -15,9 +15,9 @@ import { SelfServiceApi } from './self-service.api';
     <p *ngIf="error" class="error-text">{{ error }}</p>
 
     <table class="simple-table">
-      <thead><tr><th>Period</th><th>Basic</th><th>Allowance</th><th>Deduction</th><th>Net</th><th></th></tr></thead>
+      <thead><tr><th>Period</th><th>Basic</th><th>Allowance</th><th>Advance</th><th>Manual</th><th>Deduction</th><th>Net</th><th></th></tr></thead>
       <tbody><tr *ngFor="let item of rows">
-        <td>{{ item.month }}/{{ item.year }}</td><td>{{ item.basicSalary }}</td><td>{{ item.allowance }}</td><td>{{ item.deduction }}</td><td>{{ item.netSalary }}</td>
+        <td>{{ item.month }}/{{ item.year }}</td><td>{{ item.basicSalary }}</td><td>{{ item.allowance }}</td><td>{{ item.advanceDeduction }}</td><td>{{ item.manualDeduction }}</td><td>{{ item.deduction }}</td><td>{{ item.netSalary }}</td>
         <td><button type="button" (click)="download(item)">Download</button></td>
       </tr></tbody>
     </table>

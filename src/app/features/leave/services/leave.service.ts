@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api.config';
 
@@ -25,6 +26,31 @@ export class LeaveService {
 
   getAll(compId: number): Observable<LeaveDto[]> {
     return this.http.get<LeaveDto[]>(`${this.apiUrl}/requests/${compId}`);
+  }
+
+  getPage(
+    compId: number,
+    page: number,
+    pageSize: number,
+    search: string,
+    status: string
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    if (status && status !== 'All') {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<any>(
+      `${this.apiUrl}/requests/${compId}/page`,
+      { params }
+    );
   }
 // getAll(compId: number, empId: number) {
 //   return this.http.get(`${this.apiUrl}/requests/${compId}/${empId}`);

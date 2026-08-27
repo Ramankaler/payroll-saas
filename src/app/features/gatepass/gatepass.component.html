@@ -29,6 +29,7 @@
               class="form-control"
               name="employeeSearch"
               [(ngModel)]="employeeSearch"
+              (ngModelChange)="onEmployeeSearchChanged()"
               (keyup.enter)="loadEmployees()"
               placeholder="Code, bio ID, first name..."
               autocomplete="off">
@@ -37,6 +38,7 @@
               <span class="material-icons">search</span>
             </button>
           </div>
+          <small class="text-muted" *ngIf="loadingEmployees">Searching employees...</small>
         </label>
 
         <label>
@@ -139,16 +141,26 @@
         </label>
 
         <label>
-          Max Rows
-          <select class="form-select" name="limit" [(ngModel)]="filters.limit">
-            <option [ngValue]="1000">1000</option>
-            <option [ngValue]="5000">5000</option>
-            <option [ngValue]="10000">10000</option>
-            <option [ngValue]="20000">20000</option>
+          Search
+          <input
+            class="form-control"
+            name="listSearch"
+            [(ngModel)]="filters.search"
+            placeholder="Employee or reason"
+            autocomplete="off"
+            (keyup.enter)="searchGatePasses()">
+        </label>
+
+        <label>
+          Page Size
+          <select class="form-select" name="pageSize" [(ngModel)]="filters.pageSize" (change)="changePageSize()">
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+            <option [ngValue]="100">100</option>
           </select>
         </label>
 
-        <button class="btn btn-primary w-100" type="button" (click)="load()" title="Apply Filters">
+        <button class="btn btn-primary w-100" type="button" (click)="searchGatePasses()" title="Apply Filters">
           <span class="material-icons">filter_alt</span>
           Apply Filters
         </button>
@@ -162,7 +174,7 @@
     <div class="card-header table-heading">
       <div>
         <h2>Gate Pass List</h2>
-        <p>{{ gatePasses.length }} records loaded</p>
+        <p>{{ totalRecords }} records found</p>
       </div>
     </div>
 
@@ -273,6 +285,20 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="!loading">
+      <span class="text-muted">Page {{ filters.page }} of {{ totalPages }}</span>
+
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary" type="button" (click)="previousPage()" [disabled]="filters.page <= 1">
+          Previous
+        </button>
+
+        <button class="btn btn-outline-secondary" type="button" (click)="nextPage()" [disabled]="filters.page >= totalPages">
+          Next
+        </button>
+      </div>
     </div>
   </section>
 </div>

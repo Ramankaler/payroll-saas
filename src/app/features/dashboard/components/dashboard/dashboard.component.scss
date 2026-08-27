@@ -21,6 +21,64 @@
   font-size: 1.1rem;
 }
 
+.birthday-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto 1.5rem;
+  max-width: 720px;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(219, 234, 254, 0.95), rgba(255, 247, 237, 0.95));
+  box-shadow: 0 18px 45px rgba(37, 99, 235, 0.12);
+  animation: birthday-pop 500ms ease-out both;
+}
+
+.birthday-banner h2 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.birthday-banner p {
+  margin: 0.25rem 0 0;
+  color: #475569;
+}
+
+.birthday-cap {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: #ffffff;
+  font-size: 1.75rem;
+  animation: birthday-bounce 900ms ease-in-out infinite;
+}
+
+@keyframes birthday-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes birthday-bounce {
+  0%, 100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(5deg);
+  }
+}
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

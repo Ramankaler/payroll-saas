@@ -49,7 +49,7 @@ export class AccountsComponent implements OnInit {
     from: '',
     to: '',
     status: '',
-    limit: 5000,
+    limit: 100,
   };
 
   reportFilter: any = {
@@ -331,6 +331,13 @@ export class AccountsComponent implements OnInit {
 
   setTab(tab: string): void {
     this.activeTab = tab;
+  }
+
+  get selectedReportName(): string {
+    const selected = this.reportTypes
+      .find(report => report.key === this.reportFilter.report);
+
+    return selected?.name ?? 'Report';
   }
 
   private emptyAccount(): any {

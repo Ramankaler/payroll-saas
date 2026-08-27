@@ -2,6 +2,10 @@
   <mat-card>
     <h2>Admin Settings (MVP)</h2>
 
+    <p *ngIf="loading">Loading settings...</p>
+
+    <h3>Company</h3>
+
     <div class="form-grid">
       <mat-form-field appearance="outline">
         <mat-label>Payroll Cycle</mat-label>
@@ -24,7 +28,61 @@
       </mat-form-field>
     </div>
 
-    <button mat-raised-button color="primary" (click)="save()">Save</button>
+    <h3>HR Policy</h3>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Probation Months</mat-label>
+        <input matInput type="number" [(ngModel)]="req.probationMonths" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Notice Days</mat-label>
+        <input matInput type="number" [(ngModel)]="req.noticeDays" />
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>OT Rate</mat-label>
+        <input matInput type="number" step="0.01" [(ngModel)]="req.otRate" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Late Grace Minutes</mat-label>
+        <input matInput type="number" [(ngModel)]="req.lateGraceMin" />
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Early Leave Grace Minutes</mat-label>
+        <input matInput type="number" [(ngModel)]="req.earlyGraceMin" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Monthly Gate Pass Limit Minutes</mat-label>
+        <input matInput type="number" [(ngModel)]="req.gatePassLimitMin" />
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Minimum Gate Pass Minutes</mat-label>
+        <input matInput type="number" [(ngModel)]="req.gatePassMinMin" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Maximum Gate Pass Minutes</mat-label>
+        <input matInput type="number" [(ngModel)]="req.gatePassMaxMin" />
+      </mat-form-field>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="save()"
+      [disabled]="saving || loading"
+    >
+      {{ saving ? 'Saving...' : 'Save' }}
+    </button>
 
     <div *ngIf="result" class="result">
       <pre>{{ result | json }}</pre>

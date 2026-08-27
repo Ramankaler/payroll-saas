@@ -12,12 +12,19 @@
 <form>
             <div class="mb-3">
               <label class="form-label">Employee</label>
-              <select [(ngModel)]="reimbursementData.empID" name="empID" class="form-select">
-                <option value="">Select Employee</option>
-                <option *ngFor="let emp of employees" [value]="emp.empID">
-                  {{ emp.firstName }} {{ emp.lastName }}
-                </option>
-              </select>
+              <input
+                class="form-control"
+                [ngModel]="employeeSearch"
+                (ngModelChange)="employeeSearch = $event; onEmployeeSearchChanged()"
+                name="employeeSearch"
+                list="reimEditEmployeeOptions"
+                placeholder="Search by employee code or name"
+                autocomplete="off">
+              <datalist id="reimEditEmployeeOptions">
+                <option *ngFor="let emp of employees" [value]="employeeLabel(emp)"></option>
+              </datalist>
+              <div class="form-text" *ngIf="loadingEmployees">Searching employees...</div>
+              <div class="form-text" *ngIf="!loadingEmployees">Selected Employee ID: {{ reimbursementData.empID || 'None' }}</div>
             </div>
 
             <div class="row">

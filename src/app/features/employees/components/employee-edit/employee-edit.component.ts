@@ -63,6 +63,8 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   submitting  = false;
   empId!: number;
   managerSearch = '';
+  loadingManagers = false;
+  private managerSearchTimer: any = null;
   addressMessage = '';
 
   readonly countries = [
@@ -148,21 +150,20 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
       designations: this.svc.getDesignations(this.authSession.companyId),
       shifts:       this.shiftService.getAll(this.authSession.companyId),
       branches:     this.branchService.getAll(this.authSession.companyId),
-      employees:    this.svc.getAll(this.authSession.companyId),
       documents:    this.svc.getDocuments(this.empId),
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ employee, departments, designations, shifts, branches, employees, documents }) => {
+        next: ({ employee, departments, designations, shifts, branches, documents }) => {
           this.employee     = employee;
           this.departments  = departments  ?? [];
           this.designations = designations ?? [];
           this.shifts       = (shifts ?? []).filter(shift => shift.isActive);
           this.branches     = branches ?? [];
-          this.employees    = (employees ?? []).filter(emp => emp.empID !== this.empId);
           this.documents    = documents    ?? [];
           this.patchForm(employee);
           this.setManagerSearch(employee.managerID);
+          this.loadManagers();
           this.loadingPage = false;
 
           // Profile photo preview
@@ -324,7 +325,48 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     }
 
     const manager = this.employees.find(emp => emp.empID === managerID);
-    this.managerSearch = manager ? this.managerLabel(manager) : '';
+    if (manager) {
+      this.managerSearch = this.managerLabel(manager);
+      return;
+    }
+
+    this.svc.getById(managerID)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (employee: any) => {
+          this.managerSearch = this.managerLabel(employee);
+        }
+      });
+  }
+
+  loadManagers(): void {
+    this.loadingManagers = true;
+
+    this.svc.lookup(this.managerSearch, 20, this.empId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: employees => {
+          this.employees = employees || [];
+          this.loadingManagers = false;
+        },
+        error: () => {
+          this.employees = [];
+          this.loadingManagers = false;
+        }
+      });
+  }
+
+  onManagerSearchChanged(value: string): void {
+    this.managerSearch = value;
+    this.form.patchValue({ managerID: null });
+
+    if (this.managerSearchTimer) {
+      clearTimeout(this.managerSearchTimer);
+    }
+
+    this.managerSearchTimer = setTimeout(() => {
+      this.loadManagers();
+    }, 300);
   }
 
   selectManager(): void {

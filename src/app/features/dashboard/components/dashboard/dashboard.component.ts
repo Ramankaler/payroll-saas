@@ -33,6 +33,7 @@ export class DashboardComponent implements OnInit {
   adminDashboard: any | null = null;
   isEmployee = false;
   dashboardMessage = '';
+  showBirthdayWish = false;
 
   kpis: Array<{ value: string; label: string; trend: string; type: string }> = [];
   upcomingBirthdays: any[] = [];
@@ -49,6 +50,7 @@ export class DashboardComponent implements OnInit {
       this.selfApi.dashboard().subscribe({
         next: (data) => {
           this.selfDashboard = data;
+          this.showBirthdayWish = this.shouldShowBirthdayWish(data.employee?.dob);
           this.kpis = [
             { value: String(data.attendedDaysThisMonth), label: 'Days Present This Month', trend: '', type: 'up' },
             { value: String(data.pendingLeaves), label: 'Pending Leaves', trend: '', type: 'up' },
@@ -75,6 +77,7 @@ export class DashboardComponent implements OnInit {
           { value: String(data.onProbation ?? 0), label: 'On Probation', trend: '', type: 'up' },
           { value: String(data.pendingLeaves ?? 0), label: 'Pending Leaves', trend: '', type: 'up' },
           { value: String(data.pendingReimbursements ?? 0), label: 'Pending Reimbursements', trend: '', type: 'up' },
+          { value: String(data.pendingAdvances ?? 0), label: 'Pending Advances', trend: '', type: 'up' },
           { value: String(data.currentMonthPayroll ?? 0), label: 'Current Month Payroll', trend: '', type: 'up' },
         ];
         this.attentionItems = [
@@ -92,6 +95,16 @@ export class DashboardComponent implements OnInit {
             label: 'Employees without shift',
             value: data.employeesWithoutShift ?? 0,
             icon: 'schedule',
+          },
+          {
+            label: 'Documents expiring in 30 days',
+            value: data.documentsExpiringSoon ?? 0,
+            icon: 'assignment_late',
+          },
+          {
+            label: 'Approved resignations in notice',
+            value: data.activeResignations ?? 0,
+            icon: 'person_remove',
           },
         ];
       },
@@ -112,6 +125,33 @@ export class DashboardComponent implements OnInit {
   onLogout(): void {
     this.store.dispatch(logout());
     this.router.navigate(['/login']);
+  }
+
+  private shouldShowBirthdayWish(dob: string | null | undefined): boolean {
+    if (!dob) {
+      return false;
+    }
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    const isBirthday =
+      birthDate.getMonth() === today.getMonth() &&
+      birthDate.getDate() === today.getDate();
+
+    if (!isBirthday) {
+      return false;
+    }
+
+    const todayKey = today.toISOString().slice(0, 10);
+    const storageKey = `birthday-wish-shown-${todayKey}`;
+
+    if (localStorage.getItem(storageKey) === 'yes') {
+      return false;
+    }
+
+    localStorage.setItem(storageKey, 'yes');
+    return true;
   }
 }
 

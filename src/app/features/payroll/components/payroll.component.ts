@@ -14,11 +14,14 @@ import { API_ROUTES } from '../../../core/config/api.config';
 import { AuthSessionService } from '../../../core/services/auth-session.service';
 
 interface SalarySlip {
+  id: number;
   empCode: string;
   employeeName: string;
   department: string;
   basic: number;
   allowances: number;
+  advanceDeduction: number;
+  manualDeduction: number;
   deductions: number;
   netPay: number;
   absentDays: number;
@@ -41,12 +44,15 @@ interface PayrollRegisterResponse {
 }
 
 interface PayrollRegisterRow {
+  id: number;
   empCode: string;
   firstName: string;
   lastName: string;
   departmentName: string;
   basicSalary: number;
   allowance: number;
+  advanceDeduction: number;
+  manualDeduction: number;
   deduction: number;
   netSalary: number;
   absentDays: number;
@@ -101,8 +107,11 @@ export class PayrollComponent implements OnInit {
     'employeeName',
     'department',
     'basic',
+    'allowances',
     'paidLeave',
     'deductionDays',
+    'advanceDeduction',
+    'manualDeduction',
     'deductions',
     'netPay',
     'status',
@@ -170,11 +179,14 @@ export class PayrollComponent implements OnInit {
         this.pageSize = result.pageSize ?? this.pageSize;
         this.totalPayout = result.totalPayout ?? 0;
         this.salarySlips = (result.rows ?? []).map((row) => ({
+          id: row.id,
           empCode: row.empCode,
           employeeName: `${row.firstName} ${row.lastName}`.trim(),
           department: row.departmentName || '-',
           basic: row.basicSalary,
           allowances: row.allowance,
+          advanceDeduction: row.advanceDeduction ?? 0,
+          manualDeduction: row.manualDeduction ?? 0,
           deductions: row.deduction,
           netPay: row.netSalary,
           absentDays: row.absentDays ?? 0,
@@ -214,6 +226,10 @@ export class PayrollComponent implements OnInit {
     return this.payrollStatus.toLowerCase() === 'finalized';
   }
 
+  get isUnlocked(): boolean {
+    return this.payrollStatus.toLowerCase() === 'unlocked';
+  }
+
   finalizePayroll(): void {
     if (!this.payrollID || this.isFinalized) {
       return;
@@ -228,12 +244,88 @@ export class PayrollComponent implements OnInit {
           this.isRunning = false;
           this.payrollStatus = result?.status ?? 'Finalized';
           this.message = result?.message ?? 'Payroll finalized.';
+          this.loadPayrollRegister();
         },
         error: (err) => {
           this.isRunning = false;
           this.message = err?.error?.message ?? 'Payroll finalize failed.';
         },
       });
+  }
+
+  unlockPayroll(): void {
+    if (!this.payrollID || !this.isFinalized) {
+      return;
+    }
+
+    const password = window.prompt('Enter your login password to unlock payroll');
+    if (!password) {
+      return;
+    }
+
+    const reason = window.prompt('Why are you unlocking this payroll?');
+    if (!reason) {
+      return;
+    }
+
+    this.isRunning = true;
+    this.http.put<any>(API_ROUTES.payrollUnlock(this.payrollID), {
+      password,
+      reason,
+    }).subscribe({
+      next: result => {
+        this.isRunning = false;
+        this.payrollStatus = result?.status ?? 'Unlocked';
+        this.message = result?.message ?? 'Payroll unlocked.';
+      },
+      error: err => {
+        this.isRunning = false;
+        this.message = err?.error?.message ?? 'Payroll unlock failed.';
+      },
+    });
+  }
+
+  adjustSlip(slip: SalarySlip): void {
+    if (this.isFinalized) {
+      this.message = 'Finalized payroll is locked.';
+      return;
+    }
+
+    const amountText = window.prompt(
+      'Enter manual deduction amount',
+      String(slip.manualDeduction ?? 0)
+    );
+
+    if (amountText === null) {
+      return;
+    }
+
+    const manualDeduction = Number(amountText);
+
+    if (Number.isNaN(manualDeduction) || manualDeduction < 0) {
+      this.message = 'Manual deduction must be a valid positive amount.';
+      return;
+    }
+
+    const reason = window.prompt('Reason for manual deduction');
+
+    if (!reason) {
+      this.message = 'Reason is required.';
+      return;
+    }
+
+    this.http.put<any>(API_ROUTES.payrollAdjustItem(slip.id), {
+      manualDeduction,
+      reason,
+    }).subscribe({
+      next: item => {
+        slip.manualDeduction = item.manualDeduction ?? manualDeduction;
+        slip.deductions = item.deduction ?? slip.deductions;
+        slip.netPay = item.netSalary ?? slip.netPay;
+        this.message = 'Payroll deduction updated.';
+      },
+      error: err => this.message = err?.error?.message ?? 'Adjustment failed.',
+    });
   }
 
   viewSlip(slip: SalarySlip): void {
@@ -247,6 +339,8 @@ export class PayrollComponent implements OnInit {
       `Code: ${slip.empCode}`,
       `Basic: ${slip.basic.toFixed(2)}`,
       `Allowances: ${slip.allowances.toFixed(2)}`,
+      `Advance deduction: ${slip.advanceDeduction.toFixed(2)}`,
+      `Manual deduction: ${slip.manualDeduction.toFixed(2)}`,
       `Paid annual leave days: ${slip.paidAnnualLeaveDays}`,
       `Absent days: ${slip.absentDays}`,
       `Leave deduction days: ${slip.leaveDeductionDays}`,

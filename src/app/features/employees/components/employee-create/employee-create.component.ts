@@ -40,6 +40,8 @@ export class EmployeeCreateComponent {
   eduFile: File | null = null;
   employees: any[] = [];
   managerSearch = '';
+  loadingManagers = false;
+  private managerSearchTimer: any = null;
   addressMessage = '';
 
   readonly countries = [
@@ -184,12 +186,30 @@ shifts: Shift[] = [];
   }
 
   loadEmployees() {
-    this.empSrv.getAll(this.authSession.companyId).subscribe({
+    this.loadingManagers = true;
+
+    this.empSrv.lookup(this.managerSearch, 20).subscribe({
       next: (res: any[]) => {
         this.employees = res || [];
-        this.setNextEmployeeCode();
-      }
+        this.loadingManagers = false;
+      },
+      error: () => {
+        this.employees = [];
+        this.loadingManagers = false;
+      },
     });
+  }
+
+  onManagerSearchChanged() {
+    this.employee.managerID = null;
+
+    if (this.managerSearchTimer) {
+      clearTimeout(this.managerSearchTimer);
+    }
+
+    this.managerSearchTimer = setTimeout(() => {
+      this.loadEmployees();
+    }, 300);
   }
 
   setNextEmployeeCode() {
@@ -284,7 +304,7 @@ shifts: Shift[] = [];
   // ================= SAVE =================
  saveEmployee() {
 
-  if (!this.employee.empCode || !this.employee.firstName || !this.employee.email || !this.employee.phone) {
+  if (!this.employee.firstName || !this.employee.email || !this.employee.phone) {
     alert('Please fill required fields');
     return;
   }
@@ -429,7 +449,6 @@ finishSuccess(){
 
     this.previewUrl = null;
     this.selectedPhoto = null;
-    this.setNextEmployeeCode();
   }
   // ================= EDUCATION =================
 addEducation() {

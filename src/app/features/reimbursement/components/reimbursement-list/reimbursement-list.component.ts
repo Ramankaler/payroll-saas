@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ReimbursementService } from '../../services/reimbursement.service';
-import { EmployeeService } from '../../../employees/employee.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 
@@ -16,16 +15,18 @@ import { AuthSessionService } from '../../../../core/services/auth-session.servi
 export class ReimbursementListComponent implements OnInit {
   private readonly authSession =  inject(AuthSessionService);
   reimbursements: any[] = [];
-  filteredReimbursements: any[] = [];
-  employees: any[] = [];
   searchTerm = '';
+  status = 'All';
+  page = 1;
+  pageSize = 25;
+  totalRecords = 0;
+  loading = false;
   get compId(): number {
   return this.authSession.companyId;
 }
 
   constructor(
     private reimbursementService: ReimbursementService,
-    private employeeService: EmployeeService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -34,29 +35,77 @@ export class ReimbursementListComponent implements OnInit {
   }
 
   loadData(): void {
-    this.reimbursementService.getAll(this.compId).subscribe((reims: any[]) => {
-      this.reimbursements = reims;
-      this.filteredReimbursements = [...reims];
-    });
+    this.loading = true;
 
-    this.employeeService.getAll(this.compId).subscribe((employees: any[]) => {
-      this.employees = employees;
-    });
+    this.reimbursementService
+      .getPage(this.compId, this.page, this.pageSize, this.searchTerm, this.status)
+      .subscribe({
+        next: (result: any) => {
+          this.reimbursements = result?.data || [];
+          this.totalRecords = result?.totalRecords || 0;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+          const message =
+            err?.error?.message || 'Failed to load reimbursements.';
+
+          this.snackBar.open(message, 'Close', {
+            duration: 4000
+          });
+        }
+      });
   }
 
-  getEmployeeName(empId: number): string {
-    const emp = this.employees.find((e: any) => e.empID === empId);
-    return emp ? emp.firstName + ' ' + emp.lastName : 'Unknown';
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  searchClaims(): void {
+    this.page = 1;
+    this.loadData();
+  }
+
+  changePageSize(): void {
+    this.page = 1;
+    this.loadData();
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.loadData();
+  }
+
+  nextPage(): void {
+    if (this.page >= this.totalPages) {
+      return;
+    }
+
+    this.page++;
+    this.loadData();
+  }
+
+  statusClass(status: string): string {
+    return String(status || '').toLowerCase();
+  }
+
+  getEmployeeName(reim: any): string {
+    const name = `${reim.firstName || ''} ${reim.lastName || ''}`.trim();
+    const code = reim.empCode ? `${reim.empCode} - ` : '';
+
+    return `${code}${name || 'Unknown'}`;
+  }
+
+  getExpenseType(reim: any): string {
+    return reim.expenseType || reim.category || '-';
   }
 
   applyFilter(): void {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredReimbursements = this.reimbursements.filter((reim: any) => {
-      const empName = this.getEmployeeName(reim.empID).toLowerCase();
-      return empName.includes(term) ||
-             reim.description.toLowerCase().includes(term) ||
-             reim.expenseType.toLowerCase().includes(term);
-    });
+    this.searchClaims();
   }
 
 cancelReimbursement(id: number): void {

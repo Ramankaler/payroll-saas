@@ -77,6 +77,12 @@ export class ReportsComponent {
           note: 'Employees under probation and days remaining.',
           icon: 'hourglass_top',
         },
+        {
+          key: 'resignation-register',
+          name: 'Resignation Register',
+          note: 'Resignation date, last working date, inactive date, and status.',
+          icon: 'person_remove',
+        },
       ],
     },
     {
@@ -130,6 +136,12 @@ export class ReportsComponent {
           name: 'Payroll Statistics',
           note: 'Gross salary, deductions, net salary, and payroll run status.',
           icon: 'bar_chart',
+        },
+        {
+          key: 'advance-register',
+          name: 'Advance Register',
+          note: 'Salary advance amount, paid amount, balance, and approval status.',
+          icon: 'savings',
         },
         {
           key: 'gratuity',
@@ -610,6 +622,10 @@ export class ReportsComponent {
         return API_ROUTES.reportsLeaveStatistics;
       case 'reimbursement-register':
         return API_ROUTES.reportsReimbursementRegister;
+      case 'advance-register':
+        return API_ROUTES.reportsAdvanceRegister;
+      case 'resignation-register':
+        return API_ROUTES.reportsResignationRegister;
       case 'leave-balance':
         return API_ROUTES.reportsLeaveBalance;
       case 'gratuity':

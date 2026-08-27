@@ -34,19 +34,60 @@ export class ReimbursementEditComponent implements OnInit {
 
   error = '';
   employees: any[] = [];
+  employeeSearch = '';
+  loadingEmployees = false;
+  private employeeSearchTimer: any = null;
   expenseTypes = ['Travel', 'Food', 'Medical', 'Office Expense', 'Other'];
   selectedFile: File | null = null;
 
   ngOnInit(): void {
-    this.loadEmployees();
     this.loadReimbursement();
   }
 
   loadEmployees(): void {
-    this.employeeService.getAll( this.authSession.companyId).subscribe({
-      next: (res: any) => this.employees = res || [],
-      error: (err: any) => console.error('Failed to load employees:', err)
+    this.loadingEmployees = true;
+
+    this.employeeService.lookup(this.employeeSearch, 20).subscribe({
+      next: (res: any) => {
+        this.employees = res || [];
+        this.loadingEmployees = false;
+        this.selectEmployee();
+      },
+      error: () => {
+        this.employees = [];
+        this.loadingEmployees = false;
+      }
     });
+  }
+
+  employeeLabel(emp: any): string {
+    const name = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+    return `${emp.empCode} - ${name}`;
+  }
+
+  onEmployeeSearchChanged(): void {
+    this.reimbursementData.empID = 0;
+
+    if (this.employeeSearchTimer) {
+      clearTimeout(this.employeeSearchTimer);
+    }
+
+    this.employeeSearchTimer = setTimeout(() => {
+      this.loadEmployees();
+    }, 300);
+  }
+
+  selectEmployee(): void {
+    const value = this.employeeSearch.trim().toLowerCase();
+
+    const selected = this.employees.find(emp =>
+      this.employeeLabel(emp).toLowerCase() === value ||
+      String(emp.empCode || '').toLowerCase() === value
+    );
+
+    this.reimbursementData.empID = selected
+      ? selected.empID
+      : this.reimbursementData.empID;
   }
 
   loadReimbursement(): void {
@@ -55,6 +96,12 @@ export class ReimbursementEditComponent implements OnInit {
       this.reimbursementService.getById(id).subscribe({
         next: (data: any) => {
           this.reimbursementData = data;
+          this.employeeService.getById(data.empID).subscribe({
+            next: (employee: any) => {
+              this.employees = [employee];
+              this.employeeSearch = this.employeeLabel(employee);
+            }
+          });
         },
         error: (err: any) => {
           this.error = `Error loading: ${err.error?.message || 'Failed'}`;
@@ -71,6 +118,8 @@ export class ReimbursementEditComponent implements OnInit {
 
   save(): void {
     this.error = '';
+    this.selectEmployee();
+
     if (this.reimbursementData.amount <= 0 || !this.reimbursementData.empID || !this.reimbursementData.description) {
       this.error = 'Please fill all required fields';
       return;

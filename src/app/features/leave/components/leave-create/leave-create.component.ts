@@ -35,6 +35,9 @@ get companyId(): number {
 }
 leaves:any[]=[];
 employees:any[]=[];
+employeeSearch = '';
+loadingEmployees = false;
+private employeeSearchTimer: any = null;
 isHalfDay:boolean=false;
 leaveTypes:any[]=[];
 employeeCode:any;
@@ -58,18 +61,32 @@ this.loadLeaveTypes();
   }
 
 onCodeChange(value:any):void{
+this.employeeSearch = value;
+
+if (this.employeeSearchTimer) {
+  clearTimeout(this.employeeSearchTimer);
+}
+
+this.employeeSearchTimer = setTimeout(() => {
+  this.loadEmployees();
+}, 300);
+
 if (!value){
 
   this.clearAutoFields();
   return;
 }
 
+this.selectEmployeeFromText(value);
+}
+
+selectEmployeeFromText(value:any):void{
 const foundEmp = this.employees.find((emp:any) =>
-  emp.empCode?.trim().toLowerCase()=== value.trim().toLowerCase()
+  emp.empCode?.trim().toLowerCase()=== value.trim().toLowerCase() ||
+  this.employeeLabel(emp).toLowerCase() === value.trim().toLowerCase()
  );
  if(foundEmp){
   this.selectedEmployeeID = foundEmp.empID;
-  console.log(this.selectedEmployeeID);
   this.fullName = `${foundEmp.firstName} ${foundEmp.lastName}`;
   this.loadAnnualBalance();
   // this.empDept = foundEmp.deptID? `Department ID: ${foundEmp.deptID}`
@@ -81,27 +98,32 @@ const foundEmp = this.employees.find((emp:any) =>
  }
 }
 
+employeeLabel(emp:any): string {
+  const name = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+  return `${emp.empCode} - ${name}`;
+}
+
 // Employee type service
 loadEmployees(){
-   this.employeeService.getAll(this.companyId).subscribe({
+   this.loadingEmployees = true;
+
+   this.employeeService.lookup(this.employeeSearch, 20).subscribe({
       next:(data)=>{
         this.employees = data;
-        console.log("employee list :",this.employees)
+        this.loadingEmployees = false;
+        if (this.employeeSearch) {
+          this.selectEmployeeFromText(this.employeeSearch);
+        }
 //         .map((emp:any)=>({
 // empID:emp.empID,
 // fullName:`${emp.firstName} ${emp.lastName}`
 //         }))
-      }
+      },
+      error:()=>{
+        this.employees = [];
+        this.loadingEmployees = false;
+      },
     });
-
-  this.leaveService.getAll(this.companyId).subscribe({
-    next: (res) => {
-      this.leaves = res;
-      console.log("Leaves", this.leaves)
-      // this.filteredLeaves = [...res];
-    }
-  });
-
   }
 //
 

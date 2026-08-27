@@ -27,6 +27,9 @@ export const accessGuard: CanActivateChildFn = (_route, state) => {
       '/my-leaves',
       '/my-reimbursements',
       '/my-payslips',
+      '/my-gatepasses',
+      '/my-advances',
+      '/my-resignation',
     ];
 
     if (employeeRoutes.includes(state.url)) return true;
@@ -86,6 +89,8 @@ function getNeededPermission(url: string): string | null {
   if (path.startsWith('/reimbursement')) return 'reimbursement.view';
 
   if (path.startsWith('/payroll')) return 'payroll.view';
+  if (path.startsWith('/advances')) return 'advance.view';
+  if (path.startsWith('/resignations')) return 'resignation.view';
   if (path.startsWith('/accounts')) return 'account.view';
   if (path.startsWith('/assets/allocations')) return 'asset.allocate';
   if (path.startsWith('/assets/reports')) return 'asset.report';

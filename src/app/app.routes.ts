@@ -35,6 +35,9 @@ import { MyAttendanceComponent } from './features/self-service/my-attendance.com
 import { MyLeavesComponent } from './features/self-service/my-leaves.component';
 import { MyReimbursementsComponent } from './features/self-service/my-reimbursements.component';
 import { MyPayslipsComponent } from './features/self-service/my-payslips.component';
+import { MyGatePassesComponent } from './features/self-service/my-gatepasses.component';
+import { MyAdvancesComponent } from './features/self-service/my-advances.component';
+import { MyResignationComponent } from './features/self-service/my-resignation.component';
 import { TeamApprovalsComponent } from './features/self-service/team-approvals.component';
 import { UserManagementComponent } from './features/admin/components/user-management/user-management.component';
 import { AssetDetailsComponent } from './features/assets/components/asset-details/asset-details.component';
@@ -42,6 +45,8 @@ import { AssetAllocationComponent } from './features/assets/components/asset-all
 import { AssetReportsComponent } from './features/assets/components/asset-reports/asset-reports.component';
 import { ReportsComponent } from './features/reports/components/reports.component';
 import { AccountsComponent } from './features/accounts/accounts.component';
+import { AdvanceComponent } from './features/advances/advance.component';
+import { ResignationComponent } from './features/resignations/resignation.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -61,6 +66,9 @@ export const routes: Routes = [
       { path: 'my-leaves', component: MyLeavesComponent },
       { path: 'my-reimbursements', component: MyReimbursementsComponent },
       { path: 'my-payslips', component: MyPayslipsComponent },
+      { path: 'my-gatepasses', component: MyGatePassesComponent },
+      { path: 'my-advances', component: MyAdvancesComponent },
+      { path: 'my-resignation', component: MyResignationComponent },
       { path: 'team-approvals', component: TeamApprovalsComponent },
       { path: 'users', component: UserManagementComponent },
       { path: 'employees', component: EmployeeListComponent },
@@ -83,6 +91,8 @@ export const routes: Routes = [
       { path: 'leaves/approve', component: LeaveApproveComponent },
       { path: 'leave-types', component: LeaveTypeListComponent },
       { path: 'reimbursement', component: ReimbursementListComponent },
+      { path: 'advances', component: AdvanceComponent },
+      { path: 'resignations', component: ResignationComponent },
       { path: 'reimbursement/create', component: ReimbursementCreateComponent },
       { path: 'reimbursement/edit/:id', component: ReimbursementEditComponent },
       { path: 'reimbursement/approve', component: ReimbursementApproveComponent },

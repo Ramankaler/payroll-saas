@@ -52,12 +52,48 @@ export class SelfServiceApi {
     return this.http.put(`${this.baseUrl}/leaves/${id}/cancel`, {});
   }
 
+  gatePasses(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/gatepasses`);
+  }
+
+  createGatePass(request: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/gatepasses`, request);
+  }
+
+  cancelGatePass(id: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/gatepasses/${id}/cancel`, {});
+  }
+
   reimbursements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/reimbursements`);
   }
 
   createReimbursement(request: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/reimbursements`, request);
+  }
+
+  advances(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/advances`);
+  }
+
+  createAdvance(request: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/advances`, request);
+  }
+
+  cancelAdvance(id: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/advances/${id}/cancel`, {});
+  }
+
+  resignations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/resignations`);
+  }
+
+  createResignation(request: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/resignations`, request);
+  }
+
+  cancelResignation(id: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/resignations/${id}/cancel`, {});
   }
 
   payslips(): Observable<any[]> {

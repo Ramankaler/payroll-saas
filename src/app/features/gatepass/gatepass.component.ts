@@ -22,9 +22,12 @@ export class GatePassComponent implements OnInit {
 
   employeeSearch = '';
   loading = false;
+  loadingEmployees = false;
   saving = false;
   message = '';
   editingId: number | null = null;
+  totalRecords = 0;
+  private employeeSearchTimer: any = null;
 
   statusList = [
     '',
@@ -39,7 +42,9 @@ export class GatePassComponent implements OnInit {
     status: '',
     from: '',
     to: '',
-    limit: 5000,
+    search: '',
+    page: 1,
+    pageSize: 25,
   };
 
   form: any = this.emptyForm();
@@ -51,23 +56,32 @@ export class GatePassComponent implements OnInit {
   }
 
   loadEmployees(): void {
+    this.loadingEmployees = true;
+
     this.employeeService
-      .getPage(
-        this.authSession.companyId,
-        1,
-        50,
-        this.employeeSearch
-      )
+      .lookup(this.employeeSearch, 20)
       .subscribe({
-        next: (result) => {
-          this.employees = result?.data ?? [];
+        next: (rows) => {
+          this.employees = rows ?? [];
+          this.loadingEmployees = false;
         },
         error: (error) => {
+          this.loadingEmployees = false;
           this.message =
             error?.error?.message ??
             'Employees could not be loaded.';
         },
       });
+  }
+
+  onEmployeeSearchChanged(): void {
+    if (this.employeeSearchTimer) {
+      clearTimeout(this.employeeSearchTimer);
+    }
+
+    this.employeeSearchTimer = setTimeout(() => {
+      this.loadEmployees();
+    }, 300);
   }
 
   load(): void {
@@ -77,8 +91,9 @@ export class GatePassComponent implements OnInit {
     this.gatePassService
       .getAll(this.authSession.companyId, this.filters)
       .subscribe({
-        next: (rows) => {
-          this.gatePasses = rows || [];
+        next: (result) => {
+          this.gatePasses = result?.data || [];
+          this.totalRecords = result?.totalRecords || 0;
           this.loading = false;
         },
         error: (error) => {
@@ -88,6 +103,38 @@ export class GatePassComponent implements OnInit {
             'Gate passes could not be loaded.';
         },
       });
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.filters.pageSize));
+  }
+
+  searchGatePasses(): void {
+    this.filters.page = 1;
+    this.load();
+  }
+
+  changePageSize(): void {
+    this.filters.page = 1;
+    this.load();
+  }
+
+  previousPage(): void {
+    if (this.filters.page <= 1) {
+      return;
+    }
+
+    this.filters.page--;
+    this.load();
+  }
+
+  nextPage(): void {
+    if (this.filters.page >= this.totalPages) {
+      return;
+    }
+
+    this.filters.page++;
+    this.load();
   }
 
   save(): void {

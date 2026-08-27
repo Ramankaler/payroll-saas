@@ -48,9 +48,9 @@
       <div class="p-3 row g-3">
 
         <div class="col-md-4">
-          <label>Employee Code *</label>
+          <label>Employee Code</label>
           <input class="form-control" [(ngModel)]="employee.empCode" name="empCode">
-          <small class="text-muted">Auto format: YYMM001, example 2607001. You can still edit if needed.</small>
+          <small class="text-muted">Leave blank for backend auto code. You can still type manually if needed.</small>
         </div>
 
         <div class="col-md-4">
@@ -168,7 +168,8 @@
           <label>Manager</label>
           <input
             class="form-control"
-            [(ngModel)]="managerSearch"
+            [ngModel]="managerSearch"
+            (ngModelChange)="managerSearch = $event; onManagerSearchChanged()"
             name="managerSearch"
             list="managerOptions"
             (change)="selectManager()"
@@ -176,6 +177,7 @@
           <datalist id="managerOptions">
             <option *ngFor="let emp of employees" [value]="managerLabel(emp)"></option>
           </datalist>
+          <small class="text-muted" *ngIf="loadingManagers">Searching managers...</small>
           <small class="text-muted">Selected Manager ID: {{ employee.managerID || 'None' }}</small>
         </div>
 

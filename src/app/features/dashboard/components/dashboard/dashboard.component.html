@@ -9,6 +9,14 @@
     </p>
   </header>
 
+  <div class="birthday-banner" *ngIf="showBirthdayWish">
+    <div class="birthday-cap">🎂</div>
+    <div>
+      <h2>Happy Birthday, {{ selfDashboard?.employee?.firstName }}!</h2>
+      <p>Wishing you a wonderful day from the HRMS team.</p>
+    </div>
+  </div>
+
   <div class="kpi-grid">
     <mat-card class="kpi-card" *ngFor="let kpi of kpis; trackBy: trackByFn">
       <div class="kpi-value">{{ kpi.value }}</div>
